@@ -1,0 +1,134 @@
+<%- include('../layouts/header') %>
+
+<div class="content-wrapper">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="card-title mb-0"><%= page_name %></h4>
+          <a href="/admin/coupon-list" class="btn btn-primary btn-sm">
+            <i class="fa fa-arrow-left"></i> Back
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="row">
+
+            <!-- Section: Basic Info -->
+            <div class="col-12">
+                <h5 class="border-bottom pb-2 mt-3">Basic Information</h5>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Coupon For</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.coupon_for %></p>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Coupon Visibility</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.visibility %></p>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Coupon Name</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.coupon_name %></p>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Coupon Code</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.coupon_code %></p>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Coupon Type</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.coupon_type %></p>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Discount</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.coupon_discount %></p>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Coupon Uses</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.coupon_uses %></p>
+                </div>
+            </div>
+        
+            <!-- Section: Validity & Conditions -->
+            <div class="col-12">
+                <h5 class="border-bottom pb-2 mt-4">Validity & Conditions</h5>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Begin Date</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.begin_date %></p>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>End Date</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.end_date %></p>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Min Cart Value</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.cart_value %></p>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Status</strong></label>
+                    <p class="mb-0 text-muted"><%= coupon.status == 1 ? 'Active' : 'Inactive' %></p>
+                </div>
+            </div>
+        
+            <!-- Section: Image & Description -->
+            <div class="col-12">
+                <h5 class="border-bottom pb-2 mt-4">Media & Description</h5>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Coupon Image</strong></label><br />
+                    <% if (coupon.coupon_image) { %>
+                        <img src="<%= coupon.coupon_image %>" width="200" />
+                    <% } else { %>
+                        <p>No image uploaded</p>
+                    <% } %>
+                </div>
+            </div>
+        
+            <div class="col-md-9">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Coupon Description</strong></label>
+                    <p class="mb-0 text-muted"><%- coupon.coupon_description %></p>
+                </div>
+            </div>
+        
+        </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../layouts/footer') %>
+</div>

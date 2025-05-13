@@ -1,0 +1,130 @@
+<%- include('../layouts/header') %>
+
+<div class="content-wrapper">
+ 
+
+  <div class="row">
+    <div class="col-12 grid-margin">
+      <div class="card">
+        <div
+                class="card-header d-flex align-items-center justify-content-between"
+               
+              >
+                <h4 class="card-title mb-0"><%= title %> <%= page_name %>  </h4>
+          
+                    
+                    <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i> Back</button>
+                 
+              </div>
+        <div class="card-body">
+         
+          <form id="submitForm" method="post" action="<%= form_url %>" enctype="multipart/form-data">
+            <div class="row">
+              
+              <!-- Category Name -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="form-label">Category Name *</label>
+                  <input type="text" class="form-control" name="category_name" id="category_name" placeholder="Category Name..." value="<%= category.category_name %>"/>
+                </div>
+              </div>
+
+              <!-- Category Type -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="form-label">Category Type *</label>
+                  <select class="form-control" name="category_type" id="category_type">
+                    <option value="">Select Type</option>
+                    <option value="course" <%= category.category_type === "course" ? 'selected' : '' %>>Course</option>
+                    <option value="test" <%= category.category_type === "test" ? 'selected' : '' %>>Test</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Status -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="form-label">Status</label>
+                  <select class="form-control" name="status" id="status">
+                    <option value="1" <%= category.status == 1 ? 'selected' : '' %>>Active</option>
+                    <option value="0" <%= category.status == 0 ? 'selected' : '' %>>Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Hidden Fields -->
+              <input type="hidden" name="slug" value="<%= category.slug %>">
+              <input type="hidden" name="id" value="<%= category.id %>">
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-md-12 mt-3">
+              <button type="submit" id="submitButton" class="btn btn-primary float-right"
+                      data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..."
+                      data-rest-text="Update">Update</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $('form').submit(function (e) {
+        e.preventDefault();
+
+        var $form = $(this);
+        var $btn = $form.find('[type="submit"]');
+
+        buttonLoading('loading', $btn);
+        $form.find('.is-invalid').removeClass('is-invalid state-invalid');
+        $form.find('.invalid-feedback').remove();
+
+        $.ajax({
+            url: $form.attr('action'),
+            type: "POST",
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function (data) {
+                if (data.success) {
+                    successMsg('', data.message);
+                    setTimeout(function () {
+                        window.location = data.redirect_url;
+                    }, 1000);
+                } else {
+                    $.each(data.errors, function (fieldName, messages) {
+                        var $field = $form.find('[name="' + fieldName + '"]');
+                        $field.addClass('is-invalid state-invalid');
+                        $field.parent().append('<div class="invalid-feedback">' + messages[0] + '</div>');
+                    });
+                    errorMsg('', data.message);
+                }
+                buttonLoading('reset', $btn);
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    $.each(xhr.responseJSON.errors, function (fieldName, messages) {
+                        var $field = $form.find('[name="' + fieldName + '"]');
+                        $field.addClass('is-invalid state-invalid');
+                        $field.parent().append('<div class="invalid-feedback">' + messages[0] + '</div>');
+                    });
+                    errorMsg('', xhr.responseJSON.message);
+                } else {
+                    errorMsg('', 'Unexpected error occurred');
+                }
+                buttonLoading('reset', $btn);
+            }
+        });
+    });
+});
+
+</script>

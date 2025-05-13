@@ -1,0 +1,99 @@
+    
+        
+        <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+              <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2018. All rights reserved.</span>
+              
+            </div>
+          </footer>
+          
+        </div>
+        
+      </div>
+      
+    </div>
+    
+
+<script src="<%= base_url %>admin/vendors/js/vendor.bundle.base.js"></script>
+<script src="<%= base_url %>admin/vendors/js/vendor.bundle.addons.js"></script>
+
+<!-- Include Snackbar.js CSS (styling) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/snackbarjs@1.1.0/dist/snackbar.min.css">
+
+<!-- Include Snackbar.js JavaScript (functionality) -->
+<script src="https://cdn.jsdelivr.net/npm/snackbarjs@1.1.0/dist/snackbar.min.js"></script>
+
+
+
+<script src="<%= base_url %>admin/js/off-canvas.js"></script>
+<script src="<%= base_url %>admin/js/hoverable-collapse.js"></script>
+<script src="<%= base_url %>admin/js/misc.js"></script>
+<script src="<%= base_url %>admin/js/settings.js"></script>
+<script src="<%= base_url %>admin/js/todolist.js"></script>
+
+
+<script src="<%= base_url %>admin/js/dashboard.js"></script>
+<script src="<%= base_url %>admin/js/my.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/node-snackbar@latest/dist/snackbar.min.js"></script>
+
+
+<script>
+  function convertToSlug(TextObj) {
+      $("#slug").val(TextObj.value.toLowerCase().replace(/[^\w ]+/g, '').replace(/ +/g, '-'));
+  }
+
+</script>
+
+<script>
+  $(document).ready(function() {
+    $('#backButton').click(function() {
+      window.history.back();
+    });
+  });
+</script>
+<script>
+  function successMsg(heading, message, html = "") {
+
+
+
+Snackbar.show({
+
+    text: message,
+
+    backgroundColor: '#232323',
+
+    width: '475px',
+
+    pos: 'bottom-center'
+
+});
+
+
+
+}
+
+
+
+function errorMsg(heading, message) {
+
+Snackbar.show({
+
+    text: message,
+
+    backgroundColor: '#232323',
+
+    width: '475px',
+
+    pos: 'bottom-center'
+
+});
+
+}
+
+
+</script>
+
+</body>
+
+
+</html>

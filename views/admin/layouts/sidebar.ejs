@@ -1,0 +1,148 @@
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+  <ul class="nav">
+    <li class="nav-item nav-profile">
+      <div class="nav-link">
+        <!-- <div class="profile-image">
+          <img src="<%= base_url %>admin/images/faces/face5.jpg" alt="image" />
+        </div> -->
+         <div class="profile-name">
+          <p class="name">
+            <%= userRole %>
+              <!-- Renders the user role value -->
+          </p>
+          <p class="designation">
+            <%= userRole %>
+              <!-- Renders the user role value -->
+          </p>
+        </div>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="<% if (userRole === 'Admin') { %> <%= base_url %>admin/dashboard <% } %> <% if (userRole && userRole === 'restaurant') { %> <%= base_url %>restaurant/dashboard <% } %>"
+      >
+        <i class="fa fa-home menu-icon"></i>
+        <span class="menu-title">Dashboard</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="/admin/customer-list">
+        <i class="fab fa-trello menu-icon"></i>
+        <span class="menu-title">Student</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="/admin/category-list">
+        <i class="fab fa-trello menu-icon"></i>
+        <span class="menu-title">Category List</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="/admin/course-list">
+        <i class="fab fa-trello menu-icon"></i>
+        <span class="menu-title">Course List</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="/admin/service-list">
+        <i class="fab fa-trello menu-icon"></i>
+        <span class="menu-title">Service List</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="/admin/coupon-list">
+        <i class="fab fa-trello menu-icon"></i>
+        <span class="menu-title">Coupon List</span>
+      </a>
+    </li>
+
+     <li class="nav-item">
+      <a class="nav-link" href="/admin/faculty-list">
+        <i class="fab fa-trello menu-icon"></i>
+        <span class="menu-title">Faculty List</span>
+      </a>
+    </li>
+<li class="nav-item">
+      <a class="nav-link" href="/admin/banner-list">
+        <i class="fab fa-trello menu-icon"></i>
+        <span class="menu-title">Banner List</span>
+      </a>
+    </li>
+    <!-- <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#customer" aria-expanded="false" aria-controls="customer">
+          <i class="fab fa-trello menu-icon"></i>
+          <span class="menu-title">Customer</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="customer">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item d-none d-lg-block"> <a class="nav-link" href="/admin/customer-create">Customer Create</a></li>
+            <li class="nav-item"> <a class="nav-link" href="/admin/customer-list">Customer List</a></li>
+          </ul>
+        </div>
+      </li> -->
+
+    <!-- <li class="nav-item">
+      <a
+        class="nav-link"
+        data-toggle="collapse"
+        href="#restaurant"
+        aria-expanded="false"
+        aria-controls="restaurant"
+      >
+        <i class="fab fa-trello menu-icon"></i>
+        <span class="menu-title">Restaurant</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="restaurant">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item d-none d-lg-block">
+            <a class="nav-link" href="/admin/restaurant-create"
+              >Restaurant Create</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/restaurant-list"
+              >Restaurant List</a
+            >
+          </li>
+        </ul>
+      </div>
+    </li> -->
+
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        data-toggle="collapse"
+        href="#menu"
+        aria-expanded="false"
+        aria-controls="menu"
+      >
+        <i class="fab fa-trello menu-icon"></i>
+        <span class="menu-title">Setting</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="menu">
+        <ul class="nav flex-column sub-menu">
+         
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/roles-list">Roles Permisstion List</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+  </ul>
+</nav>
+<style>
+  .sidebar .nav.sub-menu {
+    margin-top: 0;
+    list-style: none;
+    padding: 0 0 0 2.25rem;
+}
+</style>

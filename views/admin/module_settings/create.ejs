@@ -1,0 +1,314 @@
+
+<%- include('../layouts/header') %>
+       
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              <%= page_name %>
+            </h3>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Module Setting</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><%= page_name %></li>
+                </ol>
+            </nav>
+          </div>
+          <div class="row">
+            <div class="col-md-6 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title"<%= page_name %> form</h4>
+                  <p class="card-description">
+                    <%= page_name %>
+                  </p>
+                  <form id="module_settingsForm" class="forms-sample" method="POST" action="<%= form_url %>"  <% if (page_name == 'Logos') { %> enctype="multipart/form-data" <% } %> >
+                   
+                    <input type="hidden" name="page_name" value="<%= page_name %>"/>
+                    <% if (page_name == 'About Us') { %>
+
+                    <div class="form-group">
+                      <label for="title">Meta Title</label>
+                      <input type="text" name="meta_title" id="meta_title" class="form-control" value="<%= module_settings ? module_settings.about_us_title : '' %>" placeholder="About Meta Title">
+                      <div class="invalid-feedback"></div> 
+                    </div>
+
+
+                    <div class="form-group">
+                      <label for="card-description">Meta Description</label>
+                      <input type="text" name="meta_description" id="meta_description" class="form-control" value="<%= module_settings ? module_settings.about_us_descriptions : '' %>" placeholder="About Meta Description">
+                      <div class="invalid-feedback"></div> 
+                    </div>
+
+
+                    <div class="form-group">
+                      <label for="card-description">Meta Keywords</label>
+                      <input type="text" name="meta_keywords" id="meta_keywords" class="form-control" value="<%= module_settings ? module_settings.about_us_keywords : '' %>" placeholder="About Meta Keywords">
+                      <div class="invalid-feedback"></div> 
+                    </div>
+
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label for="about_description">Description</label>
+                        <textarea type="text" name="about_description" id="about_description"
+                          class="form-control"
+                          value="<%= module_settings ? module_settings.about_description : '' %>"
+                          placeholder="Enter Content"><%= module_settings ? module_settings.about_us : '' %></textarea>
+                        <div class="invalid-feedback"></div>
+                        
+                      </div>
+                    </div>
+
+                    <% } %>
+                    
+                    <% if (page_name == 'Privacy Policy') { %>
+
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label for="privacy_policy">Description</label>
+                          <textarea type="text" name="privacy_policy" id="privacy_policy"
+                            class="form-control"
+                            value="<%= module_settings ? module_settings.privacy_policy : '' %>"
+                            placeholder="Enter Content"><%= module_settings ? module_settings.privacy_policy : '' %></textarea>
+                          <div class="invalid-feedback"></div>
+                          
+                        </div>
+                      </div>
+
+                    <% } %>
+
+                    <% if (page_name == 'Terms & Condition') { %>
+
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <textarea type="text" name="terms_condition" id="terms_condition"
+                            class="form-control"
+                            value="<%= module_settings ? module_settings.terms_condition : '' %>"
+                            placeholder="Enter Content"><%= module_settings ? module_settings.terms_condition : '' %></textarea>
+                          <div class="invalid-feedback"></div>
+                          
+                        </div>
+                      </div>
+
+                    <% } %>
+                    <% if (page_name == 'Contact Us') { %>
+
+                      <div class="form-group">
+                        <label for="title">Email</label>
+                        <input type="email" name="email" id="email" class="form-control" value="<%= module_settings ? module_settings.email : '' %>" placeholder="Email">
+                        <div class="invalid-feedback"></div> 
+                      </div>
+
+                      <div class="form-group">
+                        <label for="title">Mobile</label>
+                        <input type="text" name="mobile" id="mobile" class="form-control" onkeypress="return isNumberKey(event)" value="<%= module_settings ? module_settings.mobile : '' %>" placeholder="Mobile">
+                        <div class="invalid-feedback"></div> 
+                      </div>
+
+                      <div class="form-group">
+                        <label for="title">Address</label>
+                        <textarea type="text" name="address" id="address" class="form-control" value="<%= module_settings ? module_settings.address : '' %>" placeholder="Address"><%= module_settings ? module_settings.address : '' %></textarea>
+                        <div class="invalid-feedback"></div> 
+                      </div>
+                      
+                      
+
+                      <div class="form-group">
+                        <label for="title">Whatsapp No</label>
+                        <input type="text" name="whatsapp" id="whatsapp" class="form-control" onkeypress="return isNumberKey(event)" value="<%= module_settings ? module_settings.whatsapp : '' %>" placeholder="Whatsapp No">
+                        <div class="invalid-feedback"></div> 
+                      </div>
+
+                      <div class="form-group">
+                        <label for="title">Instagram Url</label>
+                        <input type="text" name="instagram" id="instagram" class="form-control" value="<%= module_settings ? module_settings.instagram : '' %>" placeholder="Instagram Url">
+                        <div class="invalid-feedback"></div> 
+                      </div>
+
+                      <div class="form-group">
+                        <label for="title">YouTube Url</label>
+                        <input type="text" name="youtube" id="youtube" class="form-control" value="<%= module_settings ? module_settings.youtube : '' %>" placeholder="YouTube Url">
+                        <div class="invalid-feedback"></div> 
+                      </div>
+
+                      <div class="form-group">
+                        <label for="title">Facebook Url</label>
+                        <input type="text" name="facebook" id="facebook" class="form-control" value="<%= module_settings ? module_settings.facebook : '' %>" placeholder="Facebook Url">
+                        <div class="invalid-feedback"></div> 
+                      </div>
+
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label for="contact_detail">Detail</label>
+                          <textarea type="text" name="contact_detail" id="contact_detail"
+                            class="form-control"
+                            value="<%= module_settings ? module_settings.contact_detail : '' %>"
+                            placeholder="Enter Content"><%= module_settings ? module_settings.contact_us : '' %></textarea>
+                          <div class="invalid-feedback"></div>
+                          
+                        </div>
+                      </div>
+
+                    <% } %>
+
+                    <% if (page_name == 'Return & Refund Policy') { %>
+
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <textarea type="text" name="return_refund" id="return_refund"
+                            class="form-control"
+                            value="<%= module_settings ? module_settings.return_refund : '' %>"
+                            placeholder="Enter Content"><%= module_settings ? module_settings.return_refund : '' %></textarea>
+                          <div class="invalid-feedback"></div>
+                          
+                        </div>
+                      </div>
+
+                    <% } %>
+
+
+                    <% if (page_name == 'Cancellation Policy') { %>
+
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <textarea type="text" name="cancellation" id="cancellation"
+                            class="form-control"
+                            value="<%= module_settings ? module_settings.cancellation : '' %>"
+                            placeholder="Enter Content"><%= module_settings ? module_settings.cancellation : '' %></textarea>
+                          <div class="invalid-feedback"></div>
+                          
+                        </div>
+                      </div>
+
+                    <% } %>
+                    
+
+                    <% if (page_name == 'Why Choose Us') { %>
+
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <textarea type="text" name="why_choose_us" id="why_choose_us"
+                            class="form-control"
+                            value="<%= module_settings ? module_settings.why_choose_us : '' %>"
+                            placeholder="Enter Content"><%= module_settings ? module_settings.why_choose_us : '' %></textarea>
+                          <div class="invalid-feedback"></div>
+                          
+                        </div>
+                      </div>
+
+                    <% } %>
+
+                    <% if (page_name == 'Fcm Server Key') { %>
+
+                      <div class="form-group">
+                        <label for="title">Fcm Server Key</label>
+                        <textarea type="text" name="fcm_server_key" id="fcm_server_key" class="form-control" value="<%= module_settings ? module_settings.fcm_server_key : '' %>" placeholder="fcm server key"><%= module_settings ? module_settings.fcm_server_key : '' %></textarea>
+                        <div class="invalid-feedback"></div> 
+                      </div>
+
+                    <% } %>
+
+
+                    <% if (page_name == 'Logos') { %>
+
+                      <div class="form-group">
+                        <label for="web_favicon">Web Favicon</label>
+                        <div class="row">
+                          <div class="col-md-10">
+                            <input type="file" name="web_favicon" id="web_favicon" class="form-control" onchange="readURL(this, 'web_favicon');" value="<%= module_settings ? module_settings.web_favicon : '' %>" placeholder="Enter Your Banner Image">
+                            <div class="invalid-feedback"></div> 
+                          </div>
+                          <div class="col-md-2">
+                            <img src="<%= base_url + (module_settings ? module_settings.web_favicon : '') %>" id="web_favicon" style="width: 50px;height: 50px;">
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <div class="form-group">
+                        <label for="web_logo">Web Logo</label>
+                        <div class="row">
+                          <div class="col-md-10">
+                            <input type="file" name="web_logo" id="web_logo" class="form-control" onchange="readURL(this, 'web_logo');" value="<%= module_settings ? module_settings.web_logo : '' %>" placeholder="Enter Your Banner Image">
+                            <div class="invalid-feedback"></div> 
+                          </div>
+                          <div class="col-md-2">
+                            <img src="<%= base_url + (module_settings ? module_settings.web_logo : '') %>" id="web_logo" style="width: 50px;height: 50px;">
+                          </div>
+                        </div>
+                      </div>
+
+                    <% } %>
+
+
+                    <% if (page_name == 'Payment Settings') { %>
+
+                      <div class="form-group">
+                          <label for="is_gst">Gst</label>
+                          <select name="is_gst" id="is_gst" class="form-control">
+                            <option value="">Select</option>
+                              <option value="1" <%= module_settings && module_settings.is_gst === '1' ? 'selected' : '' %>>Yes</option>
+                              <option value="0" <%= module_settings && module_settings.is_gst === '0' ? 'selected' : '' %>>No</option>
+                          </select>
+                          <div class="invalid-feedback"></div> 
+                      </div>
+
+                      <div class="form-group">
+                        <label for="card-description">GST %</label>
+                        <input type="text" name="gst_percent" id="gst_percent" class="form-control" value="<%= module_settings ? module_settings.gst_percent : '' %>" placeholder="GST Percentage">
+                        <div class="invalid-feedback"></div> 
+                      </div>
+                      
+                      <div class="form-group">
+                        <label for="is_razorpay">Razorpay</label>
+                        <select name="is_razorpay" id="is_razorpay" class="form-control">
+                          <option value="">Select</option>
+                            <option value="1" <%= module_settings && module_settings.is_razorpay === '1' ? 'selected' : '' %>>Active</option>
+                            <option value="0" <%= module_settings && module_settings.is_razorpay === '0' ? 'selected' : '' %>>Inactive</option>
+                        </select>
+                        <div class="invalid-feedback"></div> 
+                    </div>
+
+                    <% } %>
+
+                    <button type="submit" class="btn btn-primary mr-2">Submit</button>
+                    <button class="btn btn-light">Cancel</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+       
+<script>
+      CKEDITOR.replace( 'content' );
+      CKEDITOR.replace( 'about_description' );
+      CKEDITOR.replace( 'why_choose_us' );
+      CKEDITOR.replace( 'privacy_policy' );
+      CKEDITOR.replace( 'contact_detail' );
+      CKEDITOR.replace( 'terms_condition' );
+      CKEDITOR.replace( 'cancellation' );
+      CKEDITOR.replace( 'return_refund' );
+
+      $(document).ready(function() {
+            $('#module_settingsForm').submit(function(e) {
+                e.preventDefault(); 
+
+                var formData = $(this).serialize();
+
+                
+                $.ajax({
+                    type: 'POST',
+                    url: '/submit-form',
+                    data: formData,
+                    success: function(response) {
+                        alert(response); 
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error); 
+                    }
+                });
+            });
+        });
+</script>
+<%- include('../layouts/footer') %>
+

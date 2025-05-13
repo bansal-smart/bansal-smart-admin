@@ -1,0 +1,109 @@
+<%- include('../layouts/header') %>
+
+<style>
+  td {
+    font-family: "Roboto", sans-serif;
+  }
+</style>
+
+<div class="content-wrapper">
+  <div class="card">
+    <div
+      class="card-header d-flex justify-content-justify"
+      style="align-items: center; justify-content: space-between"
+    >
+      <h4 class="card-title mb-0"><%= page_name %></h4>
+
+      <div class="row mb-3">
+        <div class="col-12 text-end">
+          <% if (req.query.status==='trashed' ) { %>
+          <a class="btn btn-primary" href="/admin/coupon-list">
+            <i class="fas fa-list"></i> List
+          </a>
+          <% } else { %>
+          <a class="btn btn-danger btn-sm" href="/admin/coupon-list/?status=trashed">
+            <i class="fas fa-trash"></i> Trashed List
+          </a>
+          <% } %>
+
+          <a class="btn btn-info btn-sm" href="/admin/coupon-create">
+            <i class="fas fa-plus"></i> Create
+          </a>
+          <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i> Back</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table id="order-listing" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Sr.No #</th>
+
+              <th>Coupon Name</th>
+              <th>Coupon Type</th>
+              <th>Begin Date</th>
+              <th>End Date</th>
+              <th>Coupon Code</th>
+              <th>Type</th>
+
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% coupons.forEach((post, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+
+              <td><%= post.coupon_name || '-' %></td>
+              <td><%= post.coupon_type || '-' %></td>
+              <td><%= post.begin_date || '-' %></td>
+              <td><%= post.end_date || '-' %></td>
+              <td><%= post.coupon_code || '-' %></td>
+              <td><%= post.type || '-' %></td>
+
+              <td>
+                <% if (post.status == 1) { %>
+                <span class="badge badge-success">Active</span>
+                <% } else { %>
+                <span class="badge badge-danger">Inactive</span>
+                <% } %>
+              </td>
+              <td>
+                <a
+                  href="/admin/coupon-edit/<%= post.id %>"
+                  class="btn btn-outline-info btn-sm"
+                  >Edit</a
+                >
+                <a
+                  href="/admin/coupon-show/<%= post.id %>"
+                  class="btn btn-outline-info btn-sm"
+                  >Show</a
+                >
+                <a
+                  href="/admin/coupon-delete/<%= post.id %>"
+                  class="btn btn-outline-danger btn-sm"
+                  >Delete</a
+                >
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $("#order-listing").DataTable();
+  });
+</script>

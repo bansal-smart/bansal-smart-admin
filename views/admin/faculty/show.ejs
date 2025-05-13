@@ -1,0 +1,52 @@
+<%- include('../layouts/header') %>
+        
+           
+        <div class="content-wrapper">
+          
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                 <div class="card-header d-flex align-items-center justify-content-between">
+            <h4 class="card-title mb-0"><%= page_name %></h4>
+      
+            <div class="row">
+              <a href="<%= back_url %>" class="btn btn-primary"><i class="fa fa-arrow-left"></i> Back</a>
+              
+            </div>
+          </div>
+                <div class="card-body">
+                <table class="table table-bordered">
+  <tr><th>Name</th><td><%= faculty.name %></td></tr>
+  <tr><th>Email</th><td><%= faculty.email %></td></tr>
+  <tr><th>Phone</th><td><%= faculty.phone %></td></tr>
+  <tr><th>Category</th><td><%= faculty.category_name || 'N/A' %></td></tr>
+    <tr><th>experience</th><td><%= faculty.experience || 'N/A' %></td></tr>
+        <tr><th>Teaching Mode</th><td><%= faculty.teaching_mode || 'N/A' %></td></tr>
+  <tr><th>Status</th><td><%= faculty.status == 1 ? 'Active' : 'Inactive' %></td></tr>
+    <tr><th>Short Description</th><td><%- faculty.short_description %></td></tr> <!-- if using CKEditor -->
+  <tr><th>Full Description</th><td><%- faculty.description %></td></tr> <!-- if using CKEditor -->
+  <tr><th>Image</th>
+    <td>
+  <% if (faculty.image) { %>
+    <a href="<%= faculty.image %>" target="_blank">
+      <img src="<%= faculty.image %>" width="100" />
+    </a>
+  <% } else { %>
+    No Image
+  <% } %>
+</td>
+
+  </tr>
+  <tr><th>Created At</th><td><%= faculty.created_at %></td></tr>
+</table>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+
+<%- include('../layouts/footer') %>
+

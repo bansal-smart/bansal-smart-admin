@@ -1,0 +1,266 @@
+<%- include('../layouts/header') %>
+  
+           
+        <div class="content-wrapper">
+          
+          <div class="row">
+            <div class="col-12 grid-margin">
+              <div class="card">
+                <div
+                class="card-header d-flex align-items-center justify-content-between"
+               
+              >
+                <h4 class="card-title mb-0"><%= page_name %>  </h4>
+          
+                    
+                    <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i> Back</button>
+                 
+              </div>
+                <div class="card-body">
+                  <h4 class="card-title"> <%= page_name %></h4>
+                  <form id="submitForm" method="post" action="<%= form_url %>" enctype="multipart/form-data">
+                   
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Category Name*</label>
+                                <select class="form-control" name="category_id" id="category_id">
+                                    <option value="">Select</option>
+                                    <% categories.forEach(function(category) { %>
+                                      <option value="<%= category.id %>" <% if (course && category.id === course.category_id) { %> selected <% } %>>
+                                          <%= category.category_name %>
+                                      </option>
+                                  <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                        <% course.course_name %>
+                        <div class="form-group">
+                          <label for="course_class">Course Class</label>
+                          <select id="course_class_id" name="course_class_id" class="form-control">
+                              <option value="">Select Class</option>
+                              <% course_classes.forEach(function(val) { %>
+                                <option value="<%= val.id %>" 
+                                  <%= course && course.course_class_id && course.course_class_id == val.id ? 'selected' : '' %>>
+                              <%= val.name %>
+                          </option>
+                              <% }); %>
+                          </select>
+                      </div>
+                
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Course Name *</label>
+                                <input type="text" onblur="convertToSlug(this)" class="form-control" name="course_name" id="course_name" placeholder="Course Name.." value="<%= course.course_name %>"/>
+                            </div>
+                        </div>
+                
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Title Heading *</label>
+                                <input type="text" class="form-control" name="title_heading" id="title_heading" placeholder="Title Heading.." value="<%= course.title_heading %>"/>
+                            </div>
+                        </div>
+                
+                        <input type="hidden" name="slug" id="slug" value="<%= course.slug %>">
+                        <input type="hidden" name="id" value="<%= course.id %>">
+                
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Course Type*</label>
+                                <select class="form-control" name="course_type" id="course_type">
+                                    <option value="paid" <%= course.course_type === "paid" ? 'selected' : '' %>>Paid</option>
+                                    <option value="free" <%= course.course_type === "free" ? 'selected' : '' %>>Free</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="row paid_course">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Price *</label>
+                                <input type="number" value="<%= course.price %>" class="form-control" name="price" id="price" placeholder="Price.."/>
+                            </div>
+                        </div>
+                
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Discount Type *</label>
+                                <select class="form-control" name="discount_type" id="discount_type">
+                                    <option value="">Select</option>
+                                    <option value="percentage" <%= course.discount_type === 'percentage' ? 'selected' : '' %>>Percentage</option>
+                                    <option value="price" <%= course.discount_type === 'price' ? 'selected' : '' %>>Price</option>
+                                </select>
+                            </div>
+                        </div>
+                
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Discount *</label>
+                                <input type="number" value="<%= course.discount %>" class="form-control" name="discount" id="discount" placeholder="Discount.."/>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Duration (In Month)*</label>
+                                <input type="number" class="form-control" name="duration" id="duration" placeholder="Duration.." value="<%= course.duration %>"/>
+                            </div>
+                        </div>
+                
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="course_visibility[]" value="featured" <%= visibility.includes('featured') ? 'checked' : '' %>>
+                          <label class="form-check-label">Featured</label>
+                      </div>
+                      <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="course_visibility[]" value="up_comming" <%= visibility.includes('up_comming') ? 'checked' : '' %>>
+                          <label class="form-check-label">Upcoming</label>
+                      </div>
+                
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label">Short Description*</label>
+                                <textarea class="form-control" name="content" id="content" placeholder="Content"><%= course.content %></textarea>
+                            </div>
+                        </div>
+                
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label">Description*</label>
+                                <textarea class="form-control" name="description" id="description" placeholder="Description"><%= course.description %></textarea>
+                            </div>
+                        </div>
+                
+                        <div class="form-group col-12">
+                            <label class="form-label">Service *</label>
+                            <% if (services && services.length > 0) { %>
+                                <div class="row">
+                                    <% services.forEach(function(item) { %>
+                                        <div class="mb-12 col-md-3">
+                                            <label class="form-label" style="font-weight:800;font-size:12px" for="service<%= item.id %>">
+                                                <input type="checkbox" name="service_id[]" value="<%= item.id %>" id="service<%= item.id %>" 
+                                                       <%= course.service_id.includes(item.id) ? 'checked' : '' %> />
+                                                <%= item.title %>
+                                            </label>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            <% } %>
+                        </div>
+                       
+                      <div class="form-group col-12">
+                        <label class="form-label">Start Time *</label>
+                        <input type="datetime-local" class="form-control" name="start_time" id="start_time" 
+                               min="<%= new Date().toISOString().slice(0, 10) %>" value="<%= course.start_time %>">
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-group">
+                          <label class="form-label">Image *</label>
+                          <input type="file" class="form-control" name="image" onchange="readURL(this, 'image_view');" id="image"/>
+                          <!-- Use the course image or fallback to the default image -->
+                          <img id="image_view" src="<%= image %>" width="200px">
+                      </div>
+                  </div>
+                  
+                  <div class="col-md-4">
+                      <div class="form-group">
+                          <label class="form-label">Details Image *</label>
+                          <input type="file" class="form-control" name="details_image" id="details_image" onchange="readURL(this, 'details_image_view');" />
+                          <img id="details_image_view" src="<%= details_image %>" width="200px">
+                      </div>
+                  </div>
+                    <div class="form-group col-sm-4">
+                        <label class="form-label">Status</label>
+                        <select name="status" id="status" class="form-control custom-select">
+                            <option value="1" <%= course.status == 1 ? 'selected' : '' %>>Active</option>
+                            <option value="0" <%= course.status == 0 ? 'selected' : '' %>>Inactive</option>
+                        </select>
+                    </div>
+                    
+                    </div>
+                    <div class="col-md-12">
+                      <div class="card-footer"></div>
+                      <button type="submit" id="submitButton" class="btn btn-primary float-right" 
+                              data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..." 
+                              data-rest-text="Create">Update</button>
+                  </div>
+                </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+   
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <script>
+        
+
+
+          
+              form.on("submit", function(event) {
+                alert();
+                event.preventDefault(); 
+               
+                $.ajax({
+                    url: form.attr("action"),
+                    method: form.attr("method"),
+                    data: form.serialize(),
+                    success: function(response) {
+                      
+                        console.log("Form submitted successfully:", response);
+                       
+                    },
+                    error: function(xhr, status, error) {
+                     
+                        console.error("Form submission error:", error);
+                        
+                    }
+                });
+            });
+        </script>
+
+<%- include('../layouts/footer') %>
+
+<script>
+  function readURL(input, imgId) {
+      if (input.files && input.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+              document.getElementById(imgId).src = e.target.result;
+          }
+          reader.readAsDataURL(input.files[0]);
+      }
+  }
+  </script>
+
+  <script>
+    $("#submitForm").on("submit", function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Get the form data
+    var formData = new FormData(this);
+
+    // Send the form data via AJAX
+    $.ajax({
+        url: $(this).attr("action"),
+        method: $(this).attr("method"),
+        data: formData,
+        contentType: false,  // Don't set contentType, as it's multipart form data
+        processData: false,  // Don't process data
+        success: function(response) {
+            console.log("Form submitted successfully:", response);
+            alert("Course updated successfully");
+        },
+        error: function(xhr, status, error) {
+            console.error("Form submission error:", error);
+            alert("Error updating course");
+        }
+    });
+});
+  </script>
+

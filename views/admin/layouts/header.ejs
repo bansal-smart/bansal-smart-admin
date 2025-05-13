@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Bansal</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="<%= base_url %>admin/vendors/iconfonts/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="<%= base_url %>admin/vendors/css/vendor.bundle.base.css">
+  <link rel="stylesheet" href="<%= base_url %>admin/vendors/css/vendor.bundle.addons.css">
+  
+  <link rel="stylesheet" href="<%= base_url %>admin/css/style.css">
+  
+  <link rel="shortcut icon" href="<%= base_url %>admin/images/favicon.png" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar@latest/dist/snackbar.min.css">
+  <script src="https://cdn.ckeditor.com/4.20.2/standard/ckeditor.js"></script>
+</head>
+
+<div class="container-scroller">
+   
+   <%- include('navbar') %>
+
+  
+   <div class="container-fluid page-body-wrapper">
+
+   <%- include('sidebar') %>
+
+  
+    <div class="main-panel">
+
+    
+      <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000" style="position: absolute; top: 20px; right: 20px; display: none;">
+        <div class="toast-header">
+          <strong class="mr-auto">Notification</strong>
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body" id="toastBody">
+         
+        </div>
+      </div>
+
+      <% if (success.length > 0) { %>
+        <div class="alert alert-success">
+            <%= success %>
+          </div>
+      <% } %>
+      
+      <% if (error.length > 0) { %>
+          <div class="alert alert-danger">
+              <%= error %>
+          </div>
+      <% } %>
