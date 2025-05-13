@@ -188,10 +188,24 @@
                                     <div class="form-group">
                                         <label class="form-label">Batch Type*</label>
                                         <select class="form-control" name="batch_type" id="batch_type">
+                                             <option value="">Select Batch Type</option>
                                             <option value="online" <%=course.batch_type=='online' ? 'selected' : '' %>
                                                 >Online</option>
                                             <option value="offline" <%=course.batch_type=='offline' ? 'selected' : '' %>
                                                 >Offline</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                 <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Batch Year*</label>
+                                        <select class="form-control" name="batch_year" id="batch_year">
+                                            <option value="" >Select Batch Year</option>
+                                            <option value="2025" <%=course.batch_year=='2025' ? 'selected' : '' %>
+                                                >2025</option>
+                                            <option value="2024" <%=course.batch_year=='2024' ? 'selected' : '' %>
+                                                >2024</option>
                                         </select>
                                     </div>
                                 </div>
@@ -429,7 +443,9 @@
                 if ($('form').length > 0) {
                     $('form').submit(function (e) {
                         e.preventDefault();
-
+ for (instance in CKEDITOR.instances) {
+        CKEDITOR.instances[instance].updateElement();
+    }
                         var $form = $(this);
                         var $btn = $form.find('[type="submit"]');
 

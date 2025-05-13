@@ -4,15 +4,32 @@ const jwt = require("jsonwebtoken");
 const { validateRequiredFields } = require("../../helpers/validationsHelper");
 const List = async (req, res) => {
   try {
-    let where =
-      req.query.status === "trashed"
-        ? "WHERE courses.deleted_at IS NOT NULL"
-        : "WHERE courses.deleted_at IS NULL";
+    let whereClauses = [];
+
+    // Filter for trashed or not
+    if (req.query.status === "trashed") {
+      whereClauses.push("courses.deleted_at IS NOT NULL");
+    } else {
+      whereClauses.push("courses.deleted_at IS NULL");
+    }
+
+    // Filter by category_id if provided
+    if (req.query.category_id) {
+      whereClauses.push(`courses.category_id = ${pool.escape(req.query.category_id)}`);
+    }
+
+    // Filter by course status (0 or 1)
+    if (req.query.course_status === "0" || req.query.course_status === "1") {
+      whereClauses.push(`courses.status = ${pool.escape(req.query.course_status)}`);
+    }
+
+    const where = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
     const query = `${withCategory()} ${where} ORDER BY courses.id DESC`;
     const page_name =
       req.query.status === "trashed" ? "Trashed Course List" : "Course List";
 
+    // Fetch filtered courses
     const customers = await new Promise((resolve, reject) => {
       pool.query(query, (err, result) => {
         if (err) {
@@ -23,10 +40,19 @@ const List = async (req, res) => {
       });
     });
 
+    // Fetch category list for filter dropdown
+    const category_list = await new Promise((resolve, reject) => {
+      pool.query("SELECT id, category_name FROM categories WHERE deleted_at IS NULL", (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+
     res.render("admin/course/list", {
       success: req.flash("success"),
       error: req.flash("error"),
       customers,
+      category_list,
       req,
       page_name,
       list_url: "/admin/course-list",
@@ -316,7 +342,6 @@ const Update = async (req, res) => {
   const courseId = req.params.courseId;
   const isInsert = !courseId || courseId === "null" || courseId === "0";
 
-  // Extracting values from request body
   const {
     category_id,
     course_class_id,
@@ -340,13 +365,15 @@ const Update = async (req, res) => {
     video,
     seo_title,
     seo_description,
+    batch_type,
+    batch_year,
   } = req.body;
 
   const imageFile = req?.files?.image?.[0];
   const detailsImageFile = req?.files?.details_image?.[0];
   const brochureFile = req?.files?.brochure?.[0];
 
-  // Slug generation
+  // Generate slug if missing
   let slug = inputSlug?.trim();
   if (!slug && title_heading) {
     slug = title_heading
@@ -356,38 +383,34 @@ const Update = async (req, res) => {
       .replace(/-+/g, "-");
   }
 
-  // Validation
+  // --- Validation ---
   const errors = {};
-  if (!category_id?.trim()) errors.category_id = ["Category ID is required"];
-  if (!course_class_id?.trim())
-    errors.course_class_id = ["Course Class ID is required"];
+
+  if (!category_id?.trim()) errors.category_id = ["Category is required"];
+  if (!batch_type?.trim()) errors.batch_type = ["Batch Type is required"];
+  if (!batch_year?.trim()) errors.batch_year = ["Batch Year is required"];
+  if (!course_class_id?.trim()) errors.course_class_id = ["Course Class ID is required"];
   if (!course_name?.trim()) errors.course_name = ["Course name is required"];
-  if (!title_heading?.trim())
-    errors.title_heading = ["Title heading is required"];
+  if (!title_heading?.trim()) errors.title_heading = ["Title heading is required"];
   if (!slug) errors.slug = ["Slug is required"];
-  if (!["free", "paid"].includes(course_type))
-    errors.course_type = ["Invalid course type"];
-  if (course_type === "paid" && (!price || isNaN(price)))
-    errors.price = ["Price must be a number"];
-  if (!discount_type?.trim())
-    errors.discount_type = ["Discount type is required"];
-  if (discount && isNaN(discount))
-    errors.discount = ["Discount must be numeric"];
-  if (!duration || isNaN(duration))
-    errors.duration = ["Duration must be numeric"];
+  if (!["free", "paid"].includes(course_type)) errors.course_type = ["Invalid course type"];
+  if (course_type === "paid" && (!price || isNaN(price))) errors.price = ["Price must be a number"];
+  if (!discount_type?.trim()) errors.discount_type = ["Discount type is required"];
+  if (discount && isNaN(discount)) errors.discount = ["Discount must be numeric"];
+  if (!duration || isNaN(duration)) errors.duration = ["Duration must be numeric"];
   if (!content?.trim()) errors.content = ["Content is required"];
   if (!description?.trim()) errors.description = ["Description is required"];
-  if (!start_time || isNaN(Date.parse(start_time)))
-    errors.start_time = ["Valid start time is required"];
-  if (!["0", "1"].includes(status))
-    errors.status = ["Status must be '0' or '1'"];
+  if (!start_time || isNaN(Date.parse(start_time))) errors.start_time = ["Valid start time is required"];
+  if (!["0", "1"].includes(status)) errors.status = ["Status must be '0' or '1'"];
 
+  // File validations only during insert
   if (isInsert) {
     if (!imageFile) errors.image = ["Course image is required"];
     if (!detailsImageFile) errors.details_image = ["Details image is required"];
     if (!brochureFile) errors.brochure = ["Brochure file is required"];
   }
 
+  // If validation errors exist
   if (Object.keys(errors).length > 0) {
     return res.status(422).json({
       success: false,
@@ -396,10 +419,11 @@ const Update = async (req, res) => {
     });
   }
 
-  // Offer price calculation
+  // --- Offer price calculation ---
   let offer_price = 0;
   const parsedPrice = parseFloat(price);
   const parsedDiscount = parseFloat(discount);
+
   if (course_type === "paid" && !isNaN(parsedPrice)) {
     if (discount_type === "percentage" && !isNaN(parsedDiscount)) {
       offer_price = parsedPrice - (parsedPrice * parsedDiscount) / 100;
@@ -411,7 +435,7 @@ const Update = async (req, res) => {
     if (offer_price < 0) offer_price = 0;
   }
 
-  // Prepare main data
+  // --- Prepare data ---
   const data = {
     category_id: category_id.trim(),
     course_class_id: course_class_id.trim(),
@@ -419,17 +443,15 @@ const Update = async (req, res) => {
     title_heading: title_heading.trim(),
     slug,
     course_type,
-    price,
+    price: parsedPrice || 0,
     discount_type,
-    discount,
-    duration,
-    content,
-    description,
+    discount: parsedDiscount || 0,
+    duration: parseInt(duration),
+    content: content.trim(),
+    description: description.trim(),
     start_time,
     status,
-    course_visibility: Array.isArray(course_visibility)
-      ? course_visibility.join(",")
-      : "",
+    course_visibility: Array.isArray(course_visibility) ? course_visibility.join(",") : "",
     service_id: Array.isArray(service_id) ? service_id.join(",") : "",
     teacher_id: Array.isArray(teacher_id) ? teacher_id.join(",") : "",
     video,
@@ -438,30 +460,28 @@ const Update = async (req, res) => {
     mode_of_class,
     meeting_link,
     offer_price,
+    batch_type,
+    batch_year,
   };
 
-  // Add uploaded files
+  // Add file paths
   if (imageFile) data.image = `/uploads/courses/${imageFile.filename}`;
-  if (detailsImageFile)
-    data.details_image = `/uploads/courses/${detailsImageFile.filename}`;
+  if (detailsImageFile) data.details_image = `/uploads/courses/${detailsImageFile.filename}`;
   if (brochureFile) data.brochure = `/uploads/courses/${brochureFile.filename}`;
 
+  // --- Database operation ---
   try {
     if (isInsert) {
       const fields = Object.keys(data);
-      const placeholders = fields.map(() => "?");
+      const placeholders = fields.map(() => "?").join(", ");
       const values = fields.map((key) => data[key]);
 
-      const insertQuery = `INSERT INTO courses (${fields.join(
-        ", "
-      )}) VALUES (${placeholders.join(", ")})`;
+      const insertQuery = `INSERT INTO courses (${fields.join(", ")}) VALUES (${placeholders})`;
 
       pool.query(insertQuery, values, (err, result) => {
         if (err) {
-          console.error(err);
-          return res
-            .status(500)
-            .json({ success: false, message: "Insert failed" });
+          console.error("Insert Error:", err);
+          return res.status(500).json({ success: false, message: "Insert failed" });
         }
         return res.json({
           success: true,
@@ -479,10 +499,8 @@ const Update = async (req, res) => {
 
       pool.query(updateQuery, values, (err, result) => {
         if (err) {
-          console.error(err);
-          return res
-            .status(500)
-            .json({ success: false, message: "Update failed" });
+          console.error("Update Error:", err);
+          return res.status(500).json({ success: false, message: "Update failed" });
         }
         return res.json({
           success: true,
@@ -492,16 +510,17 @@ const Update = async (req, res) => {
       });
     }
   } catch (err) {
-    console.error(err);
+    console.error("Exception:", err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
+
 const Delete = async (req, res) => {
   try {
-    const categorieId = req.params.categorieId;
+    const categorieId = req.params.courseId;
 
-    const softDeleteQuery = "UPDATE cotego SET deleted_at = NOW() WHERE id = ?";
+    const softDeleteQuery = "UPDATE courses SET deleted_at = NOW() WHERE id = ?";
 
     pool.query(softDeleteQuery, [categorieId], (error, result) => {
       if (error) {
@@ -510,11 +529,11 @@ const Delete = async (req, res) => {
       }
     });
 
-    req.flash("success", "Customer soft deleted successfully");
-    return res.redirect("/admin/categorie-list");
+    req.flash("success", "Course soft deleted successfully");
+    return res.redirect("/admin/course-list");
   } catch (error) {
     req.flash("error", error.message);
-    return res.redirect(`/admin/categorie-list`);
+    return res.redirect(`/admin/course-list`);
   }
 };
 
