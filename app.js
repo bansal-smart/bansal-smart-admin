@@ -11,10 +11,8 @@ const flash = require('connect-flash');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const base_url = 'http://localhost:5000/';
-const { getLogoutUrl,getDashboardUrl } = require('./helpers/validationsHelper'); // Import helpers
-
-
-
+const { getLogoutUrl,getDashboardUrl } = require('./helpers/validationsHelper'); // Import helper
+require('dotenv').config();
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());

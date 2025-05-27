@@ -1,0 +1,235 @@
+<%- include('../layouts/header') %>
+
+    <section class="content-body">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h4 class="card-title mb-0">
+                                <%= page_name %>
+                            </h4>
+
+
+                            <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i
+                                    class="fa fa-arrow-left"></i> Back</button>
+
+                        </div>
+                        <div class="card-body">
+
+                            <form id="submitForm" method="post" action="<%= form_url %>" enctype="multipart/form-data">
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Category Name*</label>
+                                            <select class="form-control" name="category_id" id="category_id">
+                                                <option value="">Select</option>
+                                                <% categories.forEach(function(category) { %>
+                                                    <option value="<%= category.id %>" <% if (typeof post !=='undefined'
+                                                        && category.id==post.category_id) { %> selected <% } %>>
+                                                            <%= category.category_name %>
+                                                    </option>
+                                                    <% }); %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Course Name*</label>
+                                            <select class="form-control" name="course_id" id="course_id">
+                                                <option value="">Select</option>
+                                                <% courses.forEach(function(course) { %>
+                                                    <option value="<%= course.id %>" <% if (post &&
+                                                        post.course_id==course.id) { %> selected <% } %>>
+                                                            <%= course.course_name %>
+                                                    </option>
+                                                    <% }); %>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label"> Test Name *</label>
+                                            <input type="text" class="form-control" name="test_name" id="test_name"
+                                                placeholder="Test Name.." value="<%= post?.test_name %>" />
+                                        </div>
+                                    </div>
+
+                                    <!-- <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Title Heading *</label>
+                                            <input type="text" class="form-control" name="title_heading"
+                                                id="title_heading" placeholder="Title Heading.."
+                                                value="<%= post?.title_heading %>" />
+                                        </div>
+                                    </div> -->
+
+
+                                    <input type="hidden" name="id" value="<%= post?.id %>">
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Start Time *</label>
+                                            <input type="datetime-local" class="form-control" name="start_time"
+                                                id="start_time" value="<%= post?.start_time %>">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">End Time *</label>
+                                            <input type="datetime-local" class="form-control" name="end_time"
+                                                id="end_time" value="<%= post?.end_time %>">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <!-- <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Number of Question * </label>
+                                                    <input type="number" class="form-control" readonly=""
+                                                        name="no_of_question" id="no_of_question" value="0">
+                                                </div>
+                                            </div> -->
+
+
+
+
+                                            <!-- <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Total Marks*</label>
+                                                    <input type="number" class="form-control" readonly=""
+                                                        name="maximum_marks" id="maximum_marks">
+                                                </div>
+                                            </div> -->
+
+                                        </div>
+
+                                    </div>
+                                    <!-- <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Test Series Type*</label>
+                                            <select class="form-control" name="type" id="type">
+                                                <option value="paid" <%=post?.type==="paid" ? 'selected' : '' %>
+                                                    >Paid</option>
+                                                <option value="free" <%=post?.type==="free" ? 'selected' : '' %>
+                                                    >Free</option>
+                                            </select>
+                                        </div>
+                                    </div> -->
+
+
+
+                                </div>
+
+
+                                <div class="row">
+
+
+
+
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="form-label">Intruction*</label>
+                                            <textarea class="form-control ckeditor" name="instruction" id="instruction"
+                                                placeholder="Instruction"><%= post?.instruction %></textarea>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Test Banner Image *</label>
+                                            <input type="file" class="form-control" name="banner" accept="image/*"
+                                                onchange="readURL(this, 'image_view');" id="banner" />
+
+                                            <img id="image_view"
+                                                src="<%= post?.banner ? public_url + post.banner : base_url + 'admin/images/default-featured-image.png' %>"
+                                                width="150px" style="margin-top:10px;" />
+                                        </div>
+                                    </div>
+
+                                    <script>
+                                        function readURL(input, id) {
+                                            if (input.files && input.files[0]) {
+                                                const reader = new FileReader();
+                                                reader.onload = function (e) {
+                                                    document.getElementById(id).src = e.target.result;
+                                                };
+                                                reader.readAsDataURL(input.files[0]);
+                                            }
+                                        }
+                                    </script>
+
+
+                                    <div class="form-group col-sm-4">
+                                        <label class="form-label">Status</label>
+                                        <select name="status" id="status" class="form-control custom-select">
+                                            <option value="1" <%=post?.status==1 ? 'selected' : '' %>>Active
+                                            </option>
+                                            <option value="0" <%=post?.status==0 ? 'selected' : '' %>>Inactive
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-12">
+
+                                    <button type="submit" id="submitButton" class="btn btn-primary float-right"
+                                        data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..."
+                                        data-rest-text="<%= action %>">
+                                        <%= action %>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <%- include('../layouts/footer') %>
+
+        <!-- <script>
+  function readURL(input, imgId) {
+      if (input.files && input.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+              document.getElementById(imgId).src = e.target.result;
+          }
+          reader.readAsDataURL(input.files[0]);
+      }
+  }
+  </script> -->
+
+
+
+
+        <script>
+            $(document).ready(function () {
+                $('.instructor').select2({
+                    //  placeholder: "Select Faculty",
+                    allowClear: true
+                });
+            });
+        </script>
+
+
+        <script>
+            $("#type").change(function () {
+                var course_type = $(this).val();
+                if (course_type == "free") {
+                    $(".paid_course").addClass('d-none');
+                }
+                else {
+                    $(".paid_course").removeClass('d-none');
+                }
+            });
+            CKEDITOR.replace('description');
+
+            $(".instructor").select2();
+        </script>

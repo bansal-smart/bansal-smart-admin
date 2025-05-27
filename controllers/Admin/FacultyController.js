@@ -72,7 +72,6 @@ const Create = async (req, res) => {
   }
 };
 
-
 const getCategoriesFromTable = async () => {
   return new Promise((resolve, reject) => {
     const query = `SELECT * FROM categories WHERE status = 1 AND deleted_at IS NULL AND category_type = 'course'`;
@@ -91,30 +90,26 @@ const path = require("path");
 const checkImagePath = (relativePath) => {
   const normalizedPath = path.normalize(relativePath);
 
-
   const fullPath = path.join(__dirname, "..", "public", normalizedPath);
 
-  console.log("Server checking for file at:", fullPath); 
-
+  console.log("Server checking for file at:", fullPath);
 
   return fs.existsSync(fullPath);
 };
 
 const Edit = async (req, res) => {
   try {
-    const postId = req.params.postId; 
+    const postId = req.params.postId;
 
-   
     const getCourseQuery = "SELECT * FROM faculties WHERE id = ?";
 
-    
     const post = await new Promise((resolve, reject) => {
       pool.query(getCourseQuery, [postId], function (error, result) {
         if (error) {
           req.flash("error", error.message);
           return reject(error);
         }
-       
+
         resolve(result[0]); // Ensure result[0] contains course data
       });
     });
@@ -142,7 +137,7 @@ const Edit = async (req, res) => {
 
       form_url: "/admin/faculty-update/" + postId, // URL for the update form
       page_name: "Edit",
-        action: "Update",
+      action: "Update",
       image: imageExists
         ? `${post.image}`
         : "admin/images/default-featured-image.png",
@@ -282,9 +277,10 @@ const Update = async (req, res) => {
 
 const Delete = async (req, res) => {
   try {
-    const categorieId = req.params.categorieId;
+    const categorieId = req.params.postId;
 
-    const softDeleteQuery = "UPDATE cotego SET deleted_at = NOW() WHERE id = ?";
+    const softDeleteQuery =
+      "UPDATE faculties SET deleted_at = NOW() WHERE id = ?";
 
     pool.query(softDeleteQuery, [categorieId], (error, result) => {
       if (error) {
@@ -293,11 +289,11 @@ const Delete = async (req, res) => {
       }
     });
 
-    req.flash("success", "Customer soft deleted successfully");
-    return res.redirect("/admin/categorie-list");
+    req.flash("success", "Faculty deleted successfully");
+    return res.redirect("/admin/faculty-list");
   } catch (error) {
     req.flash("error", error.message);
-    return res.redirect(`/admin/categorie-list`);
+    return res.redirect(`/admin/faculty-list`);
   }
 };
 

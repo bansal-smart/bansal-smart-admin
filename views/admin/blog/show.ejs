@@ -1,0 +1,60 @@
+<%- include('../layouts/header') %>
+
+  <div class="content-body">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h4 class="card-title mb-0">
+                <%= page_name %>
+              </h4>
+              <a href="<%= list_url %>" class="btn btn-primary btn-sm">
+                <i class="fa fa-arrow-left"></i> Back
+              </a>
+            </div>
+            <div class="card-body">
+              <div class="row">
+
+                <!-- Section: Basic Info -->
+                <div class="col-12">
+                  <h5 class="border-bottom pb-2 mt-3">Basic Information</h5>
+                </div>
+
+                <div class="col-md-12">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Title Heading</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= post.title %>
+                    </p>
+                  </div>
+                </div>
+
+
+
+                <div class="col-md-12">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Description</strong></label>
+                    <p class="mb-0 text-muted"><%- post.description %></p>
+                  </div>
+                </div>
+
+                <div class="col-md-12">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Status</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= post.status==1 ? 'Active' : 'Inactive' %>
+                    </p>
+                  </div>
+                </div>
+
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%- include('../layouts/footer') %>
+      </div>

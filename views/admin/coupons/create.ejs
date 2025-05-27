@@ -1,11 +1,10 @@
 <%- include('../layouts/header') %>
 
-<div class="content-wrapper">
-  
-
-  <div class="row">
-    <div class="col-12 grid-margin">
-      <div class="card">
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h4 class="card-title mb-0"><%= title %> <%= page_name %></h4>
           <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i> Back</button>
@@ -118,13 +117,14 @@
                   <input type="file" class="form-control" name="coupon_image" onchange="readURL(this, 'image_view');" id="image"/>
                   <!-- Use the course image or fallback to the default image -->
                   <img id="image_view" src="<%= image %>" width="200px">
+              
                 </div>
               </div>
               <!-- Coupon Description -->
               <div class="col-md-12">
                 <div class="form-group">
                   <label for="coupon_description">Coupon Description</label>
-                  <textarea class="form-control" id="coupon_description" name="coupon_description"><%= post.coupon_description || '' %></textarea>
+                  <textarea class="form-control ckeditor" id="coupon_description" name="coupon_description"><%= post.coupon_description || '' %></textarea>
                 </div>
               </div>
         
@@ -158,47 +158,3 @@
 
 <%- include('../layouts/footer') %>
 
-<script src="https://cdn.ckeditor.com/4.20.1/standard/ckeditor.js"></script>
-<script>
-  CKEDITOR.replace('coupon_description');
-</script>
-
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- AJAX Form Submission -->
-<script>
-  $("#submitForm").on("submit", function(event) {
-    event.preventDefault(); // Prevent default form submission
-
-    var formData = new FormData(this);
-
-    $.ajax({
-      url: $(this).attr("action"),
-      method: $(this).attr("method"),
-      data: formData,
-      contentType: false,
-      processData: false,
-      success: function(response) {
-        alert("<%= title %> updated successfully");
-        window.location.href = response.redirect_url;
-      },
-      error: function(xhr, status, error) {
-        console.error("Form submission error:", error);
-        alert("Error updating <%= title %>");
-      }
-    });
-  });
-</script>
-
-<script>
-  function readURL(input, imgId) {
-      if (input.files && input.files[0]) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-              document.getElementById(imgId).src = e.target.result;
-          }
-          reader.readAsDataURL(input.files[0]);
-      }
-  }
-  </script>

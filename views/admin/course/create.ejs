@@ -1,25 +1,10 @@
 <%- include('../layouts/header') %>
 
-    <style>
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            font-size: 15px
-        }
-
-        .form-group label.form-label {
-            font-weight: 700;
-        }
-
-        .form-group label {
-            font-size: 0.8125rem;
-            line-height: 1;
-            vertical-align: middle;
-        }
-    </style>
-    <div class="content-wrapper">
-
-        <div class="row">
-            <div class="col-12 grid-margin">
-                <div class="card">
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h4 class="card-title mb-0">
                             <%= page_name %>
@@ -27,7 +12,7 @@
 
 
                         <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i
-                                class="fa fa-arrow-left"></i> Back</button>
+                                class="fa fa-arrow-left"></i></button>
 
                     </div>
                     <div class="card-body">
@@ -135,9 +120,22 @@
                                             placeholder="Duration.." value="<%= course.duration %>" />
                                     </div>
                                 </div>
-
+   
                                 <div class="col-md-6">
-                                    <div class="form-group">
+                                      <div class="form-group">
+                                        <label for="course_class">Faculty</label>
+                                        <select id="teacher_id" name="teacher_id[]" class="form-control instructor" multiple >
+                                            
+
+                                                 <% faculties.forEach(function(val) { %>
+        <option value="<%= val.id %>" 
+          <%= course && Array.isArray(course.teacher_ids) && course.teacher_ids.includes(val.id) ? 'selected' : '' %>>
+          <%= val.name %>
+        </option>
+      <% }); %>
+                                        </select>
+                                    </div>
+                                    <!-- <div class="form-group">
                                         <label class="form-label">Faculty *</label>
                                         <select name="teachers[]" id="teachers" multiple style="width:100%"
                                             class="form-control instructor">
@@ -167,7 +165,7 @@
                                             <option value="61" <%=course.teacher_ids.includes(61) ? 'selected' : '' %>
                                                 >Hrithik Verma Sir</option>
                                         </select>
-                                    </div>
+                                    </div> -->
                                 </div>
 
                                 <div class="col-md-4">
@@ -283,7 +281,7 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label class="form-label">Description*</label>
-                                        <textarea class="form-control" name="description" id="description"
+                                        <textarea class="form-control ckeditor" name="description" id="description"
                                             placeholder="Description"><%= course.description %></textarea>
                                     </div>
                                 </div>
@@ -322,12 +320,13 @@
                                     <div class="form-group">
                                         <label class="form-label">Image *</label>
                                         <input type="file" class="form-control" name="image"
+                                        accept="image/*" 
                                             onchange="readURL(this, 'image_view');" id="image" />
                                         <!-- Use the course image or fallback to the default image -->
                                         
 
                                         <img id="image_view"
-                                            src="<%= course.image ? public_url + course.image : base_url + 'admin/images/default-featured-image.png' %>"
+                                            src="<%= course.image ?  course.image : base_url + 'admin/images/default-featured-image.png' %>"
                                             width="150px" />
 
                                     </div>
@@ -337,11 +336,12 @@
                                     <div class="form-group">
                                         <label class="form-label">Details Image *</label>
                                         <input type="file" class="form-control" name="details_image" id="details_image"
-                                            onchange="readURL(this, 'details_image_view');" />
+                                        accept="image/*" 
+                                            onchange="readURL(this, 'image_view');" />
                                         
 
                                          <img id="image_view"
-                                            src="<%= course.details_image ? public_url + course.details_image : base_url + 'admin/images/default-featured-image.png' %>"
+                                            src="<%= course.details_image ?  course.details_image : base_url + 'admin/images/default-featured-image.png' %>"
                                             width="150px" />
                                     </div>
                                 </div>
@@ -403,6 +403,7 @@
             </div>
         </div>
     </div>
+</section>
 
 
     <%- include('../layouts/footer') %>
@@ -418,16 +419,9 @@
       }
   }
   </script> -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-        <!-- jQuery (required by Select2) -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-        <!-- Select2 JS -->
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+        
 
         <script>
             $(document).ready(function () {
@@ -437,66 +431,7 @@
                 });
             });
         </script>
-        <script>
-            $(document).ready(function () {
-                // Ensure a form exists before trying to attach the submit handler
-                if ($('form').length > 0) {
-                    $('form').submit(function (e) {
-                        e.preventDefault();
- for (instance in CKEDITOR.instances) {
-        CKEDITOR.instances[instance].updateElement();
-    }
-                        var $form = $(this);
-                        var $btn = $form.find('[type="submit"]');
-
-                        buttonLoading('loading', $btn);  // Assuming this is a function for loading button state
-                        $form.find('.is-invalid').removeClass('is-invalid state-invalid');
-                        $form.find('.invalid-feedback').remove();
-
-                        // Use FormData for form submission
-                        $.ajax({
-                            url: $form.attr('action'),
-                            type: "POST",
-                            data: new FormData(this),
-                            processData: false,
-                            contentType: false,
-                            cache: false,
-                            success: function (data) {
-                                if (data.success) {
-                                    successMsg('', data.message);  // Assuming successMsg is a function
-                                    setTimeout(function () {
-                                        window.location = data.redirect_url;
-                                    }, 1000);
-                                } else {
-                                    handleFormErrors(data.errors, $form);  // Handle validation errors
-                                    errorMsg('', data.message);  // Assuming errorMsg is a function
-                                }
-                                buttonLoading('reset', $btn);  // Reset button state
-                            },
-                            error: function (xhr) {
-                                if (xhr.status === 422) {
-                                    handleFormErrors(xhr.responseJSON.errors, $form);  // Handle validation errors
-                                    errorMsg('', xhr.responseJSON.message);  // Show error message
-                                } else {
-                                    errorMsg('', 'Unexpected error occurred');
-                                }
-                                buttonLoading('reset', $btn);  // Reset button state
-                            }
-                        });
-                    });
-                }
-            });
-
-            // Function to handle form errors
-            function handleFormErrors(errors, $form) {
-                $.each(errors, function (fieldName, messages) {
-                    var $field = $form.find('[name="' + fieldName + '"]');
-                    $field.addClass('is-invalid state-invalid');
-                    $field.parent().append('<div class="invalid-feedback">' + messages[0] + '</div>');
-                });
-            }
-        </script>
-
+       
 
         <script>
             $("#course_type").change(function () {
@@ -508,7 +443,7 @@
                     $(".paid_course").removeClass('d-none');
                 }
             });
-            CKEDITOR.replace('description');
+           
 
             $(".instructor").select2();
         </script>

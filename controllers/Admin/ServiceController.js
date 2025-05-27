@@ -60,6 +60,7 @@ const Create = async (req, res) => {
       error: req.flash("error"),
       form_url: "/admin/service-update",
       page_name: "Create",
+      action: "Create",
       title: "Service",
       post: {}, // Empty Service for creation
       image: "",
@@ -103,6 +104,7 @@ const Edit = async (req, res) => {
         : "admin/images/default-featured-image.png",
       form_url: "/admin/service-update/" + serviceId,
       page_name: "Edit",
+      action: "Update",
       title: "Service",
     });
   } catch (error) {

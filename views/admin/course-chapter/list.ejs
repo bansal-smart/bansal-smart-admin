@@ -1,0 +1,129 @@
+<%- include('../layouts/header') %>
+
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="page-header">
+        
+        <%- include('../partials/course_tabs', { course: course }) %>
+        </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+           
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h4 class="card-title mb-0"><%= page_name %></h4>
+          
+                <div class="row">
+                  <div class="col-12 text-end">
+                    <% if (req.query.status==='trashed' ) { %>
+                    <a class="btn btn-primary" href="<%= list_url %>">
+                      <i class="fas fa-list"></i>
+                    </a>
+                    <% } else { %>
+                    <a class="btn btn-danger btn-sm" href="<%= trashed_list_url %>">
+                      <i class="fas fa-trash"></i> 
+                    </a>
+                    <% } %>
+          
+                    <a class="btn btn-info btn-sm" href="<%= create_url %>">
+                      <i class="fas fa-plus"></i> 
+                    </a>
+                    <button type="button" id="backButton" class="btn btn-primary btn-sm">
+                      <i class="fa fa-arrow-left"></i> 
+                    </button>
+                  </div>
+                </div>
+            </div>
+            <div class="card-body">
+
+      <div class="table-responsive">
+        <table id="example3" class="display table-responsive-lg">
+          <thead>
+            <tr>
+              <th>Sr.No #</th>
+
+              <th>Course Name</th>
+              <th>Subject Name</th>
+              <th>Chapter Name</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% data.forEach((post, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+
+              <td><%= post.course_name || '-' %></td>
+
+              <td><%= post.subject_name || '-' %></td>
+              <td><%= post.chapter_name || '-' %></td>
+              <td>
+                <% if (post.status == 1) { %>
+                <span class="badge badge-success">Active</span>
+                <% } else { %>
+                <span class="badge badge-danger">Inactive</span>
+                <% } %>
+              </td>
+            
+              <td>
+  <% if (req.query.status === 'trashed') { %>
+    <!-- Restore Button -->
+    <a
+      href="/admin/course_chapter-restore/<%= post.id %>"
+      class="btn btn-success shadow btn-xs sharp me-1"
+      title="Restore"
+    >
+      <i class="fa fa-undo"></i>
+    </a>
+
+    <!-- Permanent Delete Button -->
+    <a
+      href="/admin/course-chapter-permanent-delete/<%= post.id %>"
+      class="btn btn-danger shadow btn-xs sharp"
+      onclick="return confirm('Are you sure you want to permanently delete this chapter? This action cannot be undone.');"
+      title="Delete Permanently"
+    >
+      <i class="fa fa-trash"></i>
+    </a>
+  <% } else { %>
+    <!-- Edit Button -->
+    <a
+      href="/admin/course-chapter-edit/<%= post.id %>"
+      class="btn btn-primary shadow btn-xs sharp me-1"
+      title="Edit"
+    >
+      <i class="fas fa-pencil-alt"></i>
+    </a>
+
+    <!-- Soft Delete Button -->
+    <a
+      href="/admin/course-chapter-delete/<%= post.id %>"
+      class="btn btn-warning shadow btn-xs sharp"
+      title="Soft Delete"
+    >
+      <i class="fa fa-trash"></i>
+    </a>
+  <% } %>
+</td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+        </div></div>
+        </div>
+  </div></section>
+
+<%- include('../layouts/footer') %>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $("#order-listing").DataTable();
+  });
+</script>

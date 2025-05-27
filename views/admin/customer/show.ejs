@@ -1,125 +1,245 @@
 <%- include('../layouts/header') %>
-        
-           
-        <div class="content-wrapper">
-          <div class="page-header">
-            <h3 class="page-title">
-              Customers
-            </h3>
-            <nav aria-label="breadcrumb">
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">UI Elements</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Tabs</li>
-              </ol>
-            </nav>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <div class="card">
-                <div class="card-body">
-                  <h4 class="card-title">Custom pills</h4>
-                  <p class="card-description">Add class <code>.nav-pills-custom</code> and <code>.tab-content-custom-pill</code> to <code>.nav-pills</code> and <code>.tab-content</code></p>
-                  <div class="row">
-                    <div class="col-md-10 mx-auto">
-                      <ul class="nav nav-pills nav-pills-custom" id="pills-tab-custom" role="tablist">
-                        <li class="nav-item">
-                          <a class="nav-link active" id="pills-home-tab-custom" data-toggle="pill" href="#pills-health" role="tab" aria-controls="pills-home" aria-selected="true">
-                            Health
-                          </a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="pills-profile-tab-custom" data-toggle="pill" href="#pills-career" role="tab" aria-controls="pills-profile" aria-selected="false">
-                            Career
-                          </a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="pills-contact-tab-custom" data-toggle="pill" href="#pills-music" role="tab" aria-controls="pills-contact" aria-selected="false">
-                            Music
-                          </a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="pills-vibes-tab-custom" data-toggle="pill" href="#pills-vibes" role="tab" aria-controls="pills-contact" aria-selected="false">
-                            Vibes
-                          </a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="pills-energy-tab-custom" data-toggle="pill" href="#pills-energy" role="tab" aria-controls="pills-contact" aria-selected="false">
-                            Energy
-                          </a>
-                        </li>
-                      </ul>
-                      <div class="tab-content tab-content-custom-pill" id="pills-tabContent-custom">
-                        <div class="tab-pane fade show active" id="pills-health" role="tabpanel" aria-labelledby="pills-home-tab-custom">
-                          <div class="d-flex mb-4">
-                            <img src="../../images/samples/300x300/12.jpg" class="w-25 h-100 rounded" alt="sample image">
-                            <img src="../../images/samples/300x300/1.jpg" class="w-25 h-100 ml-4 rounded" alt="sample image">
-                            <img src="../../images/samples/300x300/2.jpg" class="w-25 h-100 ml-4 rounded" alt="sample image">
-                          </div>
-                          <p>
-                              I'm not the monster he wants me to be. So I'm neither man nor beast. I'm something new entirely. With 
-                              my own set of rules. I'm Dexter. Boo. Only you could make those words cute. I'm thinking two circus clowns dancing. You?
-                          </p>
-                          <p>
-                              Under normal circumstances, I'd take that as a compliment. Tell him time is of the essence. I'm really more 
-                              an apartment person. Finding a needle in a haystack isn't hard when every straw is computerized.
-                          </p>
-                        </div>
-                        <div class="tab-pane fade" id="pills-career" role="tabpanel" aria-labelledby="pills-profile-tab-custom">
-                          <div class="media">
-                            <img class="mr-3 w-25 rounded" src="http://www.urbanui.com/" alt="sample image">
-                            <div class="media-body">
-                              <p>I'm thinking two circus clowns dancing. You? Finding a needle in a haystack isn't hard when every straw is 
-                                computerized. Tell him time is of the essence. 
-                                Somehow, I doubt that. You have a good heart, Dexter.</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="tab-pane fade" id="pills-music" role="tabpanel" aria-labelledby="pills-contact-tab-custom">
-                          <div class="media">
-                            <img class="mr-3 w-25 rounded" src="../../images/samples/300x300/14.jpg" alt="sample image">
-                            <div class="media-body">
-                              <p>
-                                  I'm really more an apartment person. This man is a knight in shining armor. Oh I beg to differ, 
-                                  I think we have a lot to discuss. After all, you are a client. You all right, Dexter?
-                              </p>
-                              <p>
-                                  I'm generally confused most of the time. Cops, another community I'm not part of. You're a killer. 
-                                  I catch killers. Hello, Dexter Morgan.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="tab-pane fade" id="pills-vibes" role="tabpanel" aria-labelledby="pills-vibes-tab-custom">
-                          <div class="media">
-                            <img class="mr-3 w-25 rounded" src="../../images/samples/300x300/15.jpg" alt="sample image">
-                            <div class="media-body">
-                              <p>
-                                  This man is a knight in shining armor. I feel like a jigsaw puzzle missing a piece. And I'm not 
-                                  even sure what the picture should be. Somehow, I doubt that. You have a good heart, Dexter. Keep your mind limber.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="tab-pane fade" id="pills-energy" role="tabpanel" aria-labelledby="pills-energy-tab-custom">
-                          <div class="media">
-                            <img class="mr-3 w-25 rounded" src="../../images/samples/300x300/11.jpg" alt="sample image">
-                            <div class="media-body">
-                              <p>
-                                  Finding a needle in a haystack isn't hard when every straw is computerized. You're a killer. I catch killers. 
-                                  I will not kill my sister. I will not kill my sister. I will not kill my sister. Rorschach would say you have a hard time relating to others.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+<style>
+    .tab{
+  list-style:none;
+}
+.tab li{
+  display:inline-block;
+  margin-right:20px;
+  background: #DDDD;
+  padding: 10px;
+}
+.tab li a{
+  text-decoration: none;
+}
+.tab li.active a{
+  color:red;
+}
+
+ul{
+  list-style: none;
+}
+
+.tab-content li{
+  display: none;
+}
+
+.tab-content li.active{
+  display: block
+}
+
+</style>
+  <div class="content-body">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h4 class="card-title mb-0">
+                <%= page_name %>
+              </h4>
+              <a href="/admin/customer-list" class="btn btn-primary btn-sm">
+                <i class="fa fa-arrow-left"></i> Back
+              </a>
+            </div>
+            <div class="card-body">
+   <div class="col-12">
+  <ul class="tab mb-4">
+    <li>
+      <a href="/admin/customer-show/<%= customer.id %>" class="tab-link">Student Details</a>
+    </li>
+    <li>
+      <a href="/admin/customer-course-booking/<%= customer.id %>" class="tab-link">Course Booking</a>
+    </li>
+    <li>
+      <a href="/admin/customer-test-series-booking/<%= customer.id %>" class="tab-link">Test Series Booking</a>
+    </li>
+  </ul>
+</div>
+
+<script>
+  // Get current URL
+  const currentUrl = window.location.pathname;
+
+  // Get all tab links
+  const links = document.querySelectorAll('.tab-link');
+
+  links.forEach(link => {
+    if (currentUrl.includes(link.getAttribute('href'))) {
+      link.parentElement.classList.add('active');
+    }
+  });
+</script>
+
+              <div class="row">
+                <!-- Course Name -->
+                <!-- Student Name -->
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Student Name</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= customer.name || 'N/A' %>
+                    </p>
                   </div>
                 </div>
+
+                <!-- Student Email -->
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Student Email</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= customer.email || 'N/A' %>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Student Mobile -->
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Student Mobile</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= customer.mobile || 'N/A' %>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Gender -->
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Gender</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= customer.gender || 'N/A' %>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Role -->
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Role</strong></label>
+                    <p class="mb-0 text-muted">Student</p>
+                  </div>
+                </div>
+
+                <!-- Date of Birth -->
+                <!-- <div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Date of Birth</strong></label>
+    <p class="mb-0 text-muted"><%= customer.date_of_birth || 'N/A' %></p>
+  </div>
+</div> -->
+
+                <!-- Nationality -->
+                <!-- <div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Nationality</strong></label>
+    <p class="mb-0 text-muted"><%= customer.nationality || 'N/A' %></p>
+  </div>
+</div> -->
+
+                <!-- Address -->
+                <!-- <div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Address</strong></label>
+    <p class="mb-0 text-muted"><%= customer.address || 'N/A' %></p>
+  </div>
+</div> -->
+
+                <!-- City -->
+                <!-- <div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>City</strong></label>
+    <p class="mb-0 text-muted"><%= customer.city || 'N/A' %></p>
+  </div>
+</div> -->
+
+                <!-- State -->
+                <!-- <div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>State</strong></label>
+    <p class="mb-0 text-muted"><%= customer.state || 'N/A' %></p>
+  </div>
+</div> -->
+
+                <!-- Pincode -->
+                <!-- <div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Pincode</strong></label>
+    <p class="mb-0 text-muted"><%= customer.pincode || 'N/A' %></p>
+  </div>
+</div> -->
+
+                <!-- Father Name -->
+                <!-- <div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Father Name</strong></label>
+    <p class="mb-0 text-muted"><%= customer.father_name || 'N/A' %></p>
+  </div>
+</div> -->
+
+                <!-- Membership Date -->
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Category Name</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= categoryDetails ? categoryDetails.category_name : 'N/A' %>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Course Class</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= courseClassDetails ? courseClassDetails.name : 'N/A' %>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Registration Type</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= customer.registration_type || 'N/A' %>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Status</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= customer.status===1 ? 'Active' : customer.status===0 ? 'Inactive' : 'N/A' %>
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Registration Center</strong></label>
+                    <p class="mb-0 text-muted">
+                      <%= centerDetails ? centerDetails.name : 'N/A' %>
+                    </p>
+                  </div>
+                </div>
+                <!-- Profile Picture (Just showing if exists) -->
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Profile Picture</strong></label>
+                    <% if (customer.profile_pic) { %>
+                      <img src="<%= customer.profile_pic %>" alt="Profile" style="max-width:100%;">
+                      <% } else { %>
+                        <p class="mb-0 text-muted">N/A</p>
+                        <% } %>
+                  </div>
+                </div>
+
+
+
               </div>
             </div>
           </div>
         </div>
-        
+      </div>
+    </div>
 
-<%- include('../layouts/footer') %>
-
+    <%- include('../layouts/footer') %>

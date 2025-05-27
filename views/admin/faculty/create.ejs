@@ -1,253 +1,140 @@
 <%- include('../layouts/header') %>
 
-    <style>
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            font-size: 15px
-        }
-
-        .form-group label.form-label {
-            font-weight: 700;
-        }
-
-        .form-group label {
-            font-size: 0.8125rem;
-            line-height: 1;
-            vertical-align: middle;
-        }
-    </style>
-    <div class="content-wrapper">
-
-        <div class="row">
-            <div class="col-12 grid-margin">
-                <div class="card">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h4 class="card-title mb-0">
-                            <%= page_name %>
-                        </h4>
+  <div class="content-body">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+              <h4 class="card-title mb-0">
+                <%= page_name %>
+              </h4>
 
 
-                        <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i
-                                class="fa fa-arrow-left"></i> Back</button>
+              <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i>
+                Back</button>
 
-                    </div>
-                    <div class="card-body">
-
-                       <form id="submitForm" method="post" action="<%= form_url %>" enctype="multipart/form-data">
-  <div class="row">
-
-    <!-- Category Dropdown -->
-    <div class="col-md-4">
-      <div class="form-group">
-        <label class="form-label">Category Name*</label>
-        <select class="form-control" name="category_id" id="category_id">
-          <option value="">Select</option>
-          <% categories.forEach(function(category) { %>
-            <option value="<%= category.id %>" <%= post?.category_id == category.id ? 'selected' : '' %>>
-              <%= category.category_name %>
-            </option>
-          <% }); %>
-        </select>
-      </div>
-    </div>
-
-    <!-- Name -->
-    <div class="form-group col-md-6">
-      <label class="form-label">Name *</label>
-      <input type="text" class="form-control" name="name" id="name" value="<%= post?.name || '' %>">
-    </div>
-
-    <!-- Email -->
-    <div class="form-group col-md-6">
-      <label class="form-label">Email *</label>
-      <input type="text" class="form-control" name="email" id="email" value="<%= post?.email || '' %>">
-    </div>
-
-    <!-- Phone -->
-    <div class="form-group col-md-4">
-      <label class="form-label">Phone No *</label>
-      <input type="text" class="form-control" name="phone" id="phone" value="<%= post?.phone || '' %>">
-    </div>
-
-    <!-- Subject -->
-    <div class="form-group col-md-4">
-      <label class="form-label">Subject *</label>
-      <input type="text" class="form-control" name="subject" id="subject" value="<%= post?.subject || '' %>">
-    </div>
-
-    <!-- Experience -->
-    <div class="form-group col-md-4">
-      <label class="form-label">Experience *</label>
-      <input type="text" class="form-control" name="experience" id="experience" value="<%= post?.experience || '' %>">
-    </div>
-
-    <!-- Teaching Mode -->
-    <div class="form-group col-md-4">
-      <label class="form-label">Teaching Mode*</label>
-      <select name="teaching_mode" id="teaching_mode" class="form-control">
-        <option value="online" <%= post?.teaching_mode === 'online' ? 'selected' : '' %>>Online</option>
-        <option value="offline" <%= post?.teaching_mode === 'offline' ? 'selected' : '' %>>Offline</option>
-      </select>
-    </div>
-
-    <!-- Short Description -->
-    <div class="col-md-12">
-      <div class="form-group">
-        <label class="form-label">Short Description*</label>
-        <textarea class="form-control" name="short_description" id="short_description"><%= post?.short_description || '' %></textarea>
-      </div>
-    </div>
-
-    <!-- Description/Bio -->
-    <div class="col-md-12">
-      <div class="form-group">
-        <label class="form-label">Description/Bio*</label>
-        <textarea class="form-control" name="description" id="description"><%= post?.description || '' %></textarea>
-      </div>
-    </div>
-
-    <!-- Image Upload -->
-    <div class="col-md-4">
-      <div class="form-group">
-        <label class="form-label">Image *</label>
-        <input type="file" class="form-control" name="image" onchange="readURL(this, 'image_view');" id="image" />
-        <img id="image_view"
-             src="<%= post?.image ? public_url + post.image : base_url + 'admin/images/default-featured-image.png' %>"
-             width="150px" />
-      </div>
-    </div>
-
-    <!-- Status -->
-    <div class="form-group col-md-4">
-      <label class="form-label">Status</label>
-      <select name="status" id="status" class="form-control">
-        <option value="1" <%= post?.status == 1 ? 'selected' : '' %>>Active</option>
-        <option value="0" <%= post?.status == 0 ? 'selected' : '' %>>Inactive</option>
-      </select>
-    </div>
-
-  </div>
-
-  <!-- Submit Button -->
-  <div class="col-md-12 mt-3">
-<button type="submit" id="submitButton" class="btn btn-primary float-right"
-        data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..."
-        data-rest-text="<%= post?.page_name || page_name %>">
-    <%= post?.action || action %>
-</button>
-  </div>
-</form>
-
-                    </div>
-                </div>
             </div>
+            <div class="card-body">
+
+              <form id="submitForm" method="post" action="<%= form_url %>" enctype="multipart/form-data">
+                <div class="row">
+
+                  <!-- Category Dropdown -->
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label class="form-label">Category Name*</label>
+                      <select class="form-control" name="category_id" id="category_id">
+                        <option value="">Select</option>
+                        <% categories.forEach(function(category) { %>
+                          <option value="<%= category.id %>" <%=post?.category_id==category.id ? 'selected' : '' %>>
+                            <%= category.category_name %>
+                          </option>
+                          <% }); %>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Name -->
+                  <div class="form-group col-md-6">
+                    <label class="form-label">Name *</label>
+                    <input type="text" class="form-control" name="name" id="name" value="<%= post?.name || '' %>">
+                  </div>
+
+                  <!-- Email -->
+                  <div class="form-group col-md-6">
+                    <label class="form-label">Email *</label>
+                    <input type="text" class="form-control" name="email" id="email" value="<%= post?.email || '' %>">
+                  </div>
+
+                  <!-- Phone -->
+                  <div class="form-group col-md-4">
+                    <label class="form-label">Phone No *</label>
+                    <input type="text" class="form-control" name="phone" id="phone" value="<%= post?.phone || '' %>">
+                  </div>
+
+                  <!-- Subject -->
+                  <div class="form-group col-md-4">
+                    <label class="form-label">Subject *</label>
+                    <input type="text" class="form-control" name="subject" id="subject"
+                      value="<%= post?.subject || '' %>">
+                  </div>
+
+                  <!-- Experience -->
+                  <div class="form-group col-md-4">
+                    <label class="form-label">Experience *</label>
+                    <input type="text" class="form-control" name="experience" id="experience"
+                      value="<%= post?.experience || '' %>">
+                  </div>
+
+                  <!-- Teaching Mode -->
+                  <div class="form-group col-md-4">
+                    <label class="form-label">Teaching Mode*</label>
+                    <select name="teaching_mode" id="teaching_mode" class="form-control">
+                      <option value="online" <%=post?.teaching_mode==='online' ? 'selected' : '' %>>Online</option>
+                      <option value="offline" <%=post?.teaching_mode==='offline' ? 'selected' : '' %>>Offline</option>
+                    </select>
+                  </div>
+
+                  <!-- Short Description -->
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label class="form-label">Short Description*</label>
+                      <textarea class="form-control" name="short_description"
+                        id="short_description"><%= post?.short_description || '' %></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Description/Bio -->
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label class="form-label">Description/Bio*</label>
+                      <textarea class="form-control ckeditor" name="description"
+                        id="description"><%= post?.description || '' %></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Image Upload -->
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label class="form-label">Image *</label>
+                      <input type="file" class="form-control" name="image"  accept="image/*"   />
+                      <img id="image_view"
+                        src="<%= post?.image ?  post.image : base_url + 'admin/images/default-featured-image.png' %>"
+                        width="150px" />
+                    </div>
+                  </div>
+
+                  <!-- Status -->
+                  <div class="form-group col-md-4">
+                    <label class="form-label">Status</label>
+                    <select name="status" id="status" class="form-control">
+                      <option value="1" <%=post?.status==1 ? 'selected' : '' %>>Active</option>
+                      <option value="0" <%=post?.status==0 ? 'selected' : '' %>>Inactive</option>
+                    </select>
+                  </div>
+
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-md-12 mt-3">
+                  <button type="submit" id="submitButton" class="btn btn-primary float-right"
+                    data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..."
+                    data-rest-text="<%= post?.page_name || page_name %>">
+                    <%= post?.action || action %>
+                  </button>
+                </div>
+              </form>
+
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
 
     <%- include('../layouts/footer') %>
 
-        <!-- <script>
-  function readURL(input, imgId) {
-      if (input.files && input.files[0]) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-              document.getElementById(imgId).src = e.target.result;
-          }
-          reader.readAsDataURL(input.files[0]);
-      }
-  }
-  </script> -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
 
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-        <!-- jQuery (required by Select2) -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-        <!-- Select2 JS -->
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-
-        <script>
-            $(document).ready(function () {
-                $('.instructor').select2({
-                    //  placeholder: "Select Faculty",
-                    allowClear: true
-                });
-            });
-        </script>
-        <script>
-            $(document).ready(function () {
-                // Ensure a form exists before trying to attach the submit handler
-                if ($('form').length > 0) {
-                    $('form').submit(function (e) {
-                        e.preventDefault();
-                         for (instance in CKEDITOR.instances) {
-        CKEDITOR.instances[instance].updateElement();
-    }
-                        var $form = $(this);
-                        var $btn = $form.find('[type="submit"]');
-
-                        buttonLoading('loading', $btn);  // Assuming this is a function for loading button state
-                        $form.find('.is-invalid').removeClass('is-invalid state-invalid');
-                        $form.find('.invalid-feedback').remove();
-
-                        // Use FormData for form submission
-                        $.ajax({
-                            url: $form.attr('action'),
-                            type: "POST",
-                            data: new FormData(this),
-                            processData: false,
-                            contentType: false,
-                            cache: false,
-                            success: function (data) {
-                                if (data.success) {
-                                    successMsg('', data.message);  // Assuming successMsg is a function
-                                    setTimeout(function () {
-                                        window.location = data.redirect_url;
-                                    }, 1000);
-                                } else {
-                                    handleFormErrors(data.errors, $form);  // Handle validation errors
-                                    errorMsg('', data.message);  // Assuming errorMsg is a function
-                                }
-                                buttonLoading('reset', $btn);  // Reset button state
-                            },
-                            error: function (xhr) {
-                                if (xhr.status === 422) {
-                                    handleFormErrors(xhr.responseJSON.errors, $form);  // Handle validation errors
-                                    errorMsg('', xhr.responseJSON.message);  // Show error message
-                                } else {
-                                    errorMsg('', 'Unexpected error occurred');
-                                }
-                                buttonLoading('reset', $btn);  // Reset button state
-                            }
-                        });
-                    });
-                }
-            });
-
-            // Function to handle form errors
-            function handleFormErrors(errors, $form) {
-                $.each(errors, function (fieldName, messages) {
-                    var $field = $form.find('[name="' + fieldName + '"]');
-                    $field.addClass('is-invalid state-invalid');
-                    $field.parent().append('<div class="invalid-feedback">' + messages[0] + '</div>');
-                });
-            }
-        </script>
-
-
-        <script>
-            $("#course_type").change(function () {
-                var course_type = $(this).val();
-                if (course_type == "free") {
-                    $(".paid_course").addClass('d-none');
-                }
-                else {
-                    $(".paid_course").removeClass('d-none');
-                }
-            });
-            CKEDITOR.replace('description');
-
-            $(".instructor").select2();
-        </script>
+    

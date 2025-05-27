@@ -7,7 +7,7 @@ const adminauthenticateCustomer = require("../middlewares/adminauthenticateCusto
 
 const upload = multer(); // No storage configuration needed for `upload.none()`
 
-const fileUploadPath = "public/uploads/banner/";
+const fileUploadPath = "public/uploads/banners/";
 const fileUploadPathStorage = setupStorage(fileUploadPath);
 const fileUploadPathStorageMulter = multer({ storage: fileUploadPathStorage });
 
@@ -31,7 +31,7 @@ router.get(
 router.post(
   "/admin/banner-update/:postId?",
   adminauthenticateCustomer,
-  fileUploadPathStorageMulter.fields([{ name: "image", maxCount: 1 }]),
+  fileUploadPathStorageMulter.fields([{ name: "banner", maxCount: 1 }]),
   BannerController.Update
 );
 

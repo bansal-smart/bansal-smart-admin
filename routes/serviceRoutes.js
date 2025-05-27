@@ -6,7 +6,9 @@ const ServiceController = require('../controllers/Admin/ServiceController');
 const adminauthenticateCustomer = require('../middlewares/adminauthenticateCustomer');
 
 const upload = multer();  // No storage configuration needed for `upload.none()`
-
+const serviceUploadPath = 'public/uploads/service/';
+const serviceUploadStorage = setupStorage(serviceUploadPath);
+const serviceUploadMulter = multer({ storage: serviceUploadStorage });
 router.get(
   "/admin/service-list",
   adminauthenticateCustomer,
@@ -20,17 +22,15 @@ router.get(
 );
 
 router.get(
-  "/admin/service-edit/:serviceId", // Use serviceId to edit specific service
+  "/admin/service-edit/:serviceId?", // Use serviceId to edit specific service
   adminauthenticateCustomer,
   ServiceController.Edit
 );
 
-const serviceUploadPath = 'uploads/service/';
-const serviceUploadStorage = setupStorage(serviceUploadPath);
-const serviceUploadMulter = multer({ storage: serviceUploadStorage });
+
 
 router.post(
-  "/admin/service-update/:serviceId", // Use serviceId to update specific service
+  "/admin/service-update/:serviceId?", // Use serviceId to update specific service
   adminauthenticateCustomer,
   serviceUploadMulter.fields([
     { name: 'image', maxCount: 1 },

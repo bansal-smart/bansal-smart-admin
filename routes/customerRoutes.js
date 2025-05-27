@@ -15,6 +15,6 @@ router.get('/admin/customer-delete/:customerId', adminauthenticateCustomer, Cust
 router.get('/admin/customer-restore/:customerId', adminauthenticateCustomer, CustomerController.Restore);
 router.get('/admin/customer-permanent-delete', adminauthenticateCustomer, CustomerController.PermanentDelete);
 router.get('/admin/customer-show/:customerId', adminauthenticateCustomer, CustomerController.Show);
-
-
+router.get('/admin/customer-course-booking/:customerId', adminauthenticateCustomer, CustomerController.Booking);
+router.get('/admin/customer-test-series-booking/:customerId', adminauthenticateCustomer, CustomerController.testSeriesBooking);
 module.exports = router;

@@ -11,11 +11,9 @@ const courseUploadPath = "public/uploads/courses/";
 const courseUploadStorage = setupStorage(courseUploadPath);
 const courseUploadMulter = multer({ storage: courseUploadStorage });
 
-router.get(
-  "/admin/course-list",
-  adminauthenticateCustomer,
-  CourseController.List
-);
+router.route("/admin/course-list/:course_type")
+  .get(adminauthenticateCustomer, CourseController.List)
+  .post(adminauthenticateCustomer, CourseController.List);
 router.get(
   "/admin/course-create",
   adminauthenticateCustomer,
@@ -67,4 +65,9 @@ router.get(
   CourseController.Show
 );
 
+router.get(
+  "/admin/course-booking-list/:courseId",
+  adminauthenticateCustomer,
+  CourseController.Booking
+);
 module.exports = router;

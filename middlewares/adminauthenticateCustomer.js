@@ -1,41 +1,60 @@
 const jwt = require('jsonwebtoken');
 const dbPool = require('../db/database');
 
-function adminauthenticateCustomer(req, res, next) {
-    const accessToken = req.cookies.access_token;
+function adminAuthenticateCustomer(req, res, next) {
 
-    if (!accessToken) {
-        return res.redirect('/admin/login'); 
+   
+  const accessToken = req.cookies.access_token;
+ 
+  if (!accessToken) {
+     console.log("No token found, redirecting to login");
+    return res.redirect('/admin/login');
+  }
+
+  try {
+    const decodedToken = jwt.verify(accessToken, 'your_secret_key');
+    const customerId = decodedToken.userId;
+   // console.log(customerId);
+    if (!customerId) {
+      return res.redirect('/admin/login');
     }
 
-    try {
+    dbPool.query('SELECT * FROM users WHERE id = ?', [customerId], (error, rows) => {
+      if (error) {
+     //   console.error(error);
+        return res.status(500).json({ status: false, msg: 'Internal server error.' });
+      }
+
+      if (rows.length > 0) {
         
-        const decodedToken = jwt.verify(accessToken, 'your_secret_key');
-        const customerId = decodedToken.customerId;
+        const customer = rows[0];
+        req.customer = customer;
+        req.user = customer;
 
-        if (!customerId) {
-            return res.redirect('/admin/login'); 
-        }
+        // Store role and permissions from token/session
+        req.roles = decodedToken.roles || [];
+        req.permissions = decodedToken.permissions || [];
+       
+        // Make permissions available to views
+        res.locals.user = customer;
+        res.locals.roles = req.roles;
+        res.locals.permissions = req.permissions;
+        
+        req.session.userRole = req.roles;
 
-        dbPool.query('SELECT * FROM customers WHERE id = ?', [customerId], (error, rows) => {
-            if (error) {
-                console.error(error);
-                return res.status(500).json({ status: false, msg: 'Internal server error.' });
-            }
+        
+        req.session.permissions = req.permissions;
 
-            if (rows.length > 0) {
-                req.customer = rows[0];
-                req.user = rows[0];
-                next(); 
-            } else {
-                return res.redirect('/admin/login'); 
-            }
-        });
+        next();
+      } else {
+        return res.redirect('/admin/login');
+      }
+    });
 
-    } catch (error) {
-        console.log(error.message);
-        return res.redirect('/admin/login'); 
-    }
+  } catch (error) {
+    console.log(error.message);
+    return res.redirect('/admin/login');
+  }
 }
 
-module.exports = adminauthenticateCustomer;
+module.exports = adminAuthenticateCustomer;

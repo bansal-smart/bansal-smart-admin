@@ -1,39 +1,45 @@
 <%- include('../layouts/header') %>
 
-<style>
-    td {
-  font-family: 'Roboto', sans-serif;
-}
-</style>
-<div class="content-wrapper">
-    
-    <div class="card">
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
         <div class="card-header d-flex align-items-center justify-content-between">
-            <h4 class="card-title mb-0"><%= page_name %></h4>
-      
+            <!-- <h4 class="card-title mb-0"><%= page_name %></h4> -->
+            <h3 class="card-title-2">
+              <% let activeType = req.params.course_type; %>
+<a href="/admin/course-list/all" class="btn <%= activeType === 'all' ? 'btn-primary' : 'btn-default' %> mr-2">All Course</a>
+
+<a href="/admin/course-list/online" class="btn <%= activeType === 'online' ? 'btn-primary' : 'btn-default' %> mr-2">Online Course</a>
+<a href="/admin/course-list/offline" class="btn <%= activeType === 'offline' ? 'btn-primary' : 'btn-default' %> mr-2">Offline Course</a>
+<a href="/admin/course-list/free" class="btn <%= activeType === 'free' ? 'btn-primary' : 'btn-default' %> mr-2">Free Course</a>
+<a href="/admin/course-list/paid" class="btn <%= activeType === 'paid' ? 'btn-primary' : 'btn-default' %> mr-2">Paid Course</a>
+
+        </h3>
             <div class="row">
               <div class="col-12 text-end">
                 <% if (req.query.status==='trashed' ) { %>
                 <a class="btn btn-primary" href="<%= list_url %>">
-                  <i class="fas fa-list"></i> List
+                  <i class="fas fa-list"></i> 
                 </a>
                 <% } else { %>
                 <a class="btn btn-danger btn-sm" href="<%= trashed_list_url %>">
-                  <i class="fas fa-trash"></i> Trashed List
+                  <i class="fas fa-trash"></i> 
                 </a>
                 <% } %>
       
                 <a class="btn btn-info btn-sm" href="<%= create_url %>">
-                  <i class="fas fa-plus"></i> Create
+                  <i class="fas fa-plus"></i> 
                 </a>
                 <button type="button" id="backButton" class="btn btn-primary btn-sm">
-                  <i class="fa fa-arrow-left"></i> Back
+                  <i class="fa fa-arrow-left"></i> 
                 </button>
               </div>
             </div>
           </div>
         <div class="card-body">
-        <form method="GET" action="<%= list_url %>" class="mb-3">
+        <!-- <form method="GET" action="<%= list_url %>" class="mb-3">
   <div class="row">
     <div class="col-md-3">
       <label>Filter by Category</label>
@@ -58,64 +64,70 @@
 
     <div class="col-md-3 d-flex align-items-end">
       <button type="submit" class="btn btn-primary me-2">
-        <i class="fas fa-filter"></i> Filter
+        <i class="fas fa-filter"></i> 
       </button>
       <a href="<%= list_url %>" class="btn btn-secondary">
-        <i class="fas fa-times"></i> Reset
+        <i class="fas fa-times"></i> 
       </a>
     </div>
   </div>
-</form>
+</form> -->
 <hr>
-            <div class="row">
-                <div class="col-12">
-                    <div class="table-responsive">
-                        <table id="order-listing" class="table">
-                            <thead>
-                                <tr>
-                                    <th>Sr.No #</th>
-                                   
-                                    <th>Category Name</th>
-                                    <th>Course Name</th>
-                                    <th>Course Price</th>
-                                    <!-- <th>Registration Date</th> -->
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% customers.forEach((course, index) => { %>
-                                    <tr>
-                                        <td><%= index + 1 %></td>
+
+              <div class="row">
+                 <% customers.forEach((course, index) => { %>
+           <div class="col-md-6">
+                              
+                                <div class="box border my-3 p-4 course" style="border-color: #13bfa6;box-shadow: 0 5px 10px black;">
+                                    <p>Category : <%= course.category_name  %>
+                                       
+                                        </p><p>Upload By : <td>
+  <%= course.uploaded_by_name %> 
+
+</td> 
                                         
-                                        <td><%= course.category_name  %></td>
-                                        <td><%= course.course_name %></td>
-                                        <td>&#8377; <%= course.offer_price %></td>
-                                        <!-- <td><%= formatDate(course.created_at) %></td> -->
-                                        <td>
-                                            <% if (course.status == 1) { %>
+                                                                                     
+                                           
+                                   <% if (course.status == 1) { %>
                                                 <label class="badge badge-success">Active</label>
                                             <% } else { %>
                                                 <label class="badge badge-danger">Inactive</label>
                                             <% } %>
-                                        </td>
-                                        <td>
-                                            <a href="/admin/course-edit/<%= course.id %>" class="btn btn-outline-info">Edit</a>
-                                            <a href="/admin/course-show/<%= course.id %>" class="btn btn-outline-primary">View</a>
-                                            
-                                            <a href="/admin/course-delete/<%= course.id %>" class="btn btn-outline-danger">Delete</a>
-                                        </td>
-                                    </tr>
-                                <% }); %>
-
-                                <% function formatDate(dateString) {
-                                    const date = new Date(dateString);
-                                    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
-                                    return new Intl.DateTimeFormat('en-US', options).format(date);
-                                } %>
-
-                            </tbody>
-                        </table>
+                                    </p>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4">
+                                            <img src="<%= course.image %>" width="100%">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <a href="/admin/course-show/<%= course.id %>" class="text-dark course-title">
+                                              <%= course.course_name %></a>                                       <div class="mt-4"><strong> &#8377; <%= course.offer_price %> </strong></div>
+                                        </div>
+                                      
+                                        
+                                    </div>
+                                    
+                                    <p class="mb-0 mt-3"><a
+                        href="/admin/course-show/<%= course.id %>"
+                        class="btn btn-primary shadow btn-xs sharp me-1"
+                        ><i class="fas fa-eye"></i
+                      ></a>
+                      <a
+                        href="/admin/course-edit/<%= course.id %>"
+                        class="btn btn-primary shadow btn-xs sharp me-1"
+                        ><i class="fas fa-pencil-alt"></i
+                      ></a>
+                      <a
+                        href="/admin/course-delete/<%= course.id %>"
+                        class="btn btn-danger shadow btn-xs sharp"
+                        ><i class="fa fa-trash"></i
+                      ></a>
+                            </p>
+                                </div>
+                              
+                            </div>
+                 <% }); %>
+              </div>
+             
                     </div>
                 </div>
             </div>
@@ -125,15 +137,5 @@
 
 <%- include('../layouts/footer') %>
 
-<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
-
-<script>
-    $(document).ready(function() {
-        $('#order-listing').DataTable();
-    });
-
-
-</script>
 
 

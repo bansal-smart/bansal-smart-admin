@@ -1,0 +1,56 @@
+<div>
+  <style>
+    .nav-tabs .nav-link {
+      padding: 1rem
+    }
+
+    .page-header .nav-tabs .nav-item.active {
+      background: #0DB3D6;
+      color: white
+    }
+
+    .nav-tabs .nav-item.active .nav-link {
+      color: white
+    }
+
+    .page-header .nav-tabs .nav-item {
+      background: white;
+      margin: 6px;
+      border-radius: 3px;
+      color: black;
+    }
+
+    .page-header {
+      background-color: #024DAE;
+      color: white;
+    }
+  </style>
+
+  <div class="col-lg-12">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/course-show/<%= course.id %>">Overview</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link menu5" href="/admin/course-subject-list/<%= course.id %>">Subject
+          <span class="ml-2 count badge bg-dark"><span class="ml-2 count badge bg-dark"><%= subjectCount %></span</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link menu6" href="/admin/course-chapter-list/<%= course.id %>">Chapters
+          <span class="ml-2 count badge bg-dark"><span class="ml-2 count badge bg-dark"><%= chapterCount %></span></span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link pdf" href="/admin/course-pdf-list/<%= course.id %>">PDF
+          <span class="ml-2 count badge bg-dark"><%= pdfCount %></span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link video" href="/admin/course-video-list/<%= course.id %>">video lectures
+          <span class="ml-2 count badge bg-dark"><%= videoCount %></span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/course-booking-list/<%= course.id %>">Students
+          <span class="ml-2 count badge bg-dark"><%= bookingCount %></span></a>
+      </li>
+    </ul>
+  </div>
+</div>

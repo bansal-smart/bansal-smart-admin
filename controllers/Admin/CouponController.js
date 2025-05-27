@@ -5,7 +5,7 @@ const checkImagePathAsync = require("../../utils/checkImagePth");
 const { validateRequiredFields } = require("../../helpers/validationsHelper");
 const fs = require("fs");
 const path = require("path");
-
+const base_url = process.env.BASE_URL;
 // List Coupons
 const List = async (req, res) => {
   try {
@@ -39,6 +39,9 @@ const List = async (req, res) => {
       coupons,
       req,
       page_name,
+        list_url: "/admin/coupon-list",
+      trashed_list_url: "/admin/coupon-list/?status=trashed",
+      create_url: "/admin/coupon-create",
     });
   } catch (error) {
     console.error("Coupon List Error:", error);
@@ -68,7 +71,7 @@ const Create = async (req, res) => {
 const Edit = async (req, res) => {
   try {
     const couponId = req.params.couponId;
-
+    console.log(couponId); 
     const post = await new Promise((resolve, reject) => {
       pool.query(
         "SELECT * FROM coupons WHERE id = ?",
@@ -87,15 +90,13 @@ const Edit = async (req, res) => {
       );
     });
 
-    const imageExists = await checkImagePathAsync(post.coupon_image);
-
+    const imageExists = checkImagePath(post.coupon_image); // use post.coupon_image
+    
     res.render("admin/coupons/create", {
       success: req.flash("success"),
       error: req.flash("error"),
       post,
-      image: imageExists
-        ? post.coupon_image
-        : "admin/images/default-featured-image.png",
+    image: `${post.coupon_image}`,
       form_url: "/admin/coupon-update/" + couponId,
       page_name: "Edit",
       title: "Coupon",
@@ -103,121 +104,90 @@ const Edit = async (req, res) => {
   } catch (error) {
     console.error("Edit Error:", error.message);
     req.flash("error", error.message);
-    res.redirect("back");
+    res.redirect(req.get("Referrer") || "/"); // fix deprecated redirect
   }
 };
-
 const Update = async (req, res) => {
-  const courseId = req.params.courseId;
+  const couponId = req.params.couponId;
   const body = req.body;
+ const isInsert = !couponId || couponId === "null" || couponId === "0";
+  console.log(req.body);
 
   // Destructure and sanitize fields
-  const category_id = body.category_id?.trim();
-  const course_class_id = body.course_class_id?.trim();
-  const course_name = body.course_name?.trim();
-  const title_heading = body.title_heading?.trim();
-  let slug = body.slug?.trim();
-  const course_type = body.course_type?.trim() || "free";
-  const price = body.price?.trim();
-  const discount_type = body.discount_type?.trim();
-  const discount = body.discount?.trim();
-  const duration = body.duration?.trim();
-  const content = body.content?.trim();
-  const description = body.description?.trim();
-  const start_time = body.start_time?.trim();
+  const coupon_for = body.coupon_for?.trim();
+  const visibility = body.visibility?.trim();
+  const coupon_name = body.coupon_name?.trim();
+  const coupon_code = body.coupon_code?.trim();
+  const begin_date = body.begin_date?.trim();
+  const end_date = body.end_date?.trim();
+  const coupon_type = body.coupon_type?.trim();
+  const coupon_discount = body.coupon_discount?.trim();
+  const cart_value = body.cart_value?.trim();
+  const coupon_uses = body.coupon_uses?.trim();
+  const coupon_description = body.coupon_description?.trim();
   const status = body.status?.trim();
-  const course_visibility = Array.isArray(body.course_visibility)
-    ? body.course_visibility.join(",")
-    : "";
-  const service_id = Array.isArray(body.service_id)
-    ? body.service_id.join(",")
-    : "";
-
-  // Generate slug from title_heading if not provided
-  if (!slug && title_heading) {
-    slug = title_heading
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
-  }
-
+  const imageFile = req?.files?.coupon_image?.[0];
   // Validation
   const errors = {};
-  if (!category_id) errors.category_id = ["Category ID is required"];
-  if (!course_class_id)
-    errors.course_class_id = ["Course Class ID is required"];
-  if (!course_name) errors.course_name = ["Course name is required"];
-  if (!title_heading) errors.title_heading = ["Title heading is required"];
-  if (!slug) errors.slug = ["Slug is required"];
-  if (!["free", "paid"].includes(course_type))
-    errors.course_type = ["Course type must be 'free' or 'paid'"];
-  if (course_type === "paid" && (!price || isNaN(price)))
-    errors.price = ["Price is required and must be a number"];
-  if (!discount_type) errors.discount_type = ["Discount type is required"];
-  if (discount && isNaN(discount))
-    errors.discount = ["Discount must be numeric"];
-  if (!duration || isNaN(duration))
-    errors.duration = ["Duration is required and must be numeric"];
-  if (!content) errors.content = ["Content is required"];
-  if (!description) errors.description = ["Description is required"];
-  if (!start_time || isNaN(Date.parse(start_time)))
-    errors.start_time = ["Valid start time is required"];
+  if (!coupon_for) errors.coupon_for = ["Coupon for is required"];
+  if (!visibility) errors.visibility = ["Visibility is required"];
+  if (!coupon_name) errors.coupon_name = ["Coupon name is required"];
+  if (!coupon_code) errors.coupon_code = ["Coupon code is required"];
+  if (!begin_date || isNaN(Date.parse(begin_date)))
+    errors.begin_date = ["Valid begin date is required"];
+  if (!end_date || isNaN(Date.parse(end_date)))
+    errors.end_date = ["Valid end date is required"];
+  if (!coupon_type) errors.coupon_type = ["Coupon type is required"];
+  if (!coupon_discount || isNaN(coupon_discount))
+    errors.coupon_discount = ["Discount must be numeric"];
+  if (!cart_value || isNaN(cart_value))
+    errors.cart_value = ["Cart value must be numeric"];
+  if (!coupon_uses || isNaN(coupon_uses))
+    errors.coupon_uses = ["Uses must be numeric"];
+  if (!coupon_description)
+    errors.coupon_description = ["Description is required"];
   if (!["0", "1"].includes(status))
     errors.status = ["Status must be '0' or '1'"];
 
-  // Return errors if found
+   if (isInsert) {
+    if (!imageFile) errors.image = ["Coupon image is required"];
+
+  }
   if (Object.keys(errors).length > 0) {
     return res.status(422).json({
       success: false,
       errors,
-      message: Object.values(errors)[0][0], // first error message
+      message: Object.values(errors)[0][0], // First error message
     });
   }
 
-  // Build data object
   const data = {
-    category_id,
-    course_class_id,
-    course_name,
-    title_heading,
-    slug,
-    course_type,
-    price,
-    discount_type,
-    discount,
-    duration,
-    content,
-    description,
-    start_time,
+    coupon_for,
+    visibility,
+    coupon_name,
+    coupon_code,
+    begin_date,
+    end_date,
+    coupon_type,
+    coupon_discount,
+    cart_value,
+    coupon_uses,
+    coupon_description,
     status,
-    course_visibility,
-    service_id,
   };
 
-  // Handle file uploads
-  if (req.files?.image?.[0]) {
-    data.image = path.join(
-      "/public/uploads/courses",
-      req.files.image[0].filename
-    );
-  }
-  if (req.files?.details_image?.[0]) {
-    data.details_image = path.join(
-      "/public/uploads/courses",
-      req.files.details_image[0].filename
-    );
-  }
-
   try {
-    if (courseId) {
-      // Update
+
+      if (imageFile) data.coupon_image = `/uploads/coupons/${imageFile.filename}`;
+    if (couponId) {
+      // Update query
       const fields = Object.keys(data);
       const values = Object.values(data);
       const setString = fields.map((field) => `${field} = ?`).join(", ");
-      values.push(courseId);
+      values.push(couponId);
 
-      const updateQuery = `UPDATE courses SET ${setString} WHERE id = ?`;
+      const updateQuery = `UPDATE coupons SET ${setString} WHERE id = ?`;
+
       pool.query(updateQuery, values, (err, result) => {
         if (err) {
           console.error(err);
@@ -229,33 +199,37 @@ const Update = async (req, res) => {
         if (result.affectedRows === 0) {
           return res
             .status(404)
-            .json({ success: false, message: "Course not found" });
+            .json({ success: false, message: "Coupon not found" });
         }
 
         return res.json({
           success: true,
-          message: "Course updated successfully",
+          message: "Coupon updated successfully",
         });
       });
     } else {
-      // Insert
+      // Insert query
       const fields = Object.keys(data);
       const values = Object.values(data);
-      const insertQuery = `INSERT INTO courses (${fields.join(
+      const insertQuery = `INSERT INTO coupons (${fields.join(
         ", "
       )}) VALUES (${fields.map(() => "?").join(", ")})`;
 
       pool.query(insertQuery, values, (err, result) => {
         if (err) {
           console.error(err);
-          return res
-            .status(500)
-            .json({ success: false, message: "Insert failed" });
+       
+            return res.status(500).json({
+  success: false,
+  message: "Insert failed",
+  error: err.message, // Only message
+});
         }
 
         return res.json({
           success: true,
-          message: "Course created successfully",
+          redirect_url: "/admin/coupon-list",
+          message: "Coupon created successfully",
         });
       });
     }
@@ -263,6 +237,27 @@ const Update = async (req, res) => {
     console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
+};
+
+
+
+// const checkImagePath = (filePath) => {
+//     const normalizedPath = filePath.normalize(filePath); // converts \ to /
+//     const fullPath = filePath.join(__dirname, '..', 'public', normalizedPath);
+
+//     return fs.existsSync(fullPath);
+//       };
+
+const checkImagePath = (relativePath) => {
+  const normalizedPath = path.normalize(relativePath);
+
+  // Get the absolute path from the project root (where the 'public' folder is located)
+  const fullPath = path.join(__dirname, "..", "public", normalizedPath);
+
+  console.log("Server checking for file at:", fullPath); // For debugging
+
+  // Check if the file exists on the server
+  return fs.existsSync(fullPath);
 };
 
 // Update Coupon

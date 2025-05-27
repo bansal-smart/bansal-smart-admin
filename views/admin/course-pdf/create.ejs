@@ -1,0 +1,137 @@
+<%- include('../layouts/header') %>
+
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0"><%= title %></h4>
+            <button type="button" id="backButton" class="btn btn-primary btn-sm">
+              <i class="fa fa-arrow-left"></i> Back
+            </button>
+          </div>
+          <div class="card-body">
+            <form id="submitForm" class="forms-sample"
+                  action="<%= form_url %>"
+                  method="post"
+                  enctype="multipart/form-data">
+              <div class="row">
+                <!-- <div class="form-group col-sm-6">
+                  <label class="form-label">category *</label>
+                  <select name="category_id" id="category_id" class="form-control" required>
+                    <option value="">Select category</option>
+                    <% categories.forEach(function(category) { %>
+                      <option value="<%= category.id %>" <% if (post && post.category_id == category.id) { %> selected <% } %>>
+                        <%= category.category_name %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div>
+
+              
+                <div class="form-group col-sm-6">
+                  <label class="form-label">Course *</label>
+                  <select name="course_id" id="course_id" class="form-control" required>
+                    <option value="">Select Course</option>
+                    <% courses.forEach(function(course) { %>
+                      <option value="<%= course.id %>" <% if (post && post.course_id == course.id) { %> selected <% } %>>
+                        <%= course.course_name %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div> -->
+<input type="hidden" name="category_id" value="<%= course.category_id %>">
+<input type="hidden" name="course_id" value="<%= course.id %>">
+                <div class="form-group col-sm-6">
+                  <label class="form-label">Subject *</label>
+                  <select name="subject_id" id="subject_id" class="form-control" required>
+                    <option value="">Select Subject</option>
+                    <% subjects.forEach(function(subject) { %>
+                      <option value="<%= subject.id %>" <% if (post && post.subject_id == subject.id) { %> selected <% } %>>
+                        <%= subject.subject_name %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div>
+               
+                <div class="form-group col-sm-6">
+                  <label class="form-label">Chapter *</label>
+                  <select name="chapter_id" id="chapter_id" class="form-control" required>
+                    <option value="">Select Chapter</option>
+                    <% chapters.forEach(function(chapter) { %>
+                      <option value="<%= chapter.id %>" <% if (post && post.chapter_id == chapter.id) { %> selected <% } %>>
+                        <%= chapter.chapter_name %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div>
+                
+                <!-- <div class="form-group col-sm-6">
+                  <label class="form-label">Topic *</label>
+                  <select name="topic_id" id="topic_id" class="form-control" required>
+                    <option value="">Select topic</option>
+                    <% topics.forEach(function(topic) { %>
+                      <option value="<%= topic.id %>" <% if (post && post.topic_id == topic.id) { %> selected <% } %>>
+                        <%= topic.topic_name %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div> -->
+
+                <div class="form-group col-sm-6">
+                  <div class="form-group">
+                    <label class="form-label">Title *</label>
+                    <input type="text" class="form-control" name="title" id="title" placeholder="Title..." value="<%= post.title %>"/>
+                  </div>
+                </div>
+
+                <div class="form-group col-sm-6">
+                  <div class="form-group">
+                      <label class="form-label"> PDF *</label>
+                      <input type="file" class="form-control" name="pdf" id="pdf"
+                          accept=".pdf">
+                          <% if (post.pdf) { %>
+                              <a href="<%= public_url + post.pdf %>" target="_blank">View PDF</a>
+                          <% } %>
+                  </div>
+                </div>
+
+                <div class="form-group col-sm-6">
+                  <label class="form-label">Status</label>
+                  <select name="status" id="status" class="form-control custom-select" required>
+                    <option value="1" <%= post?.status == 1 ? 'selected' : '' %>>Active</option>
+                    <option value="0" <%= post?.status == 0 ? 'selected' : '' %>>Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              <% if (post && post.id) { %>
+                <input type="hidden" name="id" value="<%= post.id %>">
+              <% } %>
+
+              <div class="col-md-12 mt-3">
+                <button type="submit" id="submitButton" class="btn btn-primary float-right"
+                        data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..."
+                        data-rest-text="<%= post?.id ? 'Update' : 'Create' %>">
+                  <%= post?.id ? 'Update' : 'Create' %>
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<%- include('../layouts/footer') %>
+
+<script>
+  // Back button to go to previous page
+  document.getElementById('backButton').addEventListener('click', () => {
+    window.history.back();
+  });
+</script>

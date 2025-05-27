@@ -1,0 +1,158 @@
+<%- include('../layouts/header') %>
+
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="card-title mb-0"><%= page_name %></h4>
+          <a href="/admin/test-series-list" class="btn btn-primary btn-sm">
+            <i class="fa fa-arrow-left"></i> Back
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="row">
+
+            <!-- Section: Basic Info -->
+            <div class="col-12">
+                <h5 class="border-bottom pb-2 mt-3">Basic Information</h5>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Title Heading</strong></label>
+                    <p class="mb-0 text-muted"><%= post.title_heading %></p>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Slug</strong></label>
+                    <p class="mb-0 text-muted"><%= post.slug %></p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Category</strong></label>
+                    <p class="mb-0 text-muted"><%= post.category_name || 'No category' %></p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Type</strong></label>
+                    <p class="mb-0 text-muted"><%= post.type %></p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Price</strong></label>
+                    <p class="mb-0 text-muted"><%= post.price %></p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Discount (%)</strong></label>
+                    <% if (post.discount_type === 'percentage') { %>
+                        <p class="mb-0 text-muted"><%= post.discount %> %</p>
+                    <% } else { %>
+                        <p class="mb-0 text-muted">No discount</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Offer Price</strong></label>
+                    <p class="mb-0 text-muted"><%= post.offer_price %></p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Start Time</strong></label>
+                    <p class="mb-0 text-muted"><%= post.start_time %></p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>End Time</strong></label>
+                    <p class="mb-0 text-muted"><%= post.end_time %></p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Short Description</strong></label>
+                    <p class="mb-0 text-muted"><%= post.short_description %></p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Description</strong></label>
+                    <p class="mb-0 text-muted"><%- post.description %></p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Status</strong></label>
+                    <p class="mb-0 text-muted"><%= post.status == 1 ? 'Active' : 'Inactive' %></p>
+                </div>
+            </div>
+
+           
+<!-- 
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Created At</strong></label>
+                    <p class="mb-0 text-muted"><%= post.created_at %></p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Updated At</strong></label>
+                    <p class="mb-0 text-muted"><%= post.updated_at %></p>
+                </div>
+            </div> -->
+
+            <!-- Media Section -->
+            <div class="col-12">
+                <h5 class="border-bottom pb-2 mt-4">Media</h5>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Thumbnail Image</strong></label><br />
+                    <% if (post.image) { %>
+                        <img src="<%= post.image %>" width="200" />
+                    <% } else { %>
+                        <p>No image uploaded</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                    <label><strong>Details Image</strong></label><br />
+                    <% if (post.details_image) { %>
+                        <img src="<%= post.details_image %>" width="200" />
+                    <% } else { %>
+                        <p>No details image uploaded</p>
+                    <% } %>
+                </div>
+            </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../layouts/footer') %>
+</div>

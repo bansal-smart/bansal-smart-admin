@@ -1,0 +1,90 @@
+<%- include('../layouts/header') %>
+
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="card-title mb-0"><%= title %> <%= page_name %></h4>
+          <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i> Back</button>
+        </div>
+        <div class="card-body">
+          
+          <form id="submitForm" class="forms-sample"
+                action="<%= form_url %>"
+                method="post"
+                enctype="multipart/form-data">
+                
+<input type="hidden" name="course_id" value="<%= course.id %>"
+            <div class="row">
+        
+              <div id="subjectContainer" class="form-group col-sm-6">
+                <label class="form-label">Subject Name *</label>
+                
+                <% if (post && post.id) { %>
+                  <!-- Edit mode: single subject_name input -->
+                  <input type="text" name="subject_name" class="form-control" placeholder="Subject Name" required
+                        value="<%= post.subject_name %>">
+                <% } else { %>
+                  <!-- Create mode: multiple subject_name[] inputs with add button -->
+                  <div class="subjectGroup input-group mb-2">
+                    <input type="text" name="subject_name[]" class="form-control" placeholder="Subject Name" required>
+                    <div class="input-group-append">
+                      <button type="button" class="btn btn-success addSubject">+</button>
+                    </div>
+                  </div>
+                <% } %>
+              </div>
+
+              <div class="form-group col-sm-6">
+                <label class="form-label">Status</label>
+                <select name="status" id="status" class="form-control custom-select" required>
+                  <option value="1" <%= post?.status == 1 ? 'selected' : '' %>>Active</option>
+                  <option value="0" <%= post?.status == 0 ? 'selected' : '' %>>Inactive</option>
+                </select>
+              </div>
+            
+            <% if (post && post.id) { %>
+              <input type="hidden" name="id" value="<%= post.id %>">
+            <% } %>
+            
+            <div class="col-md-12 mt-3">
+              <button type="submit" id="submitButton" class="btn btn-primary float-right"
+                      data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..."
+                      data-rest-text="<%= post?.id ? 'Update' : 'Create' %>">
+                <%= post?.id ? 'Update' : 'Create' %>
+              </button>
+            </div>
+          </form>
+        </div></div></div></div></div></section>
+<%- include('../layouts/footer') %>
+
+  <script>
+    // Add Subject input dynamically (only on create mode)
+    document.addEventListener('DOMContentLoaded', function () {
+      const container = document.getElementById('subjectContainer');
+      const addBtn = container.querySelector('.addSubject');
+
+      if (addBtn) {
+        addBtn.addEventListener('click', function () {
+          const newInputGroup = document.createElement('div');
+          newInputGroup.classList.add('subjectGroup', 'input-group', 'mb-2');
+          newInputGroup.innerHTML = `
+            <input type="text" name="subject_name[]" class="form-control" placeholder="Subject Name" required>
+            <div class="input-group-append">
+              <button type="button" class="btn btn-danger removeSubject">-</button>
+            </div>
+          `;
+          container.appendChild(newInputGroup);
+        });
+
+        // Delegate removal of subject inputs
+        container.addEventListener('click', function (e) {
+          if (e.target.classList.contains('removeSubject')) {
+            e.target.closest('.subjectGroup').remove();
+          }
+        });
+      }
+    });
+  </script>

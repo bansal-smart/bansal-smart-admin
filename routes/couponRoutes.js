@@ -20,17 +20,17 @@ router.get(
 );
 
 router.get(
-  "/admin/coupon-edit/:couponId", // Use categoryId instead of courseId
+  "/admin/coupon-edit/:couponId?", // Use categoryId instead of courseId
   adminauthenticateCustomer,
   CouponController.Edit
 );
 
-const couponUploadPath = "uploads/coupon/";
+const couponUploadPath = "public/uploads/coupons/";
 const couponUploadStorage = setupStorage(couponUploadPath);
 const cooponUploadMulter = multer({ storage: couponUploadStorage });
 
 router.post(
-  "/admin/coupon-update/:couponId", // Use categoryId instead of courseId
+  "/admin/coupon-update/:couponId?", // Use categoryId instead of courseId
   adminauthenticateCustomer,
   cooponUploadMulter.fields([{ name: "coupon_image", maxCount: 1 }]),
   CouponController.Update

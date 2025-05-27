@@ -1,11 +1,11 @@
 <%- include('../layouts/header') %>
 
-<div class="content-wrapper">
- 
 
-  <div class="row">
-    <div class="col-12 grid-margin">
-      <div class="card">
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
         <div
                 class="card-header d-flex align-items-center justify-content-between"
                
@@ -71,60 +71,3 @@
 </div>
 
 <%- include('../layouts/footer') %>
-
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-  $(document).ready(function () {
-    $('form').submit(function (e) {
-        e.preventDefault();
-
-        var $form = $(this);
-        var $btn = $form.find('[type="submit"]');
-
-        buttonLoading('loading', $btn);
-        $form.find('.is-invalid').removeClass('is-invalid state-invalid');
-        $form.find('.invalid-feedback').remove();
-
-        $.ajax({
-            url: $form.attr('action'),
-            type: "POST",
-            data: new FormData(this),
-            processData: false,
-            contentType: false,
-            cache: false,
-            success: function (data) {
-                if (data.success) {
-                    successMsg('', data.message);
-                    setTimeout(function () {
-                        window.location = data.redirect_url;
-                    }, 1000);
-                } else {
-                    $.each(data.errors, function (fieldName, messages) {
-                        var $field = $form.find('[name="' + fieldName + '"]');
-                        $field.addClass('is-invalid state-invalid');
-                        $field.parent().append('<div class="invalid-feedback">' + messages[0] + '</div>');
-                    });
-                    errorMsg('', data.message);
-                }
-                buttonLoading('reset', $btn);
-            },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    $.each(xhr.responseJSON.errors, function (fieldName, messages) {
-                        var $field = $form.find('[name="' + fieldName + '"]');
-                        $field.addClass('is-invalid state-invalid');
-                        $field.parent().append('<div class="invalid-feedback">' + messages[0] + '</div>');
-                    });
-                    errorMsg('', xhr.responseJSON.message);
-                } else {
-                    errorMsg('', 'Unexpected error occurred');
-                }
-                buttonLoading('reset', $btn);
-            }
-        });
-    });
-});
-
-</script>

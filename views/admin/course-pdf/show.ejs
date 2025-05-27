@@ -1,0 +1,73 @@
+<%- include('../layouts/header') %>
+
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row mb-3">
+      <div class="col-12 d-flex justify-content-between align-items-center">
+        <h4>Chapter PDF Details</h4>
+        <button type="button" id="backButton" class="btn btn-primary btn-sm">
+          <i class="fa fa-arrow-left"></i> Back
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <table class="table table-bordered">
+          <tbody>
+            <tr>
+              <th>ID</th>
+              <td><%= chapter.id %></td>
+            </tr>
+            <tr>
+              <th>Chapter Name</th>
+              <td><%= chapter.chapter_name %></td>
+            </tr>
+            <tr>
+              <th>Course</th>
+              <td><%= chapter.course_name %></td>
+            </tr>
+            <tr>
+              <th>Subject</th>
+              <td><%= chapter.subject_name %></td>
+            </tr>
+            <tr>
+              <th>Topic</th>
+              <td><%= chapter.topic_name %></td>
+            </tr>
+            <tr>
+              <th>PDF Title</th>
+              <td><%= chapter.title %></td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td>
+                <% if (chapter.status == 1) { %>
+                  <span class="badge badge-success">Active</span>
+                <% } else { %>
+                  <span class="badge badge-secondary">Inactive</span>
+                <% } %>
+              </td>
+            </tr>
+            <tr>
+              <th>Created At</th>
+              <td><%= new Date(chapter.created_at).toLocaleString() %></td>
+            </tr>
+            <tr>
+              <th>Updated At</th>
+              <td><%= new Date(chapter.updated_at).toLocaleString() %></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>
+
+<script>
+  document.getElementById('backButton').addEventListener('click', () => {
+    window.history.back();
+  });
+</script>

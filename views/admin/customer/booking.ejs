@@ -1,0 +1,134 @@
+<%- include('../layouts/header') %>
+<style>
+    .tab{
+  list-style:none;
+}
+.tab li{
+  display:inline-block;
+  margin-right:20px;
+  background: #DDDD;
+  padding: 10px;
+}
+.tab li a{
+  text-decoration: none;
+}
+.tab li.active a{
+  color:red;
+}
+
+ul{
+  list-style: none;
+}
+
+.tab-content li{
+  display: none;
+}
+
+.tab-content li.active{
+  display: block
+}
+
+</style>
+<section class="content-body">
+  <div class="container-fluid">
+    
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <h4 class="card-title mb-0"><%= page_name %></h4>
+          
+          </div>
+
+         
+    <div class="card-body">
+   <div class="col-12">
+  <ul class="tab mb-4">
+    <li>
+      <a href="/admin/customer-show/<%= customer.id %>" class="tab-link">Student Details</a>
+    </li>
+    <li>
+      <a href="/admin/customer-course-booking/<%= customer.id %>" class="tab-link">Course Booking</a>
+    </li>
+    <li>
+      <a href="/admin/customer-test-series-booking/<%= customer.id %>" class="tab-link">Test Series Booking</a>
+    </li>
+  </ul>
+</div>
+
+<script>
+  // Get current URL
+  const currentUrl = window.location.pathname;
+
+  // Get all tab links
+  const links = document.querySelectorAll('.tab-link');
+
+  links.forEach(link => {
+    if (currentUrl.includes(link.getAttribute('href'))) {
+      link.parentElement.classList.add('active');
+    }
+  });
+</script>
+
+
+            <div class="table-responsive">
+              <table id="example3" class="display table-responsive-lg">
+                <thead>
+                  <tr>
+                    <th>Sr.No #</th>
+                   
+                    <th>Transaction Id</th>
+                    <th>Course Name</th>
+                    <th>Price</th>
+                    <th>Order Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% bookings.forEach((booking, index) => { %>
+                    <tr>
+                      <td><%= index + 1 %></td>
+                      
+                      <td><%= booking.transaction_id %></td>
+                      <td><%= booking.course_name %></td>
+                      <td><%= booking.total_amount.toFixed(2) %></td>
+                      <td><%= new Date(booking.created_at).toLocaleDateString("en-GB") %></td>
+                      <td><%= booking.payment_status %></td>
+                      <td>
+                        <a href="/admin/booking-details/<%= booking.id %>" class="btn btn-primary shadow btn-xs sharp me-1">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../layouts/footer') %>
+
+
+<script>
+   
+tabs(".tab",".contents");
+
+function tabs(menuName, contentName) {
+    $(menuName).find('li').each(function() {
+        $(this).click(function() {
+            $(menuName).find('li').removeClass('active')
+            $(contentName).children().removeClass('active')
+            var clicked = $(this).find('a').attr('href')
+            $(this).addClass('active')
+            $(contentName).find(clicked).addClass('active')
+        });
+    });
+}
+
+</script>

@@ -1,45 +1,76 @@
 const dbPool = require('../db/database');
 
 const Customer = {
-    
     findByMobile: (mobileNumber, callback) => {
-        dbPool.query('SELECT * FROM customers WHERE mobile = ?', [mobileNumber], (error, results) => {
-            if (error) return callback(error, null);
-            callback(null, results[0]);
-        });
+        dbPool.query(
+            'SELECT * FROM front_users WHERE mobile = ?',
+            [mobileNumber],
+            (error, results) => {
+                if (error) return callback(error, null);
+                callback(null, results[0]);
+            }
+        );
     },
 
-    
     saveOtp: (mobileNumber, otp, callback) => {
-        const expiresIn = Date.now() + 5 * 60 * 1000; 
-        dbPool.query('UPDATE customers SET otp = ?, otp_expires = ? WHERE mobile = ?', [otp, expiresIn, mobileNumber], (error, results) => {
-            if (error) return callback(error, null);
-            callback(null, results);
-        });
+        const expiresIn = Date.now() + 5 * 60 * 1000; // 5 minutes
+        dbPool.query(
+            'UPDATE front_users SET register_otp = ?, otp_expires = ? WHERE mobile = ?',
+            [otp, expiresIn, mobileNumber],
+            (error, results) => {
+                if (error) return callback(error, null);
+                if (results.affectedRows === 0) {
+                    return callback(new Error('Mobile number not found to update OTP'), null);
+                }
+                callback(null, results);
+            }
+        );
     },
 
-    
     verifyOtp: (mobileNumber, otp, callback) => {
-        dbPool.query('SELECT * FROM customers WHERE mobile = ? AND otp = ? AND otp_expires > ?', [mobileNumber, otp, Date.now()], (error, results) => {
+        dbPool.query(
+            'SELECT * FROM front_users WHERE mobile = ? AND register_otp = ? AND otp_expires > ?',
+            [mobileNumber, otp, Date.now()],
+            (error, results) => {
+                if (error) return callback(error, null);
+                callback(null, results[0]); // null if not found or expired
+            }
+        );
+    },
+
+    create: (mobileNumber, callback) => {
+        const query = 'INSERT INTO front_users (mobile, role) VALUES (?, ?)';
+        const values = [mobileNumber, 'student'];
+
+        dbPool.query(query, values, (error, results) => {
             if (error) return callback(error, null);
-            callback(null, results[0]);
+            callback(null, {
+                id: results.insertId,
+                mobile: mobileNumber,
+                role: 'student'
+            });
         });
     },
+    updateByMobile: (mobileNumber, updateData, callback) => {
+  const fields = [];
+  const values = [];
 
-	 
-	create: (mobileNumber, callback) => {
-		const query = 'INSERT INTO customers (mobile, role) VALUES (?, ?)';
-		const values = [mobileNumber, 'customer']; 
-	
-		dbPool.query(query, values, (error, results) => {
-			if (error) {
-				return callback(error, null);
-			}
-			callback(null, results[0]);
-		});
+  for (const key in updateData) {
+    fields.push(`${key} = ?`);
+    values.push(updateData[key]);
+  }
 
-    },
+  values.push(mobileNumber); // for WHERE clause
 
+  const sql = `UPDATE front_users SET ${fields.join(', ')} WHERE mobile = ?`;
+
+  dbPool.query(sql, values, (error, results) => {
+    if (error) return callback(error, null);
+    callback(null, results);
+  });
+},
 };
+
+
 
 module.exports = Customer;

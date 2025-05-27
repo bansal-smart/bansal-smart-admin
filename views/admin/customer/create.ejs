@@ -1,9 +1,11 @@
 <%- include('../layouts/header') %>
 
-<div class="content-wrapper">
+
+<div class="content-body">
+  <div class="container-fluid">
     <div class="row">
-        <div class="col-12 grid-margin">
-            <div class="card">
+      <div class="col-12">
+        <div class="card">
                 <div
                 class="card-header d-flex align-items-center justify-content-between"
                
@@ -20,66 +22,105 @@
                         <div>
                             <section>
                                 <div class="row">
-                                    <div class="mb-3 col-md-6">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
                                         <label for="name">Full Name</label>
                                         <input type="text" name="name" id="name" class="form-control" value="<%= customer ? customer.name : '' %>" onkeypress="return isCharKey(event)" placeholder="Enter Your Full Name">
                                         <div class="invalid-feedback"></div>
                                     </div>
-                                    <div class="mb-3 col-md-6">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
                                         <label for="email">Email address</label>
                                         <input type="email" name="email" id="email" class="form-control" value="<%= customer ? customer.email : '' %>" placeholder="Enter Your Email">
                                         <div class="invalid-feedback"></div>
                                     </div>
-                                    <div class="mb-3 col-md-6">
-                                        <label for="mobile">Mobile</label>
-                                        <input type="text" name="mobile" id="mobile" class="form-control" value="<%= customer ? customer.mobile : '' %>" onkeypress="return isNumberKey(event)" placeholder="Enter Your Mobile No">
-                                        <div class="invalid-feedback"></div>
                                     </div>
 
-                                    <!-- Category Dropdown -->
-<div class="mb-3 col-md-6">
-    <label for="category_id" class="form-label">Category*</label>
-    <select class="form-control" name="category_id" id="category_id">
-      <option value="">Select your stream</option>
-      <option value="1" <%= customer.category_id == 1 ? 'selected' : '' %>>IIT-JEE</option>
-      <option value="3" <%= customer.category_id == 3 ? 'selected' : '' %>>NEET</option>
-      <option value="4" <%= customer.category_id == 4 ? 'selected' : '' %>>PRE FOUNDATION</option>
-      <option value="7" <%= customer.category_id == 7 ? 'selected' : '' %>>BOARDS</option>
-      <option value="14" <%= customer.category_id == 14 ? 'selected' : '' %>>COMPETITIVE</option>
-    </select>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                        <label for="mobile">Mobile</label>
+                                        <input type="text" name="mobile" id="mobile" class="form-control isNumberKey"  maxlength="10"  value="<%= customer ? customer.mobile : '' %>" onkeypress="return isNumberKey(event)" placeholder="Enter Your Mobile No">
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+</div>
+                               <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Category Name*</label>
+                                        <select class="form-control" name="category_id" id="category_id">
+                                            <option value="">Select</option>
+                                            <% categories.forEach(function(category) { %>
+                                                <option value="<%= category.id %>" <% if (customer &&
+                                                    category.id===customer.category_id) { %> selected <% } %>>
+                                                        <%= category.category_name %>
+                                                </option>
+                                                <% }); %>
+                                        </select>
+                                    </div>
+                                </div>
+                               <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="class_id">Course Class</label>
+                                        <select id="class_id" name="class_id" class="form-control">
+                                            <option value="">Select Class</option>
+                                            <% course_classes.forEach(function(val) { %>
+                                                <option value="<%= val.id %>" <%=customer && customer.class_id &&
+                                                    customer.class_id==val.id ? 'selected' : '' %>>
+                                                    <%= val.name %>
+                                                </option>
+                                                <% }); %>
+                                        </select>
+                                    </div>
   </div>
-  
-  <!-- Class Dropdown -->
-  <div class="mb-3 col-md-6">
-    <label for="class_id" class="form-label">Education Class</label>
-    <select class="form-control" name="class_id" id="class_id">
-      <option value="">Select Class</option>
-      <option value="12" <%= customer.class_id == 12 ? 'selected' : '' %>>6th Class</option>
-      <option value="13" <%= customer.class_id == 13 ? 'selected' : '' %>>7th Class</option>
-      <option value="14" <%= customer.class_id == 14 ? 'selected' : '' %>>8th Class</option>
-      <option value="15" <%= customer.class_id == 15 ? 'selected' : '' %>>9th Class</option>
-      <option value="16" <%= customer.class_id == 16 ? 'selected' : '' %>>10th Class</option>
-      <option value="18" <%= customer.class_id == 18 ? 'selected' : '' %>>11th Class</option>
-      <option value="19" <%= customer.class_id == 19 ? 'selected' : '' %>>12th Class</option>
-      <option value="20" <%= customer.class_id == 20 ? 'selected' : '' %>>Dropper</option>
-      <option value="21" <%= customer.class_id == 21 ? 'selected' : '' %>>Under Graduation (UG)</option>
-      <option value="22" <%= customer.class_id == 22 ? 'selected' : '' %>>Post Graduation (PG)</option>
-    </select>
-  </div>
-  
 
-                                    <div class="mb-3 col-md-6">
+               <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="class_id">Registration Type</label>
+                                        <select id="registration_type" name="registration_type" class="form-control">
+                                            <option value="">Select Class</option>
+                                         
+                                                <option value="online" <%=customer && customer.registration_type == "online" ? 'selected' : '' %>>
+                                                    Online
+                                                </option>
+                                                <option value="offline" <%=customer && customer.registration_type == "offline" ? 'selected' : '' %>>
+                                                    Offline
+                                                </option>
+                                        </select>
+                                    </div>
+  </div>
+
+  <div class="col-md-6 center-group">
+                                    <div class="form-group">
+                                        <label class="form-label">Center Name*</label>
+                                        <select class="form-control" name="center_id" id="center_id">
+                                            <option value="">Select</option>
+                                            <% centers.forEach(function(center) { %>
+                                                <option value="<%= center.id %>" <% if (customer &&
+                                                    center.id==customer.center_id) { %> selected <% } %>>
+                                                        <%= center.name %>
+                                                </option>
+                                                <% }); %>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                    <div class="col-md-6">
+                                          <div class="form-group">
                                         <label for="status">Status</label>
                                         <select name="status" id="status" class="form-control">
                                             <option value="">Select</option>
-                                            <option value="1" <%= customer && customer.status === '1' ? 'selected' : '' %>>Active</option>
-                                            <option value="0" <%= customer && customer.status === '0' ? 'selected' : '' %>>Inactive</option>
+                                            <option value="1" <%= customer && customer.status == 1 ? 'selected' : '' %>>Active</option>
+                                            <option value="0" <%= customer && customer.status == 0 ? 'selected' : '' %>>Inactive</option>
                                         </select>
-                                        <div class="invalid-feedback"></div>
+                                        
+                                    </div>
                                     </div>
 
+
                                     <div class="col-md-12">
-                                        <button type="submit" id="submitButton" class="btn btn-primary float-right" data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..." data-rest-text="Create">Update</button>
+                                        <button type="submit" id="submitButton" class="btn btn-primary float-right" data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..." data-rest-text="<%= action %>"><%= action %></button>
                                     </div>
                                 </div>
                             </section>
@@ -90,102 +131,56 @@
         </div>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/snackbarjs@1.1.0/dist/snackbar.min.css">
-<script src="https://cdn.jsdelivr.net/npm/snackbarjs@1.1.0/dist/snackbar.min.js"></script>
-
-<script>
- $(document).ready(function () {
-    $('form').submit(function (e) {
-        e.preventDefault();
-
-        var $form = $(this);
-        var $btn = $form.find('[type="submit"]');
-
-        buttonLoading('loading', $btn);
-        $form.find('.is-invalid').removeClass('is-invalid state-invalid');
-        $form.find('.invalid-feedback').remove();
-
-        $.ajax({
-            url: $form.attr('action'),
-            type: "POST",
-            data: new FormData(this),
-            processData: false,
-            contentType: false,
-            cache: false,
-            success: function (data) {
-                if (data.success) {
-                    successMsg('', data.message);
-                    setTimeout(function () {
-                        window.location = data.redirect_url;
-                    }, 1000);
-                } else {
-                    $.each(data.errors, function (fieldName, messages) {
-                        var $field = $form.find('[name="' + fieldName + '"]');
-                        $field.addClass('is-invalid state-invalid');
-                        $field.parent().append('<div class="invalid-feedback">' + messages[0] + '</div>');
-                    });
-                    errorMsg('', data.message);
-                }
-                buttonLoading('reset', $btn);
-            },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    $.each(xhr.responseJSON.errors, function (fieldName, messages) {
-                        var $field = $form.find('[name="' + fieldName + '"]');
-                        $field.addClass('is-invalid state-invalid');
-                        $field.parent().append('<div class="invalid-feedback">' + messages[0] + '</div>');
-                    });
-                    errorMsg('', xhr.responseJSON.message);
-                } else {
-                    errorMsg('', 'Unexpected error occurred');
-                }
-                buttonLoading('reset', $btn);
-            }
-        });
-    });
-});
-
-
-// Snackbar function to display messages
-function showSnackbar(message, type) {
-    Snackbar.show({
-        text: message,
-        actionText: 'Dismiss',
-        backgroundColor: type === 'success' ? '#4CAF50' : '#f44336', // Green for success, red for error
-        duration: 3000 // Duration in ms
-    });
-}
-
-// Button loading state handling
-function buttonLoading(state, $btn) {
-    if (state === 'loading') {
-        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Please wait...');
-    } else {
-        $btn.prop('disabled', false).html('Update');
-    }
-}
-
-// Success message handling
-function successMsg(title, message, btn = '') {
-    Swal.fire({
-        icon: 'success',
-        title: title,
-        html: message + '<br>' + btn,
-        timer: 3000
-    });
-}
-
-// Error message handling
-function errorMsg(title, message) {
-    Swal.fire({
-        icon: 'error',
-        title: title,
-        text: message
-    });
-}
-</script>
+</div>
 
 <%- include('../layouts/footer') %>
 
 
+
+<script>
+  $(document).ready(function () {
+    function toggleCenterGroup() {
+      if ($('#registration_type').val() === 'offline') {
+        $('.center-group').show();
+      } else {
+        $('.center-group').hide();
+      }
+    }
+
+    // Trigger on change
+    $('#registration_type').on('change', toggleCenterGroup);
+
+    // Run once on load in case of edit mode
+    toggleCenterGroup();
+  });
+</script>
+
+<!-- <script>
+$(document).ready(function () {
+    $('#category_id').on('change', function () {
+        var categoryId = $(this).val();
+
+        console.log(categoryId);
+        $('#class_id').html('<option value="">Loading...</option>');
+
+        if (categoryId) {
+            $.ajax({
+                url: '/filter/get-classes-by-category/' + categoryId,
+                type: 'GET',
+                success: function (data) {
+                    var options = '<option value="">Select Class</option>';
+                    data.forEach(function (cls) {
+                        options += '<option value="' + cls.id + '">' + cls.name + '</option>';
+                    });
+                    $('#class_id').html(options);
+                },
+                error: function () {
+                    $('#class_id').html('<option value="">Error loading classes</option>');
+                }
+            });
+        } else {
+            $('#class_id').html('<option value="">Select Class</option>');
+        }
+    });
+});
+</script> -->

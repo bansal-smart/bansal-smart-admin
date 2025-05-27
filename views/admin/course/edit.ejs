@@ -1,23 +1,10 @@
 <%- include('../layouts/header') %>
 
-    <style>
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            font-size: 15px
-        }
-
-        .form-group label.form-label {
-            font-weight: 700;
-        }
-
-        .form-group label {
-            font-size: 0.8125rem;
-            line-height: 1;
-            vertical-align: middle;
-        }
-    </style>
-    <div class="content-wrapper">
-
-        <div class="row">
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
             <div class="col-12 grid-margin">
                 <div class="card">
                     <div class="card-header d-flex align-items-center justify-content-between">
@@ -138,7 +125,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="form-label">Faculty *</label>
+                                        <label class="form-label">Facultyddd *</label>
                                         <select name="teachers[]" id="teachers" multiple style="width:100%"
                                             class="form-control instructor">
                                             <option value="">Select Faculty</option>
@@ -308,12 +295,13 @@
                                     <div class="form-group">
                                         <label class="form-label">Image *</label>
                                         <input type="file" class="form-control" name="image"
+                                        accept="image/*" 
                                             onchange="readURL(this, 'image_view');" id="image" />
                                         <!-- Use the course image or fallback to the default image -->
-                                        <img id="image_view" src="" width="200px">
+                                        <!-- <img id="image_view" src="" width="200px"> -->
 
                                         <img id="image_view"
-                                            src="<%= course.image ? public_url + course.image : base_url + 'admin/images/default-featured-image.png' %>"
+                                            src="<%= course.image ? course.image : base_url + 'admin/images/default-featured-image.png' %>"
                                             width="150px" />
 
                                     </div>
@@ -323,8 +311,13 @@
                                     <div class="form-group">
                                         <label class="form-label">Details Image *</label>
                                         <input type="file" class="form-control" name="details_image" id="details_image"
+                                        accept="image/*" 
                                             onchange="readURL(this, 'details_image_view');" />
-                                        <img id="details_image_view" src="" width="200px">
+                                        
+
+                                        <img id="image_view"
+                                            src="<%= course.details_image ? course.details_image : base_url + 'admin/images/default-featured-image.png' %>"
+                                            width="150px" />
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -395,12 +388,12 @@
       }
   }
   </script> -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      
 
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-        <!-- jQuery (required by Select2) -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
 
         <!-- Select2 JS -->
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

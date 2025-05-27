@@ -1,11 +1,10 @@
 <%- include('../layouts/header') %>
 
-<div class="content-wrapper">
-  
-
-  <div class="row">
-    <div class="col-12 grid-margin">
-      <div class="card">
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h4 class="card-title mb-0"><%= title %> <%= page_name %></h4>
           <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i> Back</button>
@@ -35,6 +34,14 @@
     </div>
 
     <div class="form-group col-sm-6">
+      <label class="form-label">Banner Position *</label>
+      <select name="position" id="position" class="form-control">
+        <option value="">Select Banner Type</option>
+        <option value="top" <%= post?.position === 'top' ? 'selected' : '' %>>Top</option>
+        <option value="bottom" <%= post?.position === 'bottom' ? 'selected' : '' %>>Bottom</option>
+      </select>
+    </div>
+    <div class="form-group col-sm-6">
       <label class="form-label">Banner Link *</label>
       <input type="text" class="form-control" name="banner_link" id="banner_link"
              placeholder="Banner Link"
@@ -43,9 +50,10 @@
 
     <div class="form-group col-sm-6">
       <label class="form-label">Banner</label>
-      <input type="file" class="form-control" name="banner" id="banner">
-      <% if (post?.image) { %>
-        <img src="/uploads/banner/<%= post.image %>" alt="Banner" width="100" class="mt-2">
+     <input type="file" class="form-control" name="banner" id="banner" accept="image/*">
+
+      <% if (post?.banner) { %>
+        <img src="<%= post.banner %>" alt="Banner" width="100" class="mt-2">
       <% } %>
     </div>
 
@@ -80,98 +88,3 @@
 </div>
 
 <%- include('../layouts/footer') %>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-        <!-- jQuery (required by Select2) -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-        <!-- Select2 JS -->
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-
-        <script>
-            $(document).ready(function () {
-                $('.instructor').select2({
-                    //  placeholder: "Select Faculty",
-                    allowClear: true
-                });
-            });
-        </script>
-        <script>
-            $(document).ready(function () {
-                // Ensure a form exists before trying to attach the submit handler
-                if ($('form').length > 0) {
-                    $('form').submit(function (e) {
-                        e.preventDefault();
-                         for (instance in CKEDITOR.instances) {
-        CKEDITOR.instances[instance].updateElement();
-    }
-                        var $form = $(this);
-                        var $btn = $form.find('[type="submit"]');
-
-                        buttonLoading('loading', $btn);  // Assuming this is a function for loading button state
-                        $form.find('.is-invalid').removeClass('is-invalid state-invalid');
-                        $form.find('.invalid-feedback').remove();
-
-                        // Use FormData for form submission
-                        $.ajax({
-                            url: $form.attr('action'),
-                            type: "POST",
-                            data: new FormData(this),
-                            processData: false,
-                            contentType: false,
-                            cache: false,
-                            success: function (data) {
-                                if (data.success) {
-                                    successMsg('', data.message);  // Assuming successMsg is a function
-                                    setTimeout(function () {
-                                        window.location = data.redirect_url;
-                                    }, 1000);
-                                } else {
-                                    handleFormErrors(data.errors, $form);  // Handle validation errors
-                                    errorMsg('', data.message);  // Assuming errorMsg is a function
-                                }
-                                buttonLoading('reset', $btn);  // Reset button state
-                            },
-                            error: function (xhr) {
-                                if (xhr.status === 422) {
-                                    handleFormErrors(xhr.responseJSON.errors, $form);  // Handle validation errors
-                                    errorMsg('', xhr.responseJSON.message);  // Show error message
-                                } else {
-                                    errorMsg('', 'Unexpected error occurred');
-                                }
-                                buttonLoading('reset', $btn);  // Reset button state
-                            }
-                        });
-                    });
-                }
-            });
-
-            // Function to handle form errors
-            function handleFormErrors(errors, $form) {
-                $.each(errors, function (fieldName, messages) {
-                    var $field = $form.find('[name="' + fieldName + '"]');
-                    $field.addClass('is-invalid state-invalid');
-                    $field.parent().append('<div class="invalid-feedback">' + messages[0] + '</div>');
-                });
-            }
-        </script>
-
-
-        <script>
-            $("#course_type").change(function () {
-                var course_type = $(this).val();
-                if (course_type == "free") {
-                    $(".paid_course").addClass('d-none');
-                }
-                else {
-                    $(".paid_course").removeClass('d-none');
-                }
-            });
-            CKEDITOR.replace('description');
-
-            $(".instructor").select2();
-        </script>

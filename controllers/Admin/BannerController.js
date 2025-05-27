@@ -57,7 +57,7 @@ const Create = async (req, res) => {
     res.render("admin/banner/create", {
       success: req.flash("success"),
       error: req.flash("error"),
-      form_url: "/admin/nanner-update",
+      form_url: "/admin/banner-update",
       page_name: "Create Banner",
       action: "Create",
       title: "Banner",
@@ -92,7 +92,7 @@ const checkImagePath = (relativePath) => {
   // Get the absolute path from the project root (where the 'public' folder is located)
   const fullPath = path.join(__dirname, "..", "public", normalizedPath);
 
-  console.log("Server checking for file at:", fullPath); // For debugging
+  //console.log("Server checking for file at:", fullPath); // For debugging
 
   // Check if the file exists on the server
   return fs.existsSync(fullPath);
@@ -147,7 +147,7 @@ const Update = async (req, res) => {
 
   const isInsert = !bannerId || bannerId === "null" || bannerId === "0";
 
-  const { title, banner_type, banner_link, status } = req.body;
+  const { title, banner_type, banner_link, position, status } = req.body;
 
   const bannerFile = req?.files?.banner?.[0];
 
@@ -156,6 +156,7 @@ const Update = async (req, res) => {
   if (!title?.trim()) errors.title = ["Title is required"];
   if (!banner_type?.trim()) errors.banner_type = ["Banner Type is required"];
   if (!banner_link?.trim()) errors.banner_link = ["Banner Link is required"];
+  if (!position?.trim()) errors.position = ["Banner position is required"];
   if (!["0", "1"].includes(status))
     errors.status = ["Status must be '0' or '1'"];
   if (isInsert && !bannerFile) {
@@ -174,11 +175,12 @@ const Update = async (req, res) => {
     title: title.trim(),
     banner_type: banner_type.trim(),
     banner_link: banner_link.trim(),
+    position: position.trim(),
     status: status,
   };
 
   if (bannerFile) {
-    data.image = `/uploads/banner/${bannerFile.filename}`;
+    data.banner = `/uploads/banners/${bannerFile.filename}`;
   }
 
   try {
@@ -234,9 +236,9 @@ const Update = async (req, res) => {
 };
 const Delete = async (req, res) => {
   try {
-    const categorieId = req.params.categorieId;
+    const categorieId = req.params.postId;
 
-    const softDeleteQuery = "UPDATE cotego SET deleted_at = NOW() WHERE id = ?";
+    const softDeleteQuery = "UPDATE banners SET deleted_at = NOW() WHERE id = ?";
 
     pool.query(softDeleteQuery, [categorieId], (error, result) => {
       if (error) {
@@ -245,11 +247,11 @@ const Delete = async (req, res) => {
       }
     });
 
-    req.flash("success", "Customer soft deleted successfully");
-    return res.redirect("/admin/categorie-list");
+    req.flash("success", "Banner soft deleted successfully");
+    return res.redirect("/admin/banner-list");
   } catch (error) {
     req.flash("error", error.message);
-    return res.redirect(`/admin/categorie-list`);
+    return res.redirect(`/admin/banner-list`);
   }
 };
 

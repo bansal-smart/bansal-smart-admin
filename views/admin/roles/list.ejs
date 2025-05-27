@@ -1,29 +1,30 @@
 <%- include('../layouts/header') %>
 
-
-<div class="content-wrapper">
-    
-    <div class="card">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <h4 class="card-title mb-0"><%= page_name %></h4>
-      
-            <div class="row">
-              <div class="col-12 text-end">
-             
-      
-             
-                <button type="button" id="backButton" class="btn btn-primary btn-sm">
-                  <i class="fa fa-arrow-left"></i> Back
-                </button>
-              </div>
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h4 class="card-title mb-0"><%= page_name %></h4>
+          
+                <div class="row">
+                  <div class="col-12 text-end">
+                    
+          
+                    <a class="btn btn-info btn-sm" href="<%= create_url %>">
+                      <i class="fas fa-plus"></i> 
+                    </a>
+                    <button type="button" id="backButton" class="btn btn-primary btn-sm">
+                      <i class="fa fa-arrow-left"></i> 
+                    </button>
+                  </div>
+                </div>
             </div>
-          </div>
-        <div class="card-body">
-     
-            <div class="row">
-                <div class="col-12">
-                    <div class="table-responsive">
-                        <table id="order-listing" class="table">
+            <div class="card-body">
+
+      <div class="table-responsive">
+              <table id="example3" class="display table-responsive-lg">
                             <thead>
                                 <tr>
                                     <th>Sr.No #</th>
@@ -48,9 +49,18 @@
                                                 <label class="badge badge-danger">Inactive</label>
                                             <% } %>
                                         </td>
+                                     
+
                                         <td>
-                                            <a href="/admin/roles-edit/<%= role.id %>" class="btn btn-outline-info">Edit</a>
-                                        </td>
+                     
+                      <a
+                        href="/admin/roles-edit/<%= role.id %>"
+                        class="btn btn-primary shadow btn-xs sharp me-1"
+                        ><i class="fas fa-pencil-alt"></i
+                      ></a>
+                      
+                    </td>
+            </tr>
                                     </tr>
                                 <% }); %>
 

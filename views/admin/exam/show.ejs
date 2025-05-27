@@ -1,0 +1,88 @@
+<%- include('../layouts/header') %>
+
+    <div class="content-body">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0">
+                                <%= page_name %>
+                            </h4>
+                            <a href="<%= list_url %>" class="btn btn-primary btn-sm">
+                                <i class="fa fa-arrow-left"></i> Back
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+
+
+                                <div class="col-md-4">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Test Name </strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.test_name %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Category</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.category_name || 'No category' %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Test Series</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.test_series_name || 'No Test Series' %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong> Image</strong></label><br />
+                                        <% if (post.image) { %>
+                                            <img src="<%= post.image %>" width="200" />
+                                            <% } else { %>
+                                                <p>No image uploaded</p>
+                                                <% } %>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Status</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.status==1 ? 'Active' : 'Inactive' %>
+                                        </p>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="col-md-12">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Instruction</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%- post.instruction %>
+                                        </p>
+                                    </div>
+                                </div>
+
+
+
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <%- include('../layouts/footer') %>
+            </div>

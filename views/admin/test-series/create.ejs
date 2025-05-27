@@ -1,0 +1,210 @@
+<%- include('../layouts/header') %>
+
+    <div class="content-body">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h4 class="card-title mb-0">
+                                <%= page_name %>
+                            </h4>
+
+
+                            <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i
+                                    class="fa fa-arrow-left"></i> Back</button>
+
+                        </div>
+                        <div class="card-body">
+
+                            <form id="submitForm" method="post" action="<%= form_url %>" enctype="multipart/form-data">
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Category Name*</label>
+                                            <select class="form-control" name="category_id" id="category_id">
+                                                <option value="">Select</option>
+                                                <% categories.forEach(function(category) { %>
+                                                    <option value="<%= category.id %>" <% if (course &&
+                                                        category.id===course.category_id) { %> selected <% } %>>
+                                                            <%= category.category_name %>
+                                                    </option>
+                                                    <% }); %>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label"> Name *</label>
+                                            <input type="text" class="form-control" name="name" id="name"
+                                                placeholder="Name.." value="<%= course.name %>" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Title Heading *</label>
+                                            <input type="text" class="form-control" name="title_heading"
+                                                id="title_heading" placeholder="Title Heading.."
+                                                value="<%= course.title_heading %>" />
+                                        </div>
+                                    </div>
+
+
+                                    <input type="hidden" name="id" value="<%= course.id %>">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Start Time *</label>
+                                            <input type="datetime-local" class="form-control" name="start_time"
+                                                id="start_time" value="<%= course.start_time %>">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">End Time *</label>
+                                            <input type="datetime-local" class="form-control" name="end_time"
+                                                id="end_time" value="<%= course.end_time %>">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Test Series Type*</label>
+                                            <select class="form-control" name="type" id="type">
+                                                <option value="paid" <%=course.type==="paid" ? 'selected' : '' %>
+                                                    >Paid</option>
+                                                <option value="free" <%=course.type==="free" ? 'selected' : '' %>
+                                                    >Free</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+                                <div class="row paid_course">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Price *</label>
+                                            <input type="number" value="<%= course.price %>" class="form-control"
+                                                name="price" id="price" placeholder="Price.." />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Discount Type *</label>
+                                            <select class="form-control" name="discount_type" id="discount_type">
+                                                <option value="">Select</option>
+                                                <option value="percentage" <%=course.discount_type==='percentage'
+                                                    ? 'selected' : '' %>>Percentage</option>
+                                                <option value="price" <%=course.discount_type==='price' ? 'selected'
+                                                    : '' %>
+                                                    >Price</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Discount *</label>
+                                            <input type="number" value="<%= course.discount %>" class="form-control"
+                                                name="discount" id="discount" placeholder="Discount.." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+
+
+
+
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="form-label">Short Description*</label>
+                                            <textarea class="form-control" name="short_description"
+                                                id="short_description"
+                                                placeholder="Enter Short Description"><%= course.short_description %></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="form-label">Description*</label>
+                                            <textarea class="form-control ckeditor" name="description" id="description"
+                                                placeholder="Description"><%= course.description %></textarea>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Image *</label>
+                                            <input type="file" class="form-control" name="image"  accept="image/*" 
+                                                onchange="readURL(this, 'image_view');" id="image" />
+                                            <!-- Use the course image or fallback to the default image -->
+
+
+                                            <img id="image_view"
+                                                src="<%= course.image ?  course.image : base_url + 'admin/images/default-featured-image.png' %>"
+                                                width="150px" />
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Details Image *</label>
+                                            <input type="file" class="form-control" name="details_image"  accept="image/*" 
+                                                id="details_image" onchange="readURL(this, 'details_image_view');" />
+
+                                            <img id="details_image_view"
+                                                src="<%= course.details_image ?  course.details_image : base_url + 'admin/images/default-featured-image.png' %>"
+                                                width="150px" />
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group col-sm-4">
+                                        <label class="form-label">Status</label>
+                                        <select name="status" id="status" class="form-control custom-select">
+                                            <option value="1" <%=course.status==1 ? 'selected' : '' %>>Active
+                                            </option>
+                                            <option value="0" <%=course.status==0 ? 'selected' : '' %>>Inactive
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-12">
+
+                                    <button type="submit" id="submitButton" class="btn btn-primary float-right"
+                                        data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..."
+                                        data-rest-text="<%=action %>"><%=action %></button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <%- include('../layouts/footer') %>
+
+
+            <script>
+                $("#type").change(function () {
+                    var course_type = $(this).val();
+                    if (course_type == "free") {
+                        $(".paid_course").addClass('d-none');
+                    }
+                    else {
+                        $(".paid_course").removeClass('d-none');
+                    }
+                });
+               
+            </script>

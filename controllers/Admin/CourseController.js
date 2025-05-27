@@ -1,84 +1,94 @@
 const pool = require("../../db/database");
 const randomstring = require("randomstring");
 const jwt = require("jsonwebtoken");
+const Helper = require("../../helpers/Helper");
 const { validateRequiredFields } = require("../../helpers/validationsHelper");
-const List = async (req, res) => {
-  try {
-    let whereClauses = [];
+function List(req, res) {
+  const { category_id, course_status } = req.query;
+  let course_type = req.params.course_type; // from route param
 
-    // Filter for trashed or not
-    if (req.query.status === "trashed") {
-      whereClauses.push("courses.deleted_at IS NOT NULL");
-    } else {
-      whereClauses.push("courses.deleted_at IS NULL");
-    }
+  const userRoles = req.session.userRole || []; // array of roles, e.g. ['Center']
+  const userId = req.user.id;
 
-    // Filter by category_id if provided
-    if (req.query.category_id) {
-      whereClauses.push(`courses.category_id = ${pool.escape(req.query.category_id)}`);
-    }
+  console.log('User Roles:', userRoles);
+  console.log('User ID:', userId);
 
-    // Filter by course status (0 or 1)
-    if (req.query.course_status === "0" || req.query.course_status === "1") {
-      whereClauses.push(`courses.status = ${pool.escape(req.query.course_status)}`);
-    }
+  let filters = [`courses.deleted_at IS NULL`]; // always exclude deleted courses
+  let queryParams = [];
 
-    const where = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
-
-    const query = `${withCategory()} ${where} ORDER BY courses.id DESC`;
-    const page_name =
-      req.query.status === "trashed" ? "Trashed Course List" : "Course List";
-
-    // Fetch filtered courses
-    const customers = await new Promise((resolve, reject) => {
-      pool.query(query, (err, result) => {
-        if (err) {
-          req.flash("error", err.message);
-          return reject(err);
-        }
-        resolve(result);
-      });
-    });
-
-    // Fetch category list for filter dropdown
-    const category_list = await new Promise((resolve, reject) => {
-      pool.query("SELECT id, category_name FROM categories WHERE deleted_at IS NULL", (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      });
-    });
-
-    res.render("admin/course/list", {
-      success: req.flash("success"),
-      error: req.flash("error"),
-      customers,
-      category_list,
-      req,
-      page_name,
-      list_url: "/admin/course-list",
-      trashed_list_url: "/admin/course-list/?status=trashed",
-      create_url: "/admin/course-create",
-    });
-  } catch (error) {
-    console.error("Course List Error:", error);
-    req.flash("error", error.message);
-    res.redirect("back");
+  // Role-based filter: if user has role 'Center', only show courses created by that user
+  if (userRoles.includes('Center')) {
+    filters.push(`courses.created_by = ?`);
+    queryParams.push(userId);
+   
   }
-};
+  else{
+    console.log("NO");
+  }
 
-const withCategory = () => `
-  SELECT courses.*, categories.category_name
-  FROM courses
-  LEFT JOIN categories ON courses.category_id = categories.id
-`;
+  // Add other filters
+  if (category_id) {
+    filters.push(`courses.category_id = ?`);
+    queryParams.push(category_id);
+  }
+
+  if (course_status !== undefined && course_status !== '') {
+    filters.push(`courses.status = ?`);
+    queryParams.push(course_status);
+  }
+
+  if (course_type) {
+    if (course_type === 'online') filters.push(`courses.course_type = 'online'`);
+    else if (course_type === 'offline') filters.push(`courses.course_type = 'offline'`);
+    else if (course_type === 'free') filters.push(`courses.course_type = 'free'`);
+    else if (course_type === 'paid') filters.push(`courses.course_type = 'paid'`);
+  }
+
+  // Build SQL query with all filters combined by AND
+  let sql = `
+    SELECT 
+      courses.*, 
+      categories.category_name,
+      users.name AS uploaded_by_name,
+      roles.name AS uploaded_by_role
+    FROM courses
+    LEFT JOIN categories ON courses.category_id = categories.id
+    LEFT JOIN users ON courses.created_by = users.id
+    LEFT JOIN roles ON users.role_id = roles.id
+    WHERE ${filters.join(' AND ')}
+    ORDER BY courses.id DESC
+  `;
+
+  runQuery(sql, queryParams)
+    .then(courses => {
+      return runQuery(`SELECT id, category_name FROM categories WHERE deleted_at IS NULL`)
+        .then(category_list => {
+          res.render('admin/course/list', {
+            customers: courses,
+            category_list,
+            req,
+            list_url: '/admin/course-list/all',
+            trashed_list_url: '/admin/course-list?status=trashed',
+            create_url: '/admin/course-create',
+            page_name: 'Course List'
+          });
+        });
+    })
+    .catch(err => {
+      console.error('DB Error:', err);
+      res.status(500).send('Internal Server Error');
+    });
+}
+
+
 const Create = async (req, res) => {
   try {
     const visibility = ["featured", "up_comming"];
     const services = await getServicesFromTable();
     const categories = await getCategoriesFromTable();
     const course_classes = await getCourseClassesFromTable();
+    const faculties = await Helper.getActiveFaculties();
 
-  
     let course = {};
 
 
@@ -104,6 +114,7 @@ const Create = async (req, res) => {
       course: course, // <== fix this
       categories: categories,
       course_classes,
+      faculties
     });
   } catch (error) {
     console.log(error.message);
@@ -124,6 +135,16 @@ const getServicesFromTable = async () => {
   });
 };
 
+function runQuery(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    pool.query(sql, params, (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
 const getCategoriesFromTable = async () => {
   return new Promise((resolve, reject) => {
     const query = `SELECT * FROM categories WHERE status = 1 AND deleted_at IS NULL AND category_type = 'course'`;
@@ -233,9 +254,7 @@ const checkImagePath = (relativePath) => {
 
   // Get the absolute path from the project root (where the 'public' folder is located)
   const fullPath = path.join(__dirname, "..", "public", normalizedPath);
-
-  console.log("Server checking for file at:", fullPath); // For debugging
-
+  // console.log("Server checking for file at:", fullPath); // For debugging
   // Check if the file exists on the server
   return fs.existsSync(fullPath);
 };
@@ -274,28 +293,9 @@ const Edit = async (req, res) => {
       });
     });
 
-    const getCategoriesQuery = "SELECT * FROM categories";
-    const categories = await new Promise((resolve, reject) => {
-      pool.query(getCategoriesQuery, function (error, result) {
-        if (error) {
-          req.flash("error", error.message);
-          return reject(error);
-        }
-        resolve(result);
-      });
-    });
-
-    // Fetch course classes from the database
-    const getCourseClassesQuery = "SELECT * FROM course_classes";
-    const course_classes = await new Promise((resolve, reject) => {
-      pool.query(getCourseClassesQuery, function (error, result) {
-        if (error) {
-          req.flash("error", error.message);
-          return reject(error);
-        }
-        resolve(result);
-      });
-    });
+    const categories = await Helper.getActiveCategoriesByType();
+    const course_classes = await Helper.getActiveCourseClasses();
+    const faculties = await Helper.getActiveFaculties();
 
     const imageExists = checkImagePath(course.image);
     const detailsImageExists = checkImagePath(course.details_image);
@@ -321,6 +321,7 @@ const Edit = async (req, res) => {
       course: course, // Pass the course details to the view
       categories: categories, // Pass the categories for the select dropdown
       course_classes: course_classes, // Pass the course classes for the select dropdown
+      faculties: faculties,
       services: services, // Pass the services data
       visibility, // Pass visibility options to the view
       form_url: "/admin/course-update/" + courseId, // URL for the update form
@@ -469,6 +470,8 @@ const Update = async (req, res) => {
   if (detailsImageFile) data.details_image = `/uploads/courses/${detailsImageFile.filename}`;
   if (brochureFile) data.brochure = `/uploads/courses/${brochureFile.filename}`;
 
+  data.created_by = req.user?.id || null;
+
   // --- Database operation ---
   try {
     if (isInsert) {
@@ -485,7 +488,7 @@ const Update = async (req, res) => {
         }
         return res.json({
           success: true,
-          redirect_url: "/admin/course-list",
+          redirect_url: "/admin/course-list/all",
           message: "Course created successfully",
         });
       });
@@ -504,7 +507,7 @@ const Update = async (req, res) => {
         }
         return res.json({
           success: true,
-          redirect_url: "/admin/course-list",
+          redirect_url: "/admin/course-list/all",
           message: "Course updated successfully",
         });
       });
@@ -530,10 +533,10 @@ const Delete = async (req, res) => {
     });
 
     req.flash("success", "Course soft deleted successfully");
-    return res.redirect("/admin/course-list");
+    return res.redirect("/admin/course-list/all");
   } catch (error) {
     req.flash("error", error.message);
-    return res.redirect(`/admin/course-list`);
+    return res.redirect(`/admin/course-list/all`);
   }
 };
 
@@ -581,30 +584,167 @@ const PermanentDelete = async (req, res) => {
 
 const Show = async (req, res) => {
   try {
-    const customerId = req.params.customerId;
+    const postId = req.params.courseId;
 
-    const getCustomerQuery = "SELECT * FROM customers WHERE id = ?";
-    const customer = await new Promise((resolve, reject) => {
-      pool.query(getCustomerQuery, [customerId], function (error, result) {
-        if (error) {
-          console.error(error);
-          req.flash("error", error.message);
-          reject(error);
-        } else {
-          resolve(result[0]);
-        }
+    // 1. Fetch course
+    const courseQuery = `
+      SELECT 
+        ts.*, 
+        c.category_name 
+      FROM 
+        \`courses\` ts
+      LEFT JOIN 
+        categories c ON ts.category_id = c.id
+      WHERE 
+        ts.id = ?
+    `;
+
+    const post = await new Promise((resolve, reject) => {
+      pool.query(courseQuery, [postId], (error, result) => {
+        if (error) return reject(error);
+        if (result.length === 0) return reject(new Error("Course not found"));
+        resolve(result[0]);
       });
     });
 
+    // 2. Parse comma-separated IDs
+    const teacherIds = post.teacher_id
+      ? post.teacher_id.split(',').map(id => parseInt(id.trim()))
+      : [];
+
+    const serviceIds = post.service_id
+      ? post.service_id.split(',').map(id => parseInt(id.trim()))
+      : [];
+
+    const teachers = await new Promise((resolve, reject) => {
+      if (teacherIds.length === 0) return resolve([]);
+      const query = `SELECT id, name FROM faculties WHERE id IN (?) AND status = 1 AND deleted_at IS NULL`;
+      pool.query(query, [teacherIds], (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+
+    // 4. Fetch services
+    const services = await new Promise((resolve, reject) => {
+      if (serviceIds.length === 0) return resolve([]);
+      const query = `SELECT id, title FROM services WHERE id IN (?) AND status = 1 AND deleted_at IS NULL`;
+      pool.query(query, [serviceIds], (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+
+
+    const subjectCount = await Helper.getSubjectCountByCourseId(postId);
+    const chapterCount = await Helper.getChapterCountByCourseId(postId);
+    const pdfCount = await Helper.getPdfCountByCourseId(postId);
+    const videoCount = await Helper.getVideoCountByCourseId(postId);
+    const bookingCount = await Helper.getBookingCountByCourseId(postId);
     res.render("admin/course/show", {
       success: req.flash("success"),
       error: req.flash("error"),
-      customer: customer,
-      form_url: "/admin/customer-update/" + customerId,
-      page_name: "Show",
+      course: post,
+      teachers,
+      services,
+      subjectCount,
+      chapterCount,
+      pdfCount,
+      videoCount,
+      bookingCount,
+      form_url: `/admin/course-update/${postId}`,
+      page_name: "Course Details",
     });
+
   } catch (error) {
-    console.log(error.message);
+    console.error("Show Error:", error.message);
+    req.flash("error", "An unexpected error occurred");
+    res.redirect("back");
+  }
+}
+
+const Booking = async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    const status = req.query.status || "active";
+    const page_name = "Course Booking List";
+
+    // Build conditional WHERE clause
+    let whereClause = `WHERE co.order_type = 'course'`;
+    const params = [];
+
+    if (courseId) {
+      whereClause += ` AND co.course_id = ?`;
+      params.push(courseId);
+    }
+
+
+    const query = `
+      SELECT
+        co.id,
+        co.user_id,
+        u.name AS customer_name,
+        ts.course_name,
+        co.transaction_id,
+        co.payment_status,
+        co.order_status,
+        co.total_amount,
+        co.created_at,
+        co.updated_at
+      FROM course_orders co
+      JOIN front_users u ON u.id = co.user_id
+      JOIN courses ts ON ts.id = co.course_id
+      ${whereClause}
+      ORDER BY co.created_at DESC
+    `;
+
+    const courseQuery = `
+      SELECT 
+        ts.*, 
+        c.category_name 
+      FROM 
+        \`courses\` ts
+      LEFT JOIN 
+        categories c ON ts.category_id = c.id
+      WHERE 
+        ts.id = ?
+    `;
+
+    const course = await new Promise((resolve, reject) => {
+      pool.query(courseQuery, [courseId], (error, result) => {
+        if (error) return reject(error);
+        if (result.length === 0) return reject(new Error("Course not found"));
+        resolve(result[0]);
+      });
+    });
+    const [bookings] = await pool.promise().query(query, params);
+    const subjectCount = await Helper.getSubjectCountByCourseId(courseId);
+    const chapterCount = await Helper.getChapterCountByCourseId(courseId);
+    const pdfCount = await Helper.getPdfCountByCourseId(courseId);
+    const videoCount = await Helper.getVideoCountByCourseId(courseId);
+    const bookingCount = await Helper.getBookingCountByCourseId(courseId);
+
+    res.render("admin/course/booking", {
+      success: req.flash("success"),
+      error: req.flash("error"),
+      bookings,
+      req,
+      page_name,
+      course,
+      subjectCount,
+      chapterCount,
+      pdfCount,
+      videoCount,
+      bookingCount,
+      list_url: `/admin/course-booking-list/${courseId}`,
+      trashed_list_url: `/admin/course-booking-list/${courseId}?status=trashed`,
+      create_url: "/admin/course-booking-create",
+    });
+
+  } catch (error) {
+    console.error("CourseBooking List Error:", error);
+    req.flash("error", "Server error in listing course bookings");
+    res.redirect(req.get("Referrer") || "/");
   }
 };
 
@@ -617,4 +757,5 @@ module.exports = {
   Restore,
   PermanentDelete,
   Show,
+  Booking,
 };

@@ -1,0 +1,225 @@
+<%- include('../layouts/header') %>
+
+    <div class="content-body">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0">
+                                <%= page_name %>
+                            </h4>
+                            <a href="/admin/live-test-list" class="btn btn-primary btn-sm">
+                                <i class="fa fa-arrow-left"></i> Back
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5 class="border-bottom pb-2 mt-3">Test Information</h5>
+                                </div>
+
+                                <!-- Test Name -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Test Name</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.test_name %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Course Name -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Course</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.course_name || 'N/A' %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Category Name -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Category</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.category_name || 'N/A' %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Test Type -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Test Type</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.test_type %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Test Pattern -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Test Pattern</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.test_pattern %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Location -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Test Location</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.test_location %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Price -->
+                                <!-- <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Price</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.price %>
+                                        </p>
+                                    </div>
+                                </div> -->
+
+                                <!-- Discount -->
+                                <!-- <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Discount</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <% if (post.discount_type==='percentage' ) { %>
+                                                <%= post.discount %>%
+                                                    <% } else if (post.discount_type==='flat' ) { %>
+                                                        ₹ <%= post.discount %>
+                                                            <% } else { %>
+                                                                No discount
+                                                                <% } %>
+                                        </p>
+                                    </div>
+                                </div> -->
+
+                                <!-- Offer Price -->
+                                <!-- <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Offer Price</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.offer_price %>
+                                        </p>
+                                    </div>
+                                </div> -->
+
+                                <!-- No of Questions -->
+                                <!-- <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>No. of Questions</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.no_of_question %>
+                                        </p>
+                                    </div>
+                                </div> -->
+
+                                <!-- Start Time -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Start Time</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.start_time %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- End Time -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>End Time</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.end_time %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Status</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.status===1 ? 'Active' : 'Inactive' %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Is Result -->
+                                <!-- <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Result Published?</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.is_result===1 ? 'Yes' : 'No' %>
+                                        </p>
+                                    </div>
+                                </div> -->
+
+                                <!-- Minimum Marks -->
+                                <!-- <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Minimum Marks</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.minimum_marks %>
+                                        </p>
+                                    </div>
+                                </div> -->
+
+                                <!-- Banner -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Banner</strong></label><br />
+                                        <% if (post.banner) { %>
+                                            <img src="<%= post.banner.replace(/\\/g, '/') %>" width="200" />
+                                            <% } else { %>
+                                                <p>No banner image</p>
+                                                <% } %>
+                                    </div>
+                                </div>
+
+                                <!-- Instruction -->
+                                <div class="col-md-12">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Instruction</strong></label>
+                                        <p class="mb-0 text-muted"><%- post.instruction || 'No instructions' %></p>
+                                    </div>
+                                </div>
+
+
+                                <!-- Created At -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Created At</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.created_at.toLocaleString() %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Updated At -->
+                                <div class="col-md-3">
+                                    <div class="form-group border rounded p-3 mb-3">
+                                        <label><strong>Updated At</strong></label>
+                                        <p class="mb-0 text-muted">
+                                            <%= post.updated_at.toLocaleString() %>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <%- include('../layouts/footer') %>
+            </div>
