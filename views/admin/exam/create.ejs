@@ -78,7 +78,50 @@
                                                 placeholder="Instruction"><%= course?.instruction %></textarea>
                                         </div>
                                     </div>
+<div class="col-md-12">
+                                <div class="row">
 
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Marks * </label>
+                                            <input type="number" class="form-control" name="marks" id="marks"  value="<%= course?.marks %>">
+                                        </div>
+                                    </div>
+
+
+                                   
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Start Date &amp; Time *</label>
+                                            <input class="form-control"   value="<%= course?.start_date_time %>" type="datetime-local" name="start_date_time" id="start_date_time">
+                                        </div>
+                                    </div>
+
+                                     <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">End Date &amp; Time *</label>
+                                            <input class="form-control"  value="<%= course?.end_date_time %>" type="datetime-local" name="end_date_time" id="end_date_time">
+                                        </div>
+                                    </div>
+                                     <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Duration (In Minutes) *</label>
+                                            <input type="text" class="form-control"  value="<%= course?.duration_test %>" name="duration_test" placeholder="Duration" id="duration_test">
+                                        </div>
+                                    </div>
+                                     <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Result Declare Time *</label>
+                                            <input class="form-control"  value="<%= course?.result_date %>" type="datetime-local" name="result_date" id="result_date">
+                                        </div>
+                                    </div>  
+
+
+
+                                </div>
+
+                            </div>
 
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -90,7 +133,7 @@
 
 
                                             <img id="image_view"
-                                                src="<%= course?.image ? public_url + course.image : base_url + 'admin/images/default-featured-image.png' %>"
+                                                src="<%= course?.image ? publicUrl  + course.image : base_url + 'admin/images/default-featured-image.png' %>"
                                                 width="150px" />
 
                                         </div>

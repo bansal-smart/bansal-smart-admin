@@ -35,28 +35,18 @@ ul{
         <div class="col-12">
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-              <h4 class="card-title mb-0">
-                <%= page_name %>
-              </h4>
-              <a href="/admin/customer-list" class="btn btn-primary btn-sm">
-                <i class="fa fa-arrow-left"></i> Back
-              </a>
-            </div>
-            <div class="card-body">
-   <div class="col-12">
-  <ul class="tab mb-4">
-    <li>
-      <a href="/admin/customer-show/<%= customer.id %>" class="tab-link">Student Details</a>
-    </li>
-    <li>
-      <a href="/admin/customer-course-booking/<%= customer.id %>" class="tab-link">Course Booking</a>
-    </li>
-    <li>
-      <a href="/admin/customer-test-series-booking/<%= customer.id %>" class="tab-link">Test Series Booking</a>
-    </li>
-  </ul>
-</div>
-
+              <ul class="tab mb-0 p-0">
+          <li>
+            <a href="/admin/customer-show/<%= customer.id %>" class="tab-link">Student Details</a>
+          </li>
+          <li>
+            <a href="/admin/customer-course-booking/<%= customer.id %>" class="tab-link">Course Booking</a>
+          </li>
+          <li>
+            <a href="/admin/customer-test-series-booking/<%= customer.id %>" class="tab-link">Test Series Booking</a>
+          </li>
+        </ul>
+        
 <script>
   // Get current URL
   const currentUrl = window.location.pathname;
@@ -70,6 +60,12 @@ ul{
     }
   });
 </script>
+              <a href="/admin/customer-list" class="btn btn-primary btn-sm">
+                <i class="fa fa-arrow-left"></i> Back
+              </a>
+            </div>
+            <div class="card-body">
+
 
               <div class="row">
                 <!-- Course Name -->
@@ -209,7 +205,7 @@ ul{
                   <div class="form-group border rounded p-3 mb-3">
                     <label><strong>Status</strong></label>
                     <p class="mb-0 text-muted">
-                      <%= customer.status===1 ? 'Active' : customer.status===0 ? 'Inactive' : 'N/A' %>
+                      <%= customer.status==1 ? 'Active' : customer.status===0 ? 'Inactive' : 'N/A' %>
                     </p>
                   </div>
                 </div>
@@ -241,5 +237,6 @@ ul{
         </div>
       </div>
     </div>
+</div>
 
     <%- include('../layouts/footer') %>

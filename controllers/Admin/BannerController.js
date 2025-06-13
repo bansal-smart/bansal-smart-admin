@@ -238,7 +238,8 @@ const Delete = async (req, res) => {
   try {
     const categorieId = req.params.postId;
 
-    const softDeleteQuery = "UPDATE banners SET deleted_at = NOW() WHERE id = ?";
+    const softDeleteQuery =
+      "UPDATE banners SET deleted_at = NOW() WHERE id = ?";
 
     pool.query(softDeleteQuery, [categorieId], (error, result) => {
       if (error) {

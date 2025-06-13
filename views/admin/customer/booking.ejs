@@ -35,27 +35,19 @@ ul{
     <div class="row">
       <div class="col-12">
         <div class="card">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <h4 class="card-title mb-0"><%= page_name %></h4>
-          
-          </div>
-
-         
-    <div class="card-body">
-   <div class="col-12">
-  <ul class="tab mb-4">
-    <li>
-      <a href="/admin/customer-show/<%= customer.id %>" class="tab-link">Student Details</a>
-    </li>
-    <li>
-      <a href="/admin/customer-course-booking/<%= customer.id %>" class="tab-link">Course Booking</a>
-    </li>
-    <li>
-      <a href="/admin/customer-test-series-booking/<%= customer.id %>" class="tab-link">Test Series Booking</a>
-    </li>
-  </ul>
-</div>
-
+             <div class="card-header d-flex justify-content-between align-items-center">
+              <ul class="tab mb-0 p-0">
+          <li>
+            <a href="/admin/customer-show/<%= customerId %>" class="tab-link">Student Details</a>
+          </li>
+          <li>
+            <a href="/admin/customer-course-booking/<%= customerId %>" class="tab-link">Course Booking</a>
+          </li>
+          <li>
+            <a href="/admin/customer-test-series-booking/<%= customerId %>" class="tab-link">Test Series Booking</a>
+          </li>
+        </ul>
+        
 <script>
   // Get current URL
   const currentUrl = window.location.pathname;
@@ -69,7 +61,13 @@ ul{
     }
   });
 </script>
+              <a href="/admin/customer-list" class="btn btn-primary btn-sm">
+                <i class="fa fa-arrow-left"></i> Back
+              </a>
+            </div>
 
+         
+    <div class="card-body">
 
             <div class="table-responsive">
               <table id="example3" class="display table-responsive-lg">
@@ -78,6 +76,7 @@ ul{
                     <th>Sr.No #</th>
                    
                     <th>Transaction Id</th>
+                    
                     <th>Course Name</th>
                     <th>Price</th>
                     <th>Order Date</th>

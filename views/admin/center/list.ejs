@@ -35,12 +35,12 @@
               <table id="example3" class="display table-responsive-lg">
                                 <thead>
                                     <tr>
-                                        <th>Sr.No #ss</th>
+                                        <th>Sr.No</th>
 
                                         <th>Name</th>
                                              <th>City</th>
                                         <th>Email</th>
-                                       
+                                        <th>Logo</th>
                                         <!-- <th>Registration Date</th> -->
                                         <th>Status</th>
                                         <th>Actions</th>
@@ -63,6 +63,16 @@
                                             <td>
                                                 <%= post.email %>
                                             </td>
+  <td>
+                        <% if (post.logo) { %>
+                          <a href="<%= publicUrl + post.logo %>" target="_blank">
+                            <img src="<%= publicUrl + post.logo %>" width="100" />
+                          </a>
+                        <% } else { %>
+                          No Image
+                        <% } %>
+                      </td>
+                                            
                                             
                                             </td>
                                             

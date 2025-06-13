@@ -1,6 +1,6 @@
 <%- include('../layouts/header') %>
 
-    <div class="content-body">
+    <section class="content-body">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
@@ -149,7 +149,7 @@
 
 
                                             <img id="image_view"
-                                                src="<%= course.image ?  course.image : base_url + 'admin/images/default-featured-image.png' %>"
+                                                src="<%= course.image ?  publicUrl +  course.image : base_url + 'admin/images/default-featured-image.png' %>"
                                                 width="150px" />
 
                                         </div>
@@ -162,7 +162,7 @@
                                                 id="details_image" onchange="readURL(this, 'details_image_view');" />
 
                                             <img id="details_image_view"
-                                                src="<%= course.details_image ?  course.details_image : base_url + 'admin/images/default-featured-image.png' %>"
+                                                src="<%= course.details_image ?  publicUrl +  course.details_image : base_url + 'admin/images/default-featured-image.png' %>"
                                                 width="150px" />
                                         </div>
                                     </div>
@@ -192,7 +192,7 @@
             </div>
         </div>
 
-
+    </section>
         <%- include('../layouts/footer') %>
 
 

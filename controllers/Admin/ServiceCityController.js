@@ -85,7 +85,7 @@ const Edit = async (req, res) => {
 
   
     const imageExists = checkImagePath(post.image);
-    const image = imageExists ? post.image : "admin/images/default-featured-image.png";
+    const image = post.image ? post.image : "admin/images/default-featured-image.png";
 
     res.render(`admin/${folder_path}/create`, {
       success: req.flash("success"),
@@ -112,12 +112,21 @@ const checkImagePath = (relativePath) => {
 
   return fs.existsSync(fullPath);
 };
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\W-]+/g, "-")   // Replace spaces and special chars with -
+    .replace(/^-+|-+$/g, "");    // Trim - from start/end
+};
+
 const Update = async (req, res) => {
   const postId = req.params.postId;
   const isInsert = !postId || postId === "null" || postId === "0";
 
   const { title, status } = req.body;
- const imageFile = req?.files?.image?.[0];
+  const imageFile = req?.files?.image?.[0];
   const errors = {};
 
   if (!title?.trim()) errors.title = ["Title is required"];
@@ -131,8 +140,10 @@ const Update = async (req, res) => {
     });
   }
 
+  const slug = slugify(title);
   const data = {
     title: title.trim(),
+    slug,
     status: status || 0,
   };
 
@@ -171,7 +182,6 @@ const Update = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 
 const Delete = async (req, res) => {
   try {

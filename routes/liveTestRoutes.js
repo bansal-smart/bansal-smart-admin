@@ -63,10 +63,16 @@ router.get(
   controller.Show
 );
 
-router.post(
-  "/admin/live-test-question-upload",
+router.get(
+  "/admin/live-test-question-list/:postId?",
   adminauthenticateCustomer,
-  upload.single('docFile'),
-  controller.QuestionUpload
+  controller.QuestionList
 );
+
+// router.post(
+//   "/admin/live-test-question-upload",
+//   adminauthenticateCustomer,
+//   upload.single('docFile'),
+//   controller.QuestionUpload
+// );
 module.exports = router;

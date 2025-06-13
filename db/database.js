@@ -20,18 +20,17 @@
 
 // module.exports = pool;
 
-
+// just comment return 
 
 const mysql = require('mysql2');
 
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root', // Replace with your MySQL username
-  password: '55AIViZznakaDjIS', // Replace with your MySQL password
-  database: 'bansal', // Replace with your database name
-  waitForConnections: true, // Optional: to allow waiting for connections if the pool is full
-  connectionLimit: 10, // Max number of simultaneous connections
-  queueLimit: 0 // No limit to the waiting queue
+  host: '193.203.162.34',
+  user: 'bansal_user', // Replace with your MySQL username
+  password: 'Bansal@@2000', // Replace with your MySQL password
+  database: 'bansal_db', // Replace with your database name
+  connectionLimit: 10, // Max number of simultaneous connection
+  port:3306,
 });
 
 // Export the pool for use in your controllers

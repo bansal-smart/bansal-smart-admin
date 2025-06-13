@@ -13,6 +13,13 @@ router.get(
   CouponController.List
 );
 
+router.post(
+  "/admin/coupon-list",
+  adminauthenticateCustomer,
+  CouponController.List
+);
+
+
 router.get(
   "/admin/coupon-create",
   adminauthenticateCustomer,

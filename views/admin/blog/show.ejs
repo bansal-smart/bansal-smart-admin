@@ -17,9 +17,7 @@
               <div class="row">
 
                 <!-- Section: Basic Info -->
-                <div class="col-12">
-                  <h5 class="border-bottom pb-2 mt-3">Basic Information</h5>
-                </div>
+             
 
                 <div class="col-md-12">
                   <div class="form-group border rounded p-3 mb-3">
@@ -38,6 +36,31 @@
                     <p class="mb-0 text-muted"><%- post.description %></p>
                   </div>
                 </div>
+                <div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Image</strong></label>
+    <br>
+    <% if (post.image) { %>
+      <img src="<%= publicUrl +post.image %>" width="100" />
+    <% } else { %>
+      <p>No image uploaded</p>
+    <% } %>
+  </div>
+</div>
+
+<div class="col-md-4">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Created Time</strong></label>
+    <p class="mb-0 text-muted"><%= post.created_at %></p>
+  </div>
+</div>
+
+<div class="col-md-4">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Last Update</strong></label>
+    <p class="mb-0 text-muted"><%= post.updated_at %></p>
+  </div>
+</div>
 
                 <div class="col-md-12">
                   <div class="form-group border rounded p-3 mb-3">
@@ -55,6 +78,8 @@
             </div>
           </div>
         </div>
+</div>
 
+    </div></div>
         <%- include('../layouts/footer') %>
       </div>

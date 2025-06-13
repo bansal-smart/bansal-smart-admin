@@ -4,21 +4,38 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card"
+                    >
+                     <div
+            class="card-header d-flex justify-content-between align-items-center"
+          >
+                                          <ul class="nav nav-pills">
+  <li class="nav-item">
+     <a class="nav-link active" href="/admin/live-test-show/<%= post.id %>">Live Test Details</a>
+  </li>
+  <!-- <li class="nav-item">
+     <a class="nav-link" href="/admin/exam-list">Exam List</a>
+  </li> -->
+  <li class="nav-item">
+    <a class="nav-link"  href="/admin/live-test-question-list/<%= post.id %>">Question List</a>
+  </li>
+
+</ul>
+             <button type="button" id="backButton" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-arrow-left"></i>
+                                </button>
+          </div>
+                        <!-- <div class="card-header d-flex justify-content-between align-items-center">
                             <h4 class="card-title mb-0">
                                 <%= page_name %>
                             </h4>
                             <a href="/admin/live-test-list" class="btn btn-primary btn-sm">
                                 <i class="fa fa-arrow-left"></i> Back
                             </a>
-                        </div>
+                        </div> -->
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-12">
-                                    <h5 class="border-bottom pb-2 mt-3">Test Information</h5>
-                                </div>
-
+                            
                                 <!-- Test Name -->
                                 <div class="col-md-3">
                                     <div class="form-group border rounded p-3 mb-3">
@@ -60,14 +77,7 @@
                                 </div>
 
                                 <!-- Test Pattern -->
-                                <div class="col-md-3">
-                                    <div class="form-group border rounded p-3 mb-3">
-                                        <label><strong>Test Pattern</strong></label>
-                                        <p class="mb-0 text-muted">
-                                            <%= post.test_pattern %>
-                                        </p>
-                                    </div>
-                                </div>
+                              
 
                                 <!-- Location -->
                                 <div class="col-md-3">
@@ -80,17 +90,17 @@
                                 </div>
 
                                 <!-- Price -->
-                                <!-- <div class="col-md-3">
+                                <div class="col-md-3">
                                     <div class="form-group border rounded p-3 mb-3">
                                         <label><strong>Price</strong></label>
                                         <p class="mb-0 text-muted">
-                                            <%= post.price %>
+                                            ₹<%= post.price %>
                                         </p>
                                     </div>
-                                </div> -->
+                                </div>
 
-                                <!-- Discount -->
-                                <!-- <div class="col-md-3">
+                               
+                                <div class="col-md-3">
                                     <div class="form-group border rounded p-3 mb-3">
                                         <label><strong>Discount</strong></label>
                                         <p class="mb-0 text-muted">
@@ -103,27 +113,27 @@
                                                                 <% } %>
                                         </p>
                                     </div>
-                                </div> -->
+                                </div>
 
                                 <!-- Offer Price -->
-                                <!-- <div class="col-md-3">
+                                <div class="col-md-3">
                                     <div class="form-group border rounded p-3 mb-3">
                                         <label><strong>Offer Price</strong></label>
                                         <p class="mb-0 text-muted">
-                                            <%= post.offer_price %>
+                                           ₹ <%= post.offer_price %>
                                         </p>
                                     </div>
-                                </div> -->
+                                </div>
 
                                 <!-- No of Questions -->
-                                <!-- <div class="col-md-3">
+                                <div class="col-md-3">
                                     <div class="form-group border rounded p-3 mb-3">
-                                        <label><strong>No. of Questions</strong></label>
+                                        <label><strong>Duration</strong></label>
                                         <p class="mb-0 text-muted">
-                                            <%= post.no_of_question %>
+                                            <%= post.duration %> Month
                                         </p>
                                     </div>
-                                </div> -->
+                                </div>
 
                                 <!-- Start Time -->
                                 <div class="col-md-3">

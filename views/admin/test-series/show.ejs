@@ -131,7 +131,7 @@
                 <div class="form-group border rounded p-3 mb-3">
                     <label><strong>Thumbnail Image</strong></label><br />
                     <% if (post.image) { %>
-                        <img src="<%= post.image %>" width="200" />
+                        <img src="<%= publicUrl + post.image %>" width="200" />
                     <% } else { %>
                         <p>No image uploaded</p>
                     <% } %>
@@ -142,7 +142,7 @@
                 <div class="form-group border rounded p-3 mb-3">
                     <label><strong>Details Image</strong></label><br />
                     <% if (post.details_image) { %>
-                        <img src="<%= post.details_image %>" width="200" />
+                        <img src="<%= publicUrl + post.details_image %>" width="200" />
                     <% } else { %>
                         <p>No details image uploaded</p>
                     <% } %>

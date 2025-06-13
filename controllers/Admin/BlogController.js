@@ -95,17 +95,29 @@ const Edit = async (req, res) => {
   }
 };
 
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\W-]+/g, '-')       // Replace spaces and non-word characters with "-"
+    .replace(/^-+|-+$/g, '');        // Remove starting/ending hyphens
+};
+
 const Update = async (req, res) => {
   const postId = req.params.postId;
   const isInsert = !postId || postId === "null" || postId === "0";
 
   const { title, description, status } = req.body;
+  const imageFile = req?.files?.image?.[0];
 
   // Validation
   const errors = {};
   if (!title?.trim()) errors.title = ["Title is required"];
   if (!description?.trim()) errors.description = ["Description is required"];
-
+  if (isInsert && !imageFile) {
+    errors.image = ["Faculty image is required"];
+  }
   if (Object.keys(errors).length > 0) {
     return res.status(422).json({
       success: false,
@@ -116,18 +128,21 @@ const Update = async (req, res) => {
 
   const data = {
     title: title.trim(),
+    slug: slugify(title), // Generate slug from title
     description: description.trim(),
     status: status || 0,
   };
+
+  if (imageFile) {
+    data.image = `/uploads/blogs/${imageFile.filename}`;
+  }
 
   try {
     const fields = Object.keys(data);
     const values = Object.values(data);
 
     if (isInsert) {
-      const insertQuery = `INSERT INTO ${table_name} (${fields.join(
-        ", "
-      )}) VALUES (${fields.map(() => "?").join(", ")})`;
+      const insertQuery = `INSERT INTO ${table_name} (${fields.join(", ")}) VALUES (${fields.map(() => "?").join(", ")})`;
       pool.query(insertQuery, values, (err, result) => {
         if (err) {
           console.error("Insert error:", err);
@@ -143,9 +158,7 @@ const Update = async (req, res) => {
         });
       });
     } else {
-      const updateQuery = `UPDATE ${table_name} SET ${fields
-        .map((field) => `${field} = ?`)
-        .join(", ")} WHERE id = ?`;
+      const updateQuery = `UPDATE ${table_name} SET ${fields.map((field) => `${field} = ?`).join(", ")} WHERE id = ?`;
       values.push(postId);
       pool.query(updateQuery, values, (err, result) => {
         if (err) {
@@ -167,6 +180,7 @@ const Update = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 const Delete = async (req, res) => {
   try {

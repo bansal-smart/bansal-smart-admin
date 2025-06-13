@@ -1,0 +1,9 @@
+[
+  {
+    "id": "secret123",
+    "execute-command": "/var/www/bansal/bansaladmin/deploy.sh",
+    "command-working-directory": "/var/www/bansal/bansaladmin",
+    "response-message": "Deploy started"
+  }
+]
+

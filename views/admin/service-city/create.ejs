@@ -40,7 +40,7 @@
                                             <input type="file" class="form-control" name="image" accept="image/*"
                                                 onchange="readURL(this, 'image_view');" id="image" />
                                             <!-- Use the course image or fallback to the default image -->
-                                            <img id="image_view" src="<%= image %>" width="150px">
+                                            <img id="image_view" src="<%= publicUrl +  image %>" width="150px">
                                         </div>
                                     </div>
 
@@ -78,6 +78,6 @@
                 </div>
             </div>
         </div>
-
+    </div>
 
         <%- include('../layouts/footer') %>

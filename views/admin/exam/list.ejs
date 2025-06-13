@@ -133,12 +133,14 @@
               <table id="example3" class="display table-responsive-lg">
                                 <thead>
                                     <tr>
-                                        <th>Sr.No #ss</th>
+                                        <th>Sr.No #</th>
 
                                         <th>Category Name</th>
                                              <th>Test Series Name</th>
-                                        <th>Name</th>
-                                       
+                                        <th>Exan Name</th>
+                                        <th>No of Questions</th>
+                                         <!-- <th>Start Time</th>
+                                          <th>End Time</th> -->
                                         <!-- <th>Registration Date</th> -->
                                         <th>Status</th>
                                         <th>Actions</th>
@@ -161,7 +163,18 @@
                                             <td>
                                                 <%= course.test_name %>
                                             </td>
+
+                                             <td>
+                                                <%= course.no_of_question %>
+                                            </td>
+<!-- 
+                                              <td>
+                                                <%= course.start_date_time %>
+                                            </td>
                                             
+                                              <td>
+                                                <%= course.end_date_time %>
+                                            </td> -->
                                             </td>
                                             <!-- <td><%= formatDate(course.created_at) %></td> -->
                                             <td>
@@ -190,7 +203,7 @@
                         ><i class="fa fa-trash"></i
                       ></a>
                        <a
-                            class="btn btn-danger shadow btn-xs sharp popup">Upload Question</a>
+                            class="btn btn-danger btn-sm shadow btn-xs popup upload-question-btn" title="Upload Document" data-exam_id = <%= course.id %>>Upload Question</a>
                     </td>
 
                                         </tr>
@@ -211,8 +224,8 @@
      <div class="card-body">
             <h2 class="card-title text-center text-primary mb-4">Upload .DOCX File</h2>
 
-            <form action="/admin/exam-question-upload" method="POST" enctype="multipart/form-data">
-            <input type="" name="test_id" value="2">
+            <form action="/admin/question-upload" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="test_id" value="" id="test_id">
               <div class="mb-3">
                 <label for="docFile" class="form-label">Select DOCX File</label>
                 <input type="file" name="docFile" id="docFile" class="form-control" accept=".docx" required />
@@ -266,4 +279,20 @@ $(function() {
   $(window).resize();
 });
 
+
+
   </script>
+
+  <script>
+  $(document).ready(function () {
+    $('.upload-question-btn').click(function () {
+      const examId = $(this).data('exam_id');
+      $('#test_id').val(examId);
+      $('#uploadPopup').show();
+    });
+
+    $('#uploadPopup .close').click(function () {
+      $('#uploadPopup').hide();
+    });
+  });
+</script>

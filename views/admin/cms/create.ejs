@@ -1,6 +1,6 @@
 <%- include('../layouts/header') %>
 
-<div class="content-body">
+<section class="content-body">
   <div class="container-fluid">
     <div class="row">
       <div class="col-12">
@@ -74,80 +74,14 @@
                         </form>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+      </div></div>
+  </div></section>
 
 
     <%- include('../layouts/footer') %>
 
 
         
-
-        <script>
-    
-         
-           
-
-
-       
-            $(document).ready(function () {
-                // Ensure a form exists before trying to attach the submit handler
-                if ($('form').length > 0) {
-                    $('form').submit(function (e) {
-                        e.preventDefault();
-                                                e.preventDefault();
-
-                        var $form = $(this);
-                        var $btn = $form.find('[type="submit"]');
-
-                        buttonLoading('loading', $btn);  // Assuming this is a function for loading button state
-                        $form.find('.is-invalid').removeClass('is-invalid state-invalid');
-                        $form.find('.invalid-feedback').remove();
-
-                        // Use FormData for form submission
-                        $.ajax({
-                            url: $form.attr('action'),
-                            type: "POST",
-                            data: new FormData(this),
-                            processData: false,
-                            contentType: false,
-                            cache: false,
-                            success: function (data) {
-                                if (data.success) {
-                                    successMsg('', data.message);  // Assuming successMsg is a function
-                                    setTimeout(function () {
-                                        window.location = data.redirect_url;
-                                    }, 1000);
-                                } else {
-                                    handleFormErrors(data.errors, $form);  // Handle validation errors
-                                    errorMsg('', data.message);  // Assuming errorMsg is a function
-                                }
-                                buttonLoading('reset', $btn);  // Reset button state
-                            },
-                            error: function (xhr) {
-                                if (xhr.status === 422) {
-                                    handleFormErrors(xhr.responseJSON.errors, $form);  // Handle validation errors
-                                    errorMsg('', xhr.responseJSON.message);  // Show error message
-                                } else {
-                                    errorMsg('', 'Unexpected error occurred');
-                                }
-                                buttonLoading('reset', $btn);  // Reset button state
-                            }
-                        });
-                    });
-                }
-            });
-
-            // Function to handle form errors
-            function handleFormErrors(errors, $form) {
-                $.each(errors, function (fieldName, messages) {
-                    var $field = $form.find('[name="' + fieldName + '"]');
-                    $field.addClass('is-invalid state-invalid');
-                    $field.parent().append('<div class="invalid-feedback">' + messages[0] + '</div>');
-                });
-            }
-        </script>
 
 
        

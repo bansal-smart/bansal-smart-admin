@@ -16,6 +16,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <script>
+  
   const editors = [];
   document.addEventListener('DOMContentLoaded', function () {
     const editorEls = document.querySelectorAll('.ckeditor');
@@ -85,6 +86,9 @@
   //   });
   // }
 </script>
+
+
+
 <script>
   function successMsg(heading, message, html = "") {
     Snackbar.show({
@@ -115,7 +119,18 @@
         reader.readAsDataURL(input.files[0]);
     }
 }
+function readURL(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
 
+    reader.onload = function (e) {
+      // Find the nearest .preview image relative to the input
+      $(input).closest('.form-group').find('img').attr('src', e.target.result);
+    };
+
+    reader.readAsDataURL(input.files[0]);
+  }
+}
 </script>
 
 
@@ -144,9 +159,9 @@
             contentType: false,
             cache: false,
             success: function (data) {
-              
+            console.log("Data is");
                 if (data.success) {
-                    console.log(data.message);
+                    
                     successMsg('', data.message);
                     setTimeout(function () {
                         window.location = data.redirect_url;
@@ -162,7 +177,7 @@
                 buttonLoading('reset', $btn);
             },
           error: function (xhr) {
-    console.log("XHR Error:", xhr); // <-- Add this for debugging
+      console.log("XHR Error:", xhr); // <-- Add this for debugging
 
     if (xhr.status === 422) {
         $.each(xhr.responseJSON.errors, function (fieldName, messages) {

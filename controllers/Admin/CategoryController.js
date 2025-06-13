@@ -109,6 +109,16 @@ const Edit = async (req, res) => {
 };
 
 // Update Category
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')         // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')     // Remove all non-word chars
+    .replace(/\-\-+/g, '-');      // Replace multiple - with single -
+};
+
 const Update = async (req, res) => {
   const categoryId = req.params.categoryId;
   let { category_name, category_type, status } = req.body;
@@ -136,7 +146,6 @@ const Update = async (req, res) => {
     status = "1"; // Default if not provided
   }
 
-  // If there are validation errors
   if (Object.keys(errors).length > 0) {
     return res.status(422).json({
       success: false,
@@ -146,7 +155,9 @@ const Update = async (req, res) => {
   }
 
   try {
-    const data = { category_name, category_type, status };
+    const slug = slugify(category_name);
+
+    const data = { category_name, category_type, status, slug };
     const setClauses = [];
     const values = [];
 
@@ -204,8 +215,8 @@ const Update = async (req, res) => {
         });
       });
     }
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Something went wrong",
@@ -213,6 +224,7 @@ const Update = async (req, res) => {
     });
   }
 };
+
 
 
 // Soft Delete Category

@@ -9,26 +9,31 @@ const folder_path = "cms";
 const module_mane = "cms";
 const List = async (req, res) => {
   try {
-   
-    
+    const where =
+      req.query.status === "trashed"
+        ? "WHERE cms.deleted_at IS NOT NULL"
+        : "WHERE cms.deleted_at IS NULL";
 
-    const query = `SELECT * FROM cms ORDER BY id DESC`;
+    const page_name =
+      req.query.status === "trashed"
+        ? "Trashed CMS Page List"
+        : "CMS Page List";
+
+    const query = `
+      SELECT * FROM cms
+      ${where}
+      ORDER BY cms.id DESC
+    `;
 
     const customers = await new Promise((resolve, reject) => {
       pool.query(query, (err, result) => {
         if (err) {
           console.error("SQL Error:", err);
-          req.flash("error", "Failed to fetch test series list");
           return reject(err);
         }
         resolve(result);
       });
     });
-
-    const page_name =
-      req.query.status === "trashed"
-        ? "Trashed CMS Page  List"
-        : "CMS Page  List";
 
     res.render("admin/cms/list", {
       success: req.flash("success"),
@@ -46,6 +51,7 @@ const List = async (req, res) => {
     res.redirect("back");
   }
 };
+
 
 const runQuery = (query, params = []) =>
   new Promise((resolve, reject) => {
@@ -81,38 +87,38 @@ const Edit = async (req, res) => {
 
     // Fetch course
     const courseResult = await runQuery(
-      "SELECT * FROM `test_series` WHERE id = ?",
+      "SELECT * FROM `cms` WHERE id = ?",
       [courseId]
     );
     if (courseResult.length === 0) {
-      req.flash("error", "Test Series not found");
-      return res.redirect("/admin/test-series-list");
+      req.flash("error", "cmd not found");
+      return res.redirect("/admin/cms-list");
     }
-    const course = courseResult[0];
+    const post = courseResult[0];
 
  
 
     // Check image existence
-    const imageExists = checkImagePath(course.image);
-    const detailsImageExists = checkImagePath(course.details_image);
+    // const imageExists = checkImagePath(course.image);
+    // const detailsImageExists = checkImagePath(course.details_image);
 
-    res.render("admin/test-series-test/create", {
+    res.render("admin/cms/create", {
       success: req.flash("success"),
       error: req.flash("error"),
-      course,
+      post,
     
   
       form_url: `/admin/cms-update/${courseId}`,
       page_name: "Edit",
-      image: imageExists
-        ? course.image
-        : "admin/images/default-featured-image.png",
+      // image: imageExists
+      //   ? course.image
+      //   : "admin/images/default-featured-image.png",
     
     });
   } catch (error) {
     console.error("Edit Error:", error.message);
     req.flash("error", error.message);
-    res.redirect(req.get("referer") || "/admin/test-series-list");
+   // res.redirect(req.get("referer") || "/admin/cms-list");
   }
 };
 // Assuming you have something like:
@@ -125,7 +131,7 @@ const Update = async (req, res) => {
   const cmsId = req.params.postId;
   const isInsert = !cmsId || cmsId === "null" || cmsId === "0";
   
-  console.log(req.body);
+  
   
   const {
     title,
@@ -219,24 +225,24 @@ const Update = async (req, res) => {
 const Delete = async (req, res) => {
   try {
     const testSeriesId = req.params.postId;
-
+    console.log(testSeriesId); 
     const softDeleteQuery =
-      "UPDATE `test_series` SET deleted_at = NOW() WHERE id = ?";
+      "UPDATE `cms` SET deleted_at = NOW() WHERE id = ?";
 
     pool.query(softDeleteQuery, [testSeriesId], (error, result) => {
       if (error) {
         console.error("Soft delete error:", error);
         req.flash("error", "Internal server error");
-        return res.redirect("/admin/test-series-list");
+        return res.redirect("/admin/cms-list");
       }
 
-      req.flash("success", "Test Series soft deleted successfully");
-      return res.redirect("/admin/test-series-list");
+      req.flash("success", "CMS Page soft deleted successfully");
+      return res.redirect("/admin/cms-list");
     });
   } catch (error) {
     console.error("Delete route error:", error.message);
     req.flash("error", "Unexpected error occurred");
-    return res.redirect("/admin/test-series-list");
+    return res.redirect("/admin/cms-list");
   }
 };
 
@@ -245,7 +251,7 @@ const Restore = async (req, res) => {
     const categorieId = req.params.postId;
 
     const RestoreQuery =
-      "UPDATE test_series SET deleted_at = null WHERE id = ?";
+      "UPDATE cms SET deleted_at = null WHERE id = ?";
 
     pool.query(RestoreQuery, [categorieId], (error, result) => {
       if (error) {
@@ -254,11 +260,11 @@ const Restore = async (req, res) => {
       }
     });
 
-    req.flash("success", "Test Series Restored successfully");
-    return res.redirect("/admin/test-series-list");
+    req.flash("success", "CMS Page Restored successfully");
+    return res.redirect("/admin/cms-list");
   } catch (error) {
     req.flash("error", error.message);
-    return res.redirect(`/admin/test-series-list`);
+    return res.redirect(`/admin/cms-list`);
   }
 };
 
@@ -301,7 +307,7 @@ const Show = async (req, res) => {
     });
 
     // If coupon image doesn't exist, use default image
-    console.log(post);
+    
     res.render("admin/cms/show", {
       success: req.flash("success"),
       error: req.flash("error"),

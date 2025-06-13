@@ -79,9 +79,15 @@ router.post(
   controller.QuestionUpload
 );
 
+router.post(
+  "/admin/question-upload",
+  adminauthenticateCustomer,
+  upload.single("docFile"),
+  controller.QuestionUpload
+);
 // List uploaded questions (assuming implemented in controller)
 router.get(
-  "/admin/exam-question-list",
+  "/admin/exam-question-list/:postId?",
   adminauthenticateCustomer,
   controller.QuestionList
 );

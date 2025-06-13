@@ -184,7 +184,8 @@
                             <a
                             class="btn btn-danger shadow btn-xs sharp popup">Upload Question</a>
 
-                            
+                            <a
+                            class="btn btn-danger btn-sm shadow btn-xs popup upload-question-btn" title="Upload Document" data-exam_id = <%= course.id %>>Upload Question</a>
                  
 
 
@@ -208,12 +209,13 @@
       </div>
     </div>
   </section>
-<div class="popup_box border shadow">
+
+    <div class="popup_box border shadow">
      <div class="card-body">
             <h2 class="card-title text-center text-primary mb-4">Upload .DOCX File</h2>
 
-            <form action="/admin/live-test-question-upload" method="POST" enctype="multipart/form-data">
-            <input type="" name="test_id" value="2">
+            <form action="/admin/question-upload" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="test_id" value="" id="test_id">
               <div class="mb-3">
                 <label for="docFile" class="form-label">Select DOCX File</label>
                 <input type="file" name="docFile" id="docFile" class="form-control" accept=".docx" required />
@@ -227,8 +229,7 @@
   <div class="close"><i class="fa fa-times"></i></div>
 </div>
   <%- include('../layouts/footer') %>
-
-  <script>
+<script>
 $(function() {
   var appendthis = "<div class='overlay'></div>";
   $(".popup").on("click", function(e) {
@@ -267,4 +268,20 @@ $(function() {
   $(window).resize();
 });
 
+
+
   </script>
+
+  <script>
+  $(document).ready(function () {
+    $('.upload-question-btn').click(function () {
+      const examId = $(this).data('exam_id');
+      $('#test_id').val(examId);
+      $('#uploadPopup').show();
+    });
+
+    $('#uploadPopup .close').click(function () {
+      $('#uploadPopup').hide();
+    });
+  });
+</script>

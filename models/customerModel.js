@@ -27,30 +27,35 @@ const Customer = {
         );
     },
 
-    verifyOtp: (mobileNumber, otp, callback) => {
-        dbPool.query(
-            'SELECT * FROM front_users WHERE mobile = ? AND register_otp = ? AND otp_expires > ?',
-            [mobileNumber, otp, Date.now()],
-            (error, results) => {
-                if (error) return callback(error, null);
-                callback(null, results[0]); // null if not found or expired
-            }
-        );
-    },
-
-    create: (mobileNumber, callback) => {
-        const query = 'INSERT INTO front_users (mobile, role) VALUES (?, ?)';
-        const values = [mobileNumber, 'student'];
-
-        dbPool.query(query, values, (error, results) => {
+ verifyOtp: (mobileNumber, otp, callback) => {
+    const currentTime = Date.now();
+    dbPool.query(
+        'SELECT * FROM front_users WHERE mobile = ? AND register_otp = ? AND otp_expires > ?',
+        [mobileNumber, otp, currentTime],
+        (error, results) => {
             if (error) return callback(error, null);
-            callback(null, {
-                id: results.insertId,
-                mobile: mobileNumber,
-                role: 'student'
-            });
+            callback(null, results[0] || null);
+        }
+    );
+},
+
+  create: (mobileNumber, callback) => {
+    const query = `
+        INSERT INTO front_users (mobile, role, verify_otp_status) 
+        VALUES (?, ?, ?)
+    `;
+    const values = [mobileNumber, 'student', 1];
+
+    dbPool.query(query, values, (error, results) => {
+        if (error) return callback(error, null);
+        callback(null, {
+            id: results.insertId,
+            mobile: mobileNumber,
+            role: 'student',
+            verify_otp_status: 1
         });
-    },
+    });
+},
     updateByMobile: (mobileNumber, updateData, callback) => {
   const fields = [];
   const values = [];

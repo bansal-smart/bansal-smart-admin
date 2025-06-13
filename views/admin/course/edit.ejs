@@ -184,32 +184,19 @@
                                 </div>
 
 
-                                <div class="col-md-4 center-show">
-                                    <div class="form-group">
-                                        <label class="form-label">Center*</label>
-                                        <select class="form-control" name="center" id="center">
-                                            <option value="">Select Center</option>
-                                            <option value="65" <%=course.center_id==65 ? 'selected' : '' %>>Bihar -
-                                                Bihta</option>
-                                            <option value="64" <%=course.center_id==64 ? 'selected' : '' %>>Bihar -
-                                                Vaishali</option>
-                                            <option value="63" <%=course.center_id==63 ? 'selected' : '' %>>Kota -
-                                                Keshavpura</option>
-                                            <option value="62" <%=course.center_id==62 ? 'selected' : '' %>>Uttar
-                                                Pradesh</option>
-                                            <option value="61" <%=course.center_id==61 ? 'selected' : '' %>>Modak
-                                            </option>
-                                            <option value="60" <%=course.center_id==60 ? 'selected' : '' %>>Jhalawar
-                                            </option>
-                                            <option value="59" <%=course.center_id==59 ? 'selected' : '' %>>Kota -
-                                                Rajeev Gandhi Nagar</option>
-                                            <option value="56" <%=course.center_id==56 ? 'selected' : '' %>>Ajmer
-                                            </option>
-                                        </select>
-
-
-                                    </div>
-                                </div>
+                               <div class="col-md-4 center-show">
+  <div class="form-group">
+    <label class="form-label">Center*</label>
+    <select class="form-control" name="center" id="center">
+      <option value="">Select Center</option>
+      <% centers.forEach(function(center) { %>
+        <option value="<%= center.id %>" <%= course.center_id == center.id ? 'selected' : '' %>>
+          <%= center.name %>
+        </option>
+      <% }) %>
+    </select>
+  </div>
+</div>
 
                                 <div class="col-md-6">
                                     <div class="form-group">

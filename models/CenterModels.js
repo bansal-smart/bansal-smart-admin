@@ -21,7 +21,13 @@ static async list(status = "active") {
 }
 
 static async findById(id) {
-  const query = `SELECT * FROM centers WHERE id = ?`;
+  const query = `
+    SELECT c.*, ci.title AS city_name
+    FROM centers c
+    LEFT JOIN servicable_cities ci ON ci.id = c.city_id
+    WHERE c.id = ?
+
+`;
   return new Promise((resolve, reject) => {
     pool.query(query, [id], (err, results) => {
       if (err) return reject(err);
@@ -147,35 +153,6 @@ static async update(id, data, logoFile) {
 }
 
 
-  static async softDelete(id) {
-    const query = "UPDATE test_series_test SET deleted_at = ? WHERE id = ?";
-    return new Promise((resolve, reject) => {
-      pool.query(query, [new Date(), id], (err, results) => {
-        if (err) return reject(err);
-        resolve(results.affectedRows);
-      });
-    });
-  }
-
-  static async restore(id) {
-    const query = "UPDATE test_series_test SET deleted_at = NULL WHERE id = ?";
-    return new Promise((resolve, reject) => {
-      pool.query(query, [id], (err, results) => {
-        if (err) return reject(err);
-        resolve(results.affectedRows);
-      });
-    });
-  }
-
-  static async permanentDelete(id) {
-    const query = "DELETE FROM test_series_test WHERE id = ?";
-    return new Promise((resolve, reject) => {
-      pool.query(query, [id], (err, results) => {
-        if (err) return reject(err);
-        resolve(results.affectedRows);
-      });
-    });
-  }
 }
 
 module.exports = CenterModel;

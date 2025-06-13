@@ -31,7 +31,15 @@
                                         </div>
                                     </div>
 
-
+  <div class="col-md-4">
+                    <div class="form-group">
+                      <label class="form-label">Image *</label>
+                      <input type="file" class="form-control" name="image"  accept="image/*"   />
+                      <img id="image_view"
+                        src="<%= post?.image ? publicUrl +  post.image : base_url + 'admin/images/default-featured-image.png' %>"
+                        width="150px" />
+                    </div>
+                  </div>
 
 
                                     <div class="col-md-12">

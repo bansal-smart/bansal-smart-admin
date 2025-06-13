@@ -20,6 +20,7 @@ const moduleSettingRoutes = require("../routes/moduleSettingRoutes");
 const faqRoutes = require("../routes/faqRoutes");
 const serviceCityRoutes = require("../routes/serviceCityRoutes");
 const examRoute = require("../routes/examRoutes");
+const courseExamRoute = require("../routes/courseExamRoutes");
 const blogRoute = require("../routes/blogRoutes");
 const courseSubjectRoutes = require("../routes/courseSubjectRoutes");
 const courseChapterRoutes = require("../routes/courseChapterRoutes");
@@ -28,7 +29,8 @@ const courseVideoRoutes = require("./courseVideoRoutes");
 const courseTopicRoute = require("../routes/courseTopicRoutes");
 const centerRoutes = require("../routes/centerRoutes");
 const bookingRoutes = require("../routes/bookingRoutes");
-
+const galleryRoutes = require("../routes/GalleryRoutes");
+const liveTestRoutes = require("../routes/liveTestRoutes");
 router.use(adminLoginRoutes);
 router.use(customerRoutes);
 router.use(customerRoutes);
@@ -51,9 +53,12 @@ router.use(courseChapterRoutes);
 router.use(coursePDFRoutes);
 router.use(courseTopicRoute);
 router.use(centerRoutes);
+router.use(liveTestRoutes);
 router.use(courseVideoRoutes);
 router.use(bookingRoutes);
 router.use(serviceCityRoutes);
+router.use(galleryRoutes);
+router.use(courseExamRoute);
 const web_logoUploadPath = "uploads/logo/";
 const web_logoStorage = setupStorage(web_logoUploadPath);
 const web_logoUpload = multer({ storage: web_logoStorage });
@@ -62,12 +67,18 @@ const web_faviconUploadPath = "uploads/favicon/";
 const web_faviconStorage = setupStorage(web_faviconUploadPath);
 const web_faviconUpload = multer({ storage: web_faviconStorage });
 
+const upload = multer();
 router.post(
-  "/admin/module_settings/update",
+  "/admin/setting/update",
   adminauthenticateCustomer,
-  web_logoUpload.array("web_logo"),
-  web_faviconUpload.array("web_favicon"),
+  // web_logoUpload.array("web_logo"),
+  // web_faviconUpload.array("web_favicon"),
+  upload.none(),           
   ModuleSettingController.Update
 );
-
+router.get(
+  "/admin/setting/:url?",
+  adminauthenticateCustomer,
+  ModuleSettingController.Edit
+);
 module.exports = router;

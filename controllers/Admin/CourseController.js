@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const Helper = require("../../helpers/Helper");
 const { validateRequiredFields } = require("../../helpers/validationsHelper");
 function List(req, res) {
+
+
   const { category_id, course_status } = req.query;
   let course_type = req.params.course_type; // from route param
 
@@ -22,24 +24,21 @@ function List(req, res) {
     queryParams.push(userId);
    
   }
-  else{
-    console.log("NO");
-  }
 
   // Add other filters
-  if (category_id) {
-    filters.push(`courses.category_id = ?`);
-    queryParams.push(category_id);
-  }
+  // if (category_id) {
+  //   filters.push(`courses.category_id = ?`);
+  //   queryParams.push(category_id);
+  // }
 
   if (course_status !== undefined && course_status !== '') {
-    filters.push(`courses.status = ?`);
+    filters.push(`courses.batch_type = ?`);
     queryParams.push(course_status);
   }
 
   if (course_type) {
-    if (course_type === 'online') filters.push(`courses.course_type = 'online'`);
-    else if (course_type === 'offline') filters.push(`courses.course_type = 'offline'`);
+    if (course_type === 'online') filters.push(`courses.batch_type = 'online'`);
+    else if (course_type === 'offline') filters.push(`courses.batch_type = 'offline'`);
     else if (course_type === 'free') filters.push(`courses.course_type = 'free'`);
     else if (course_type === 'paid') filters.push(`courses.course_type = 'paid'`);
   }
@@ -88,7 +87,7 @@ const Create = async (req, res) => {
     const categories = await getCategoriesFromTable();
     const course_classes = await getCourseClassesFromTable();
     const faculties = await Helper.getActiveFaculties();
-
+ const centers = await Helper.getCenters();
     let course = {};
 
 
@@ -114,7 +113,8 @@ const Create = async (req, res) => {
       course: course, // <== fix this
       categories: categories,
       course_classes,
-      faculties
+      faculties,
+      centers
     });
   } catch (error) {
     console.log(error.message);
@@ -163,7 +163,7 @@ const validateCourseData = (data) => {
 
   // Auto-generate slug if not provided
   if (!data.slug || data.slug.trim() === "") {
-    data.slug = data.title_heading
+    data.slug = data.course_name
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9\s-]/g, "")
@@ -277,7 +277,7 @@ const Edit = async (req, res) => {
     const getCourseQuery = "SELECT * FROM courses WHERE id = ?";
     const visibility = ["featured", "up_comming"]; // Corrected 'visibility' initialization
     const services = await getServicesFromTable(); // Fetch data from services_table
-
+const centers = await Helper.getCenters();
     // Fetch the course details from the database
     const course = await new Promise((resolve, reject) => {
       pool.query(getCourseQuery, [courseId], function (error, result) {
@@ -322,6 +322,7 @@ const Edit = async (req, res) => {
       categories: categories, // Pass the categories for the select dropdown
       course_classes: course_classes, // Pass the course classes for the select dropdown
       faculties: faculties,
+      centers,
       services: services, // Pass the services data
       visibility, // Pass visibility options to the view
       form_url: "/admin/course-update/" + courseId, // URL for the update form
@@ -376,13 +377,13 @@ const Update = async (req, res) => {
 
   // Generate slug if missing
   let slug = inputSlug?.trim();
-  if (!slug && title_heading) {
-    slug = title_heading
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
-  }
+  if (course_name) {
+  slug = course_name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
 
   // --- Validation ---
   const errors = {};
@@ -396,8 +397,8 @@ const Update = async (req, res) => {
   if (!slug) errors.slug = ["Slug is required"];
   if (!["free", "paid"].includes(course_type)) errors.course_type = ["Invalid course type"];
   if (course_type === "paid" && (!price || isNaN(price))) errors.price = ["Price must be a number"];
-  if (!discount_type?.trim()) errors.discount_type = ["Discount type is required"];
-  if (discount && isNaN(discount)) errors.discount = ["Discount must be numeric"];
+  // if (!discount_type?.trim()) errors.discount_type = ["Discount type is required"];
+  // if (discount && isNaN(discount)) errors.discount = ["Discount must be numeric"];
   if (!duration || isNaN(duration)) errors.duration = ["Duration must be numeric"];
   if (!content?.trim()) errors.content = ["Content is required"];
   if (!description?.trim()) errors.description = ["Description is required"];
@@ -641,6 +642,7 @@ const Show = async (req, res) => {
     const pdfCount = await Helper.getPdfCountByCourseId(postId);
     const videoCount = await Helper.getVideoCountByCourseId(postId);
     const bookingCount = await Helper.getBookingCountByCourseId(postId);
+    const testCount = await Helper.getTestCountByCourseId(postId);
     res.render("admin/course/show", {
       success: req.flash("success"),
       error: req.flash("error"),
@@ -651,6 +653,7 @@ const Show = async (req, res) => {
       chapterCount,
       pdfCount,
       videoCount,
+      testCount,
       bookingCount,
       form_url: `/admin/course-update/${postId}`,
       page_name: "Course Details",
@@ -723,7 +726,7 @@ const Booking = async (req, res) => {
     const pdfCount = await Helper.getPdfCountByCourseId(courseId);
     const videoCount = await Helper.getVideoCountByCourseId(courseId);
     const bookingCount = await Helper.getBookingCountByCourseId(courseId);
-
+const testCount = await Helper.getTestCountByCourseId(courseId);
     res.render("admin/course/booking", {
       success: req.flash("success"),
       error: req.flash("error"),
@@ -736,6 +739,7 @@ const Booking = async (req, res) => {
       pdfCount,
       videoCount,
       bookingCount,
+      testCount,
       list_url: `/admin/course-booking-list/${courseId}`,
       trashed_list_url: `/admin/course-booking-list/${courseId}?status=trashed`,
       create_url: "/admin/course-booking-create",

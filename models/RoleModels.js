@@ -7,7 +7,7 @@ class TestSeriesTest {
         tst.*, 
         c.category_name,
         ts.name AS test_series_name
-      FROM test_series_test tst
+      FROM live_test tst
       LEFT JOIN categories c ON tst.category_id = c.id
       LEFT JOIN test_series ts ON tst.test_series_id = ts.id
     `;
@@ -33,7 +33,7 @@ class TestSeriesTest {
         ts.*, 
         c.category_name,
         s.name as test_series_name
-      FROM test_series_test ts
+      FROM live_test ts
       LEFT JOIN categories c ON ts.category_id = c.id
       LEFT JOIN test_series s ON ts.test_series_id = s.id
       WHERE ts.id = ?
@@ -54,7 +54,7 @@ class TestSeriesTest {
     excludeId = null
   ) {
     const query = `
-      SELECT id FROM test_series_test 
+      SELECT id FROM live_test 
       WHERE category_id = ? AND test_series_id = ? AND test_name = ?
       ${excludeId ? "AND id != ?" : ""}
     `;
@@ -71,7 +71,7 @@ class TestSeriesTest {
 
   static async create(data) {
     const query = `
-      INSERT INTO test_series_test 
+      INSERT INTO live_test 
       (category_id, test_series_id, test_name, description, image, created_at) 
       VALUES (?, ?, ?, ?, ?, ?)
     `;
@@ -94,7 +94,7 @@ class TestSeriesTest {
  
   static async update(id, data) {
   const query = `
-    UPDATE test_series_test SET 
+    UPDATE live_test SET 
       category_id = ?,
       test_series_id = ?,
       test_name = ?,
@@ -124,7 +124,7 @@ class TestSeriesTest {
 
 
   static async softDelete(id) {
-    const query = "UPDATE test_series_test SET deleted_at = ? WHERE id = ?";
+    const query = "UPDATE live_test SET deleted_at = ? WHERE id = ?";
     return new Promise((resolve, reject) => {
       pool.query(query, [new Date(), id], (err, results) => {
         if (err) return reject(err);
@@ -134,7 +134,7 @@ class TestSeriesTest {
   }
 
   static async restore(id) {
-    const query = "UPDATE test_series_test SET deleted_at = NULL WHERE id = ?";
+    const query = "UPDATE live_test SET deleted_at = NULL WHERE id = ?";
     return new Promise((resolve, reject) => {
       pool.query(query, [id], (err, results) => {
         if (err) return reject(err);
@@ -144,7 +144,7 @@ class TestSeriesTest {
   }
 
   static async permanentDelete(id) {
-    const query = "DELETE FROM test_series_test WHERE id = ?";
+    const query = "DELETE FROM live_test WHERE id = ?";
     return new Promise((resolve, reject) => {
       pool.query(query, [id], (err, results) => {
         if (err) return reject(err);

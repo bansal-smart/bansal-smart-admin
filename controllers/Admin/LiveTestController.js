@@ -5,20 +5,26 @@ const jwt = require("jsonwebtoken");
 const { validateRequiredFields } = require("../../helpers/validationsHelper");
 const List = async (req, res) => {
   try {
-    const where =
+    let where =
       req.query.status === "trashed"
         ? "WHERE `live_test`.deleted_at IS NOT NULL"
         : "WHERE `live_test`.deleted_at IS NULL";
+
+    const queryParams = [];
+
+    // Add test_location filter
+    where += " AND live_test.test_location = ?";
+    queryParams.push("live-test");
 
     const query = `${withCategory()} ${where} ORDER BY \`live_test\`.id DESC`;
 
     const page_name =
       req.query.status === "trashed"
-        ? "Trashed Live Test  List"
+        ? "Trashed Live Test List"
         : "Live Test List";
 
     const customers = await new Promise((resolve, reject) => {
-      pool.query(query, (err, result) => {
+      pool.query(query, queryParams, (err, result) => {
         if (err) {
           req.flash("error", err.message);
           return reject(err);
@@ -37,12 +43,14 @@ const List = async (req, res) => {
       trashed_list_url: "/admin/live-test-list/?status=trashed",
       create_url: "/admin/live-test-create",
     });
+
   } catch (error) {
     console.error("live-test List Error:", error);
     req.flash("error", error.message);
-    // res.redirect("back");
+    res.redirect("back");
   }
 };
+
 
 const withCategory = () => `
   SELECT \`live_test\`.*, categories.category_name
@@ -60,7 +68,7 @@ const Create = async (req, res) => {
       success: req.flash("success"),
       error: req.flash("error"),
       form_url: "/admin/live-test-update",
-      page_name: "Create Test Series",
+      page_name: "Create Live Test ",
 
       post: {}, // ✅ Pass an empty object if not editing
       categories: categories,
@@ -128,7 +136,7 @@ const Edit = async (req, res) => {
       categories,
       courses,
       form_url: "/admin/live-test-update/" + courseId,
-      page_name: "Edit",
+      page_name: "Edit Live Test",
       // image: imageExists
       //   ? course.banner
       //   : "admin/images/default-featured-image.png",
@@ -143,25 +151,27 @@ const Edit = async (req, res) => {
 const Update = async (req, res) => {
   const courseId = req.params.postId;
 
-  console.log(courseId);
+  console.log(req.body);
+  
   const isInsert = !courseId || courseId === "null" || courseId === "0";
 
   const {
     category_id = "",
     course_id = "",
     test_name = "",
-    test_type = "free",
+    test_type,
     price,
     discount_type,
     discount,
     duration,
-    test_location = "live",
+    test_location = "live-test",
     test_pattern = "mcq",
     start_time = "",
     end_time = "",
     no_of_question = "0",
     maximum_marks,
     instruction,
+    
   } = req.body;
 
   const imageFile = req?.files?.banner?.[0];
@@ -179,13 +189,21 @@ const Update = async (req, res) => {
   // if (!duration || isNaN(duration)) errors.duration = ["Duration must be a number"];
 
   if (test_type === "paid") {
-    if (!price || isNaN(price))
+    if (!price || isNaN(price) || price == 0)
       errors.price = ["Price is required and must be a number"];
-    if (!discount_type?.trim())
-      errors.discount_type = ["Discount type is required"];
-    if (discount && isNaN(discount))
-      errors.discount = ["Discount must be numeric"];
+   
   }
+if (discount_type?.trim() && (!discount?.trim() || discount == 0)) {
+  errors.discount = ["Discount value is required"];
+} else if (discount?.trim() && isNaN(discount)) {
+  errors.discount = ["Discount must be numeric"];
+}
+if (
+  (discount?.trim() && !discount_type?.trim()) || 
+  (discount_type?.trim() && (!discount?.trim() || discount == 0))
+) {
+  errors.discount = ["Both discount type and discount value are required"];
+}
 
   if (isInsert) {
     if (!imageFile) errors.banner = ["Course image is required"];
@@ -298,7 +316,7 @@ const Delete = async (req, res) => {
         return res.redirect("/admin/live-test-list");
       }
 
-      req.flash("success", "Test Series soft deleted successfully");
+      req.flash("success", "Live Test  soft deleted successfully");
       return res.redirect("/admin/live-test-list");
     });
   } catch (error) {
@@ -321,7 +339,7 @@ const Restore = async (req, res) => {
       }
     });
 
-    req.flash("success", "Test Series Restored successfully");
+    req.flash("success", "Live Test  Restored successfully");
     return res.redirect("/admin/live-test-list");
   } catch (error) {
     req.flash("error", error.message);
@@ -372,11 +390,11 @@ const Show = async (req, res) => {
       pool.query(query, [postId], (error, result) => {
         if (error) {
           console.error("Database Error:", error);
-          req.flash("error", "Failed to fetch test series");
+          req.flash("error", "Failed to fetch Live Test ");
           return reject(error);
         }
         if (result.length === 0) {
-          req.flash("error", "Test series not found");
+          req.flash("error", "Live Test  not found");
           return reject(new Error("Not found"));
         }
         resolve(result[0]);
@@ -391,7 +409,7 @@ const Show = async (req, res) => {
       error: req.flash("error"),
       post: post, // still using `customer` for compatibility with view
       form_url: `/admin/live-test-update/${postId}`,
-      page_name: "Test Series Detials",
+      page_name: "Live Test  Details",
     });
   } catch (error) {
     console.error("Show Error:", error.message);
@@ -400,6 +418,101 @@ const Show = async (req, res) => {
   }
 };
 
+const QuestionList = async (req, res) => {
+
+    try {
+      const testId = req.params.postId;
+      const poolPromise = pool.promise();
+      const [columns] = await poolPromise.query("SHOW COLUMNS FROM questions");
+      const [rows] = await poolPromise.query(
+        "SELECT * FROM live_test_questions WHERE test_id = ?",
+        [testId]
+      );
+      // const headers = columns.map(col => col.Field);
+      const headers = [
+        "id",
+        "Question Details",
+        "Question Type",
+        "Option1",
+        "Option2",
+        "Option3",
+        "Option4",
+        "Correct Answer",
+      ];
+      //   let html = `
+      // <html>
+      // <head>
+      //   <meta charset="UTF-8">
+      //   <title>Questions</title>
+      //   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+      //   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      //   <style>
+      //     td { vertical-align: top; }
+      //   </style>
+      // </head>
+      // <body class="bg-light">
+      //   <div class="container mt-5">
+      //     <h2 class="text-primary">Questions</h2>
+      //     <a href="/" class="btn btn-success mb-3">Upload More</a>
+      //     <div class="table-responsive">
+      //       <table class="table table-bordered bg-white shadow">
+      //         <thead class="table-secondary">
+      //           <tr>${headers.map(h => `<th>${h}</th>`).join('')}<th>Actions</th></tr>
+      //         </thead>
+      //         <tbody>`;
+
+      // rows.forEach(row => {
+      //   html += `<tr>${
+      //     headers.map(h => `<td>${row[h] || ''}</td>`).join('')
+      //   }<td>
+      //     <a class="btn btn-sm btn-warning" href="/edit/${row.id}">Edit</a>
+      //     <a class="btn btn-sm btn-danger ms-2" href="/delete/${row.id}">Delete</a>
+      //   </td></tr>`;
+      // });
+
+      // html += `
+      //         </tbody>
+      //       </table>
+      //     </div>
+      //   </div>
+      //   <script>
+      //     // Re-render MathJax after DOM load
+      //     window.addEventListener('DOMContentLoaded', () => {
+      //       if (window.MathJax) MathJax.typeset();
+      //     });
+      //   </script>
+
+      // </body>
+      // </html>`;
+
+      // res.send(html);
+
+      const [exams] = await poolPromise.query(
+        "SELECT * FROM live_test WHERE id = ?",
+        [testId]
+        
+      );
+
+      
+
+      const exam = exams.length > 0 ? exams[0] : null;
+      res.render("admin/live-test/question-list", {
+        success: req.flash("success"),
+        error: req.flash("error"),
+        headers,
+        rows,
+        req,
+        exam,
+        page_name: "Question List",
+        list_url: "/admin/live-test-list",
+        trashed_list_url: "/admin/live-test-list/?status=trashed",
+        create_url: "/admin/live-test-create",
+      });
+    } catch (err) {
+      console.error("List Error:", err);
+      handleError(res, req, "Server error in listing data");
+    }
+  };
 module.exports = {
   Create,
   List,
@@ -409,4 +522,5 @@ module.exports = {
   Restore,
   PermanentDelete,
   Show,
+  QuestionList,
 };

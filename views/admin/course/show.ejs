@@ -14,18 +14,27 @@
                 <h4 class="card-title mb-0">
                   <%= page_name %>
                 </h4>
-                <a href="/admin/test-series-list" class="btn btn-primary btn-sm">
+                <a href="/admin/course-list/all" class="btn btn-primary btn-sm">
                   <i class="fa fa-arrow-left"></i> Back
                 </a>
               </div>
               <div class="card-body">
                 <div class="row">
                   <!-- Course Name -->
-                  <div class="col-md-12">
+                  <div class="col-md-6">
                     <div class="form-group border rounded p-3 mb-3">
                       <label><strong>Course Name</strong></label>
                       <p class="mb-0 text-muted">
                         <%= course.course_name %>
+                      </p>
+                    </div>
+                  </div>
+
+                   <div class="col-md-6">
+                    <div class="form-group border rounded p-3 mb-3">
+                      <label><strong>Course Slug</strong></label>
+                      <p class="mb-0 text-muted">
+                        <%= course.slug %>
                       </p>
                     </div>
                   </div>
@@ -196,28 +205,43 @@
                     </div>
 
                     <!-- Thumbnail Image -->
-                    <div class="col-md-3">
-                      <div class="form-group border rounded p-3 mb-3">
-                        <label><strong>Thumbnail Image</strong></label><br />
-                        <% if (course.image) { %>
-                          <img src="<%= course.image %>" width="200" />
-                          <% } else { %>
-                            <p>No image uploaded</p>
-                            <% } %>
-                      </div>
-                    </div>
+                  <div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Thumbnail Image</strong></label><br />
+    <% if (course.image) { %>
+      <img 
+  src="<%= publicUrl + course.image %>" 
+  alt="<%= course.slug %>" 
+  class="img-fluid rounded-3" 
+  style="width: 150px; aspect-ratio: 1 / 0.7; object-fit: cover;"
+/>
+    <% } else { %>
+      <p>No image uploaded</p>
+    <% } %>
+  </div>
+</div>
 
-                    <!-- Details Image -->
-                    <div class="col-md-3">
-                      <div class="form-group border rounded p-3 mb-3">
-                        <label><strong>Details Image</strong></label><br />
-                        <% if (course.details_image) { %>
-                          <img src="<%= course.details_image %>" width="200" />
-                          <% } else { %>
-                            <p>No details image uploaded</p>
-                            <% } %>
-                      </div>
-                    </div>
+<div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Details Image</strong></label><br />
+    <% if (course.details_image) { %>
+      <img src="<%= publicUrl + course.details_image %>" style="width: 150px; aspect-ratio: 1 / 0.7; object-fit: cover;"/>
+    <% } else { %>
+      <p>No details image uploaded</p>
+    <% } %>
+  </div>
+</div>
+
+<div class="col-md-3">
+  <div class="form-group border rounded p-3 mb-3">
+    <label><strong>Brochure</strong></label><br />
+    <% if (course.brochure) { %>
+      <a href="<%= publicUrl + course.brochure %>" target="_blank">Download Brochure</a>
+    <% } else { %>
+      <p>No brochure uploaded</p>
+    <% } %>
+  </div>
+</div>
 
                     <!-- Video -->
                     <div class="col-md-3">
@@ -232,16 +256,7 @@
                     </div>
 
                     <!-- Brochure -->
-                    <div class="col-md-3">
-                      <div class="form-group border rounded p-3 mb-3">
-                        <label><strong>Brochure</strong></label><br />
-                        <% if (course.brochure) { %>
-                          <a href="<%= course.brochure %>" target="_blank">Download Brochure</a>
-                          <% } else { %>
-                            <p>No brochure uploaded</p>
-                            <% } %>
-                      </div>
-                    </div>
+                   
 
                     <!-- Meeting Link -->
                     <div class="col-md-3">
@@ -260,5 +275,8 @@
             </div>
           </div>
         </div>
+        </div>
+  </div>
+  </div>
 
         <%- include('../layouts/footer') %>

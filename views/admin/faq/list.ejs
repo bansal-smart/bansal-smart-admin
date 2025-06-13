@@ -1,6 +1,6 @@
 <%- include('../layouts/header') %>
 
-  <div class="content-body">
+  <section class="content-body">
     <div class="container-fluid">
       <div class="row">
         <div class="col-12">
@@ -41,7 +41,7 @@
 
                       <th>Title</th>
 
-                      <th>Description</th>
+                    
 
 
                       <th>Status</th>
@@ -59,9 +59,7 @@
                           <%= course.title %>
                         </td>
 
-                        <td>
-                          <%- course.description %>
-                        </td>
+                       
                         </td>
                         <!-- <td><%= formatDate(course.created_at) %></td> -->
                         <td>
@@ -97,5 +95,6 @@
         </div>
       </div>
     </div>
+  </section>
 
     <%- include('../layouts/footer') %>

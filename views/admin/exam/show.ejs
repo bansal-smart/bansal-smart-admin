@@ -1,88 +1,108 @@
 <%- include('../layouts/header') %>
 
-    <div class="content-body">
-        <div class="container-fluid">
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div
+            class="card-header d-flex justify-content-between align-items-center"
+          >
+                                          <ul class="nav nav-pills">
+  <li class="nav-item">
+     <a class="nav-link" href="/admin/exam-show/<%= post.id %>">Exam Details</a>
+  </li>
+  <!-- <li class="nav-item">
+     <a class="nav-link" href="/admin/exam-list">Exam List</a>
+  </li> -->
+  <li class="nav-item">
+    <a class="nav-link"  href="/admin/exam-question-list/<%= post.id %>">Question List</a>
+  </li>
+
+</ul>
+             <button type="button" id="backButton" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-arrow-left"></i>
+                                </button>
+          </div>
+          <div class="card-body">
             <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="card-title mb-0">
-                                <%= page_name %>
-                            </h4>
-                            <a href="<%= list_url %>" class="btn btn-primary btn-sm">
-                                <i class="fa fa-arrow-left"></i> Back
-                            </a>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-
-
-                                <div class="col-md-4">
-                                    <div class="form-group border rounded p-3 mb-3">
-                                        <label><strong>Test Name </strong></label>
-                                        <p class="mb-0 text-muted">
-                                            <%= post.test_name %>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <div class="form-group border rounded p-3 mb-3">
-                                        <label><strong>Category</strong></label>
-                                        <p class="mb-0 text-muted">
-                                            <%= post.category_name || 'No category' %>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <div class="form-group border rounded p-3 mb-3">
-                                        <label><strong>Test Series</strong></label>
-                                        <p class="mb-0 text-muted">
-                                            <%= post.test_series_name || 'No Test Series' %>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <div class="form-group border rounded p-3 mb-3">
-                                        <label><strong> Image</strong></label><br />
-                                        <% if (post.image) { %>
-                                            <img src="<%= post.image %>" width="200" />
-                                            <% } else { %>
-                                                <p>No image uploaded</p>
-                                                <% } %>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group border rounded p-3 mb-3">
-                                        <label><strong>Status</strong></label>
-                                        <p class="mb-0 text-muted">
-                                            <%= post.status==1 ? 'Active' : 'Inactive' %>
-                                        </p>
-                                    </div>
-                                </div>
-
-
-
-                                <div class="col-md-12">
-                                    <div class="form-group border rounded p-3 mb-3">
-                                        <label><strong>Instruction</strong></label>
-                                        <p class="mb-0 text-muted">
-                                            <%- post.instruction %>
-                                        </p>
-                                    </div>
-                                </div>
-
-
-
-
-
-
-                            </div>
-                        </div>
-                    </div>
+              <div class="col-md-4">
+                <div class="form-group border rounded p-3 mb-3">
+                  <label><strong>Test Name </strong></label>
+                  <p class="mb-0 text-muted"><%= post.test_name %></p>
                 </div>
+              </div>
 
-                <%- include('../layouts/footer') %>
+              <div class="col-md-4">
+                <div class="form-group border rounded p-3 mb-3">
+                  <label><strong>Category</strong></label>
+                  <p class="mb-0 text-muted">
+                    <%= post.category_name || 'No category' %>
+                  </p>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group border rounded p-3 mb-3">
+                  <label><strong>Test Series</strong></label>
+                  <p class="mb-0 text-muted">
+                    <%= post.test_series_name || 'No Test Series' %>
+                  </p>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                  <label><strong> Image</strong></label
+                  ><br />
+                  <% if (post.image) { %>
+                  <img src="<%= post.image %>" width="200" />
+                  <% } else { %>
+                  <p>No image uploaded</p>
+                  <% } %>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                  <label><strong>Status</strong></label>
+                  <p class="mb-0 text-muted">
+                    <%= post.status==1 ? 'Active' : 'Inactive' %>
+                  </p>
+                </div>
+              </div>
+
+              <div class="col-md-12">
+                <div class="form-group border rounded p-3 mb-3">
+                  <label><strong>Instruction</strong></label>
+                  <p class="mb-0 text-muted"><%- post.instruction %></p>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<%- include('../layouts/footer') %>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll(".nav-link");
+
+    links.forEach(link => {
+      try {
+        const linkPath = new URL(link.href, window.location.origin).pathname;
+
+        if (currentPath === linkPath && linkPath !== "#") {
+          link.classList.add("active");
+        } else {
+          link.classList.remove("active");
+        }
+      } catch (e) {
+        console.warn("Invalid URL in nav-link:", link.href);
+      }
+    });
+  });
+</script>

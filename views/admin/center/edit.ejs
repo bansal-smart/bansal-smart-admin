@@ -1,0 +1,152 @@
+<%- include('../layouts/header') %>
+
+<section class="content-body">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h4 class="card-title mb-0"><%= page_name %></h4>
+                        <a href="/admin/center-list" class="btn btn-primary btn-sm"><i class="fa fa-arrow-left"></i> Back</a>
+                    </div>
+
+                    <div class="card-body">
+                        <form id="submitForm" method="center" action="<%= form_url %>" enctype="multipart/form-center">
+                            <input type="hidden" name="_method" value="PUT"> <!-- for method override if needed -->
+
+                            <div class="row">
+
+                                <!-- <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">City</label>
+                                        <select name="city_id" class="form-control custom-select" required>
+                                            <option value="">Select Option</option>
+                                            <option value="1" <%= (center && center.city_id == 1) ? 'selected' : '' %>>Kota</option>
+                                            <option value="2" <%= (center && center.city_id == 2) ? 'selected' : '' %>>Ajmer</option>
+                                           
+                                        </select>
+                                    </div>
+                                </div> -->
+                               <div class="col-md-6">
+  <div class="form-group">
+    <label class="form-label">City</label>
+    <select name="city_id" class="form-control custom-select" required>
+      <option value="">Select Option</option>
+      <% service_cities.forEach(function(city) { %>
+        <option value="<%= city.id %>" <%= (center && center.city_id == city.id) ? 'selected' : '' %>>
+          <%= city.name %>
+        </option>
+      <% }); %>
+    </select>
+  </div>
+</div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Name *</label>
+                                        <input type="text" class="form-control" name="name" value="<%= (center && center.name) ? center.name : '' %>" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Email *</label>
+                                        <input type="email" class="form-control" name="email" value="<%= (center && center.email) ? center.email : '' %>" required>
+                                    </div>
+                                </div>
+        <% if (!center) { %>
+<div class="col-md-6">
+    <div class="form-group">
+        <label class="form-label">Password *</label>
+        <div class="input-group">
+            <input type="text" class="form-control" name="password" id="password" required>
+            <div class="input-group-append">
+                <button type="button" class="btn btn-secondary" onclick="generatePassword()">Generate</button>
+            </div>
+        </div>
+    </div>
+</div>
+<% } %>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Mobile No *</label>
+                                        <input type="text" class="form-control" name="mobile" value="<%= (center && center.mobile) ? center.mobile : '' %>" maxlength="10" required>
+                                    </div>
+                                </div>  
+
+                                <input type="hidden" name="roles[]" value="3">
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Address</label>
+                                        <textarea class="form-control" name="address"><%= (center && center.address) ? center.address : '' %></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Map URL *</label>
+                                        <input type="text" class="form-control" name="map_url" value="<%= (center && center.map_url) ? center.map_url : '' %>" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Image Logo</label>
+
+                                    
+                                        <input type="file" class="form-control" name="logo" onchange="previewImage(event)">
+                                        <% if (center && center.logo) { %>
+                                            <img src="<%= publicUrl + center.logo %>" id="logoPreview" alt="Logo Preview" style="max-height: 100px; margin-top:10px;">
+                                        <% } else { %>
+                                            <img id="logoPreview" style="display:none; max-height:100px; margin-top:10px;">
+                                        <% } %>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Status</label>
+                                        <select name="status" class="form-control custom-select">
+                                            <option value="1" <%= (center && center.status == 1) ? 'selected' : '' %>>Active</option>
+                                            <option value="0" <%= (center && center.status == 0) ? 'selected' : '' %>>Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-primary float-right">
+                                        <%= action %>
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('../layouts/footer') %>
+<script>
+    function generatePassword() {
+        const length = 8;
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$!";
+        let password = "";
+        for (let i = 0, n = charset.length; i < length; ++i) {
+            password += charset.charAt(Math.floor(Math.random() * n));
+        }
+        document.getElementById("password").value = password;
+    }
+
+    // Optional: preview uploaded image
+    function previewImage(event) {
+        const output = document.getElementById('logoPreview');
+        output.src = URL.createObjectURL(event.target.files[0]);
+        output.style.display = 'block';
+    }
+</script>

@@ -16,6 +16,7 @@ router.get(
 // Create form
 router.get("/admin/test-series-booking-list", adminauthenticateCustomer, controller.TestSeriesBooking);
 
+router.get("/admin/live-test-booking-list", adminauthenticateCustomer, controller.LiveTestBooking);
 router.get(
   "/admin/booking-details/:bookingId",
   adminauthenticateCustomer,

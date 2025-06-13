@@ -96,7 +96,13 @@
                                             </div> -->
 
 
-
+  <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Duration (In Month)*</label>
+                                        <input type="number" class="form-control" name="duration" id="duration"
+                                            placeholder="Duration.." value="<%= post.duration %>" />
+                                    </div>
+                                </div>
 
                                             <!-- <div class="col-md-4">
                                                 <div class="form-group">
@@ -106,27 +112,60 @@
                                                 </div>
                                             </div> -->
 
-                                        </div>
+                                  
 
-                                    </div>
-                                    <!-- <div class="col-md-4">
+                              
+                                    <div class="col-md-4">
                                         <div class="form-group">
-                                            <label class="form-label">Test Series Type*</label>
-                                            <select class="form-control" name="type" id="type">
-                                                <option value="paid" <%=post?.type==="paid" ? 'selected' : '' %>
+                                            <label class="form-label">Test Type*</label>
+                                            <select class="form-control" name="test_type" id="test_type">
+                                                <option value="paid" <%=post?.test_type==="paid" ? 'selected' : '' %>
                                                     >Paid</option>
-                                                <option value="free" <%=post?.type==="free" ? 'selected' : '' %>
+                                                <option value="free" <%=post?.test_type==="free" ? 'selected' : '' %>
                                                     >Free</option>
                                             </select>
                                         </div>
-                                    </div> -->
+                                    </div>
 
 
 
                                 </div>
 
+                            <div class="row paid_course">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Price *</label>
+                                        <input type="number" value="<%= post.price %>" class="form-control"
+                                            name="price" id="price" placeholder="Price.." />
+                                    </div>
+                                </div>
 
-                                <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Discount Type *</label>
+                                        <select class="form-control" name="discount_type" id="discount_type">
+                                            <option value="">Select</option>
+                                            <option value="percentage" <%=post.discount_type==='percentage'
+                                                ? 'selected' : '' %>>Percentage</option>
+                                            <option value="price" <%=post.discount_type==='price' ? 'selected' : '' %>
+                                                >Price</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Discount *</label>
+                                        <input type="number" value="<%= post.discount %>" class="form-control"
+                                            name="discount" id="discount" placeholder="Discount.." />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+
+                              
+
+                           
 
 
 
@@ -220,7 +259,7 @@
 
 
         <script>
-            $("#type").change(function () {
+            $("#test_type").change(function () {
                 var course_type = $(this).val();
                 if (course_type == "free") {
                     $(".paid_course").addClass('d-none');

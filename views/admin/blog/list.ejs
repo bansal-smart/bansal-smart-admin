@@ -58,9 +58,14 @@
                         <td>
                           <%= course.title %>
                         </td>
-
-                        <td>
-                          <%- course.description %>
+ <td>
+                          <% if (course.image) { %>
+                            <a href="<%= publicUrl +  course.image %>" target="_blank">
+                              <img src="<%= publicUrl +  course.image %>" width="100" />
+                            </a>
+                            <% } else { %>
+                              No Image
+                              <% } %>
                         </td>
                         </td>
                         <!-- <td><%= formatDate(course.created_at) %></td> -->

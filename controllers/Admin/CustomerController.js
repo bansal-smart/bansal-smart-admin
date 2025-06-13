@@ -6,47 +6,69 @@ const { validateRequiredFields } = require("../../helpers/validationsHelper");
 
 const List = async (req, res) => {
   try {
-    let getQuery = `
-    SELECT 
-      fu.*,
-      c.category_name,
-      cl.name AS class_name
-    FROM front_users fu
-    LEFT JOIN categories c ON fu.category_id = c.id
-    LEFT JOIN course_classes cl ON fu.class_id = cl.id
-    ${req.query.status === "trashed"
-        ? "WHERE fu.deleted_at IS NOT NULL"
-        : "WHERE fu.deleted_at IS NULL"
-      }
-    ORDER BY fu.id DESC
-  `;
+    const status1 = req.query.status || "active";
 
-    console.log(getQuery);
+    const search = req.query.search;
+    const searchTerm = `%${search}%`;
+
+
+    const queryParams = [];
+
+    let getQuery = `
+      SELECT 
+        fu.*,
+        c.category_name,
+        cl.name AS class_name
+      FROM front_users fu
+      LEFT JOIN categories c ON fu.category_id = c.id
+      LEFT JOIN course_classes cl ON fu.class_id = cl.id
+      WHERE 1 = 1
+    `;
+
+    if (status1 === "trashed") {
+      getQuery += ` AND fu.deleted_at IS NOT NULL `;
+    } else if (status1 === "active") {
+      getQuery += ` AND fu.deleted_at IS NULL AND fu.status = 1 `;
+    } else if (status1 === "inactive") {
+      getQuery += ` AND fu.deleted_at IS NULL AND fu.status = 0 `;
+    } 
+  
+    if (search) {
+      getQuery += ` AND (fu.name LIKE ? OR fu.mobile LIKE ? OR fu.email LIKE ?) `;
+      queryParams.push(searchTerm, searchTerm, searchTerm);
+    }
+
+    getQuery += ` ORDER BY fu.id DESC `;
+
     const page_name =
-      req.query.status && req.query.status === "trashed"
-        ? "Trashed Customer List"
-        : "Customer List";
+      status1 === "trashed"
+        ? "Trashed Student List"
+        : status1 === "inactive"
+        ? "Inactive Student List"
+        : "Student List";
 
     const customers = await new Promise((resolve, reject) => {
-      pool.query(getQuery, function (error, result) {
+      pool.query(getQuery, queryParams, (error, result) => {
         if (error) {
           req.flash("error", error.message);
-          reject(error);
-        } else {
-          resolve(result);
+          return reject(error);
         }
+        resolve(result);
       });
     });
 
     res.render("admin/customer/list", {
       success: req.flash("success"),
       error: req.flash("error"),
-      customers: customers,
-      req: req,
-      page_name: page_name,
+      customers,
+      req,
+      page_name,
+      status1,
+      search,
     });
   } catch (error) {
     req.flash("error", error.message);
+    res.redirect("/admin/student-list");
   }
 };
 const getCategoriesFromTable = async () => {
@@ -87,7 +109,7 @@ const Create = async (req, res) => {
       categories: categories,
       course_classes: course_classes,
       centers: centers,
-      form_url: "/admin/customer-store",
+      form_url: "/admin/student-store",
       page_name: "Create Student",
       action: "Create",
     });
@@ -225,8 +247,8 @@ const Store = async (req, res) => {
 
             return res.status(200).json({
               success: true,
-              redirect_url: "/admin/customer-list",
-              message: "Customer saved successfully",
+              redirect_url: "/admin/student-list",
+              message: "Student saved successfully",
             });
           }
         );
@@ -258,7 +280,7 @@ const Edit = async (req, res) => {
       });
     });
 
-    console.log(customer);
+
     const categories = await getCategoriesFromTable();
     const course_classes = await getCourseClassesFromTable();
     const centers = await Helper.getCenters();
@@ -269,7 +291,7 @@ const Edit = async (req, res) => {
       categories: categories,
       course_classes: course_classes,
       centers: centers,
-      form_url: "/admin/customer-update/" + customerId,
+      form_url: "/admin/student-update/" + customerId,
       page_name: "Edit Student",
       action: "Update ",
     });
@@ -399,8 +421,8 @@ const Update = async (req, res) => {
             // Return success response
             return res.status(200).json({
               success: true,
-              redirect_url: "/admin/customer-list", // Or you can return a success message
-              message: "Customer updated successfully",
+              redirect_url: "/admin/student-list", // Or you can return a success message
+              message: "Student updated successfully",
             });
           }
         );
@@ -419,45 +441,51 @@ const Delete = async (req, res) => {
   try {
     const customerId = req.params.customerId;
 
-    const softDeleteQuery =
-      "UPDATE front_users SET deleted_at = NOW() WHERE id = ?";
+    const softDeleteQuery = `
+      UPDATE front_users SET deleted_at = NOW(), status = 0 WHERE id = ?
+    `;
 
     pool.query(softDeleteQuery, [customerId], (error, result) => {
       if (error) {
         console.error(error);
-        return req.flash("success", "Internal server error");
+        req.flash("error", "Internal server error");
+        return res.redirect("/admin/student-list");
       }
-    });
 
-    req.flash("success", "Customer soft deleted successfully");
-    return res.redirect("/admin/customer-list");
+      req.flash("success", "Student soft deleted successfully");
+      return res.redirect("/admin/student-list");
+    });
   } catch (error) {
     req.flash("error", error.message);
-    return res.redirect(`/admin/customer-list`);
+    return res.redirect(`/admin/student-list`);
   }
 };
+
 
 const Restore = async (req, res) => {
   try {
     const customerId = req.params.customerId;
 
-    const RestoreQuery =
-      "UPDATE front_users SET deleted_at = null WHERE id = ?";
+    const restoreQuery = `
+      UPDATE front_users SET deleted_at = NULL, status = 1 WHERE id = ?
+    `;
 
-    pool.query(RestoreQuery, [customerId], (error, result) => {
+    pool.query(restoreQuery, [customerId], (error, result) => {
       if (error) {
         console.error(error);
-        return req.flash("success", "Internal server error");
+        req.flash("error", "Internal server error");
+        return res.redirect("/admin/student-list");
       }
-    });
 
-    req.flash("success", "Customer Restored successfully");
-    return res.redirect("/admin/customer-list");
+      req.flash("success", "Student restored successfully");
+      return res.redirect("/admin/student-list");
+    });
   } catch (error) {
     req.flash("error", error.message);
-    return res.redirect(`/admin/customer-list`);
+    return res.redirect(`/admin/student-list`);
   }
 };
+
 
 const PermanentDelete = async (req, res) => {
   try {
@@ -472,18 +500,18 @@ const PermanentDelete = async (req, res) => {
       }
     });
 
-    req.flash("success", "Customer deleted successfully");
-    return res.redirect("/admin/customer-list");
+    req.flash("success", "Student deleted successfully");
+    return res.redirect("/admin/student-list");
   } catch (error) {
     req.flash("error", error.message);
-    return res.redirect(`/admin/customer-list`);
+    return res.redirect(`/admin/student-list`);
   }
 };
 
 const Show = async (req, res) => {
   try {
     const customerId = req.params.customerId;
-
+    console.log(customerId);
     const getCustomerQuery = "SELECT * FROM front_users WHERE id = ?";
     const customer = await new Promise((resolve, reject) => {
       pool.query(getCustomerQuery, [customerId], function (error, result) {
@@ -503,7 +531,7 @@ const Show = async (req, res) => {
       success: req.flash("success"),
       error: req.flash("error"),
       customer: customer,
-      form_url: "/admin/customer-show/" + customerId,
+      form_url: "/admin/student-show/" + customerId,
       page_name: "Student Details",
       categoryDetails,
       centerDetails,
@@ -553,6 +581,7 @@ const Booking = async (req, res) => {
       bookings,
       req,
       page_name,
+      customerId,
       customer,
       list_url: "/admin/customer/list",
       trashed_list_url: "/admin/course-booking-list?status=trashed",
@@ -569,40 +598,32 @@ const Booking = async (req, res) => {
 const testSeriesBooking = async (req, res) => {
   try {
     const customerId = req.params.customerId;
+   
     const status = req.query.status || "active";
     const page_name = "Test Series Booking";
 
-    const getCustomerQuery = "SELECT * FROM front_users WHERE id = ?";
-    const customer = await new Promise((resolve, reject) => {
-      pool.query(getCustomerQuery, [customerId], function (error, result) {
-        if (error) {
-          console.error(error);
-          req.flash("error", error.message);
-          reject(error);
-        } else {
-          resolve(result[0]);
-        }
-      });
-    });
     const query = `
-      SELECT
-        co.*,
-        ts.course_name
-      FROM course_orders co
-      JOIN courses ts ON ts.id = co.course_id
-      WHERE co.user_id = ? AND co.order_type = 'test'
-      ORDER BY co.created_at DESC
-    `;
+  SELECT
+    co.*,
+    ts.name AS course_name,
+    fu.name AS student_name
+  FROM course_orders co
+  JOIN test_series ts ON ts.id = co.course_id
+  JOIN front_users fu ON fu.id = co.user_id
+  WHERE co.user_id = ? AND co.order_type = 'test'
+  ORDER BY co.created_at DESC
+`;
 
     const [bookings] = await pool.promise().query(query, [customerId]);
-
+  
+    
     res.render("admin/customer/booking", {
       success: req.flash("success"),
       error: req.flash("error"),
       bookings,
       req,
       page_name,
-      customer,
+      customerId,
       list_url: "/admin/customer/list",
       trashed_list_url: "/admin/course-booking-list?status=trashed",
       create_url: "/admin/course-booking-create",

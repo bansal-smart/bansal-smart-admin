@@ -54,6 +54,7 @@ const List = async (req, res) => {
     const pdfCount = await Helper.getPdfCountByCourseId(courseId);
     const videoCount = await Helper.getVideoCountByCourseId(courseId);
              const bookingCount = await Helper.getBookingCountByCourseId(courseId);
+             const testCount = await Helper.getTestCountByCourseId(courseId);
 console.log(videos);
     res.render("admin/course-video/list", {
       success: req.flash("success"),
@@ -68,6 +69,7 @@ console.log(videos);
       pdfCount,
       videoCount,
       bookingCount,
+      testCount,
       title: "Course Video List",
       list_url: `/admin/course-video-list/${courseId}`,
       trashed_list_url: `/admin/course-video-list/${courseId}?status=trashed`,

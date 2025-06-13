@@ -6,7 +6,7 @@ const adminauthenticateCustomer = require("../middlewares/adminauthenticateCusto
 
 const route = "blog"; // Dynamic route module
 const controllerName = "Blog";
-const FileUploadPath = `public/uploads/${route}s/`;
+const FileUploadPath = `public/uploads/blogs/`;
 const storage = setupStorage(FileUploadPath);
 const upload = multer({ storage });
 
@@ -35,7 +35,6 @@ router.post(
   adminauthenticateCustomer,
   upload.fields([
     { name: "image", maxCount: 1 },
-    { name: "details_image", maxCount: 1 },
   ]),
   controller.Update
 );

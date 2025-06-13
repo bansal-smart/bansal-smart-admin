@@ -1,30 +1,27 @@
-
 <%- include('../layouts/header') %>
-       
-        <div class="content-wrapper">
-          <div class="page-header">
-            <h3 class="page-title">
-              <%= page_name %>
-            </h3>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Module Setting</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><%= page_name %></li>
-                </ol>
-            </nav>
-          </div>
-          <div class="row">
-            <div class="col-md-6 grid-margin stretch-card">
-              <div class="card">
-                <div class="card-body">
-                  <h4 class="card-title"<%= page_name %> form</h4>
-                  <p class="card-description">
-                    <%= page_name %>
-                  </p>
+
+  <div class="content-body">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+              <h4 class="card-title mb-0">
+               Setting
+              </h4>
+
+
+              <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i>
+                Back</button>
+
+            </div>
+            <div class="card-body">
                   <form id="module_settingsForm" class="forms-sample" method="POST" action="<%= form_url %>"  <% if (page_name == 'Logos') { %> enctype="multipart/form-data" <% } %> >
                    
                     <input type="hidden" name="page_name" value="<%= page_name %>"/>
-                    <% if (page_name == 'About Us') { %>
+
+                    
+                    <!-- <% if (page_name == 'About Us') { %>
 
                     <div class="form-group">
                       <label for="title">Meta Title</label>
@@ -58,9 +55,9 @@
                       </div>
                     </div>
 
-                    <% } %>
+                    <% } %> -->
                     
-                    <% if (page_name == 'Privacy Policy') { %>
+                    <!-- <% if (page_name == 'Privacy Policy') { %>
 
                       <div class="col-md-12">
                         <div class="form-group">
@@ -74,8 +71,8 @@
                         </div>
                       </div>
 
-                    <% } %>
-
+                    <% } %> -->
+<!-- 
                     <% if (page_name == 'Terms & Condition') { %>
 
                       <div class="col-md-12">
@@ -89,29 +86,109 @@
                         </div>
                       </div>
 
-                    <% } %>
-                    <% if (page_name == 'Contact Us') { %>
+                    <% } %> -->
+                    <% if (page_name == 'Contact Setting') { %>
+ <div class="row">
+    <div class="form-group col-6">
+      <label for="email">Email</label>
+      <input 
+        type="email" 
+        name="email" 
+        id="email" 
+        class="form-control" 
+        value="<%= module_settings ? module_settings.email : '' %>" 
+        placeholder="Email"
+        required
+      >
+      <div class="invalid-feedback"></div>
+    </div>
 
-                      <div class="form-group">
-                        <label for="title">Email</label>
-                        <input type="email" name="email" id="email" class="form-control" value="<%= module_settings ? module_settings.email : '' %>" placeholder="Email">
-                        <div class="invalid-feedback"></div> 
-                      </div>
+    <div class="form-group col-6">
+      <label for="mobile">Mobile</label>
+      <input 
+        type="text" 
+        name="mobile" 
+        id="mobile" 
+        class="form-control" 
+        onkeypress="return isNumberKey(event)" 
+        maxlength="10" 
+        value="<%= module_settings ? module_settings.mobile : '' %>" 
+        placeholder="Mobile"
+        required
+      >
+      <div class="invalid-feedback"></div>
+    </div>
 
-                      <div class="form-group">
-                        <label for="title">Mobile</label>
-                        <input type="text" name="mobile" id="mobile" class="form-control" onkeypress="return isNumberKey(event)" value="<%= module_settings ? module_settings.mobile : '' %>" placeholder="Mobile">
-                        <div class="invalid-feedback"></div> 
-                      </div>
+    
 
-                      <div class="form-group">
-                        <label for="title">Address</label>
-                        <textarea type="text" name="address" id="address" class="form-control" value="<%= module_settings ? module_settings.address : '' %>" placeholder="Address"><%= module_settings ? module_settings.address : '' %></textarea>
-                        <div class="invalid-feedback"></div> 
-                      </div>
+    <div class="form-group col-6">
+      <label for="instagram">Instagram</label>
+      <input 
+        type="url" 
+        name="instagram" 
+        id="instagram" 
+        class="form-control" 
+        value="<%= module_settings ? module_settings.instagram : '' %>" 
+        placeholder="https://instagram.com/yourprofile"
+      >
+      <div class="invalid-feedback"></div>
+    </div>
+
+    <div class="form-group col-6">
+      <label for="linkedin">LinkedIn</label>
+      <input 
+        type="url" 
+        name="linkedin" 
+        id="linkedin" 
+        class="form-control" 
+        value="<%= module_settings ? module_settings.linkedin : '' %>" 
+        placeholder="https://linkedin.com/in/yourprofile"
+      >
+      <div class="invalid-feedback"></div>
+    </div>
+
+    <div class="form-group col-6">
+      <label for="youtube">YouTube</label>
+      <input 
+        type="url" 
+        name="youtube" 
+        id="youtube" 
+        class="form-control" 
+        value="<%= module_settings ? module_settings.youtube : '' %>" 
+        placeholder="https://youtube.com/channel/yourchannel"
+      >
+      <div class="invalid-feedback"></div>
+    </div>
+
+    <div class="form-group col-6">
+      <label for="facebook">Facebook</label>
+      <input 
+        type="url" 
+        name="facebook" 
+        id="facebook" 
+        class="form-control" 
+        value="<%= module_settings ? module_settings.facebook : '' %>" 
+        placeholder="https://facebook.com/yourprofile"
+      >
+      <div class="invalid-feedback"></div>
+    </div>
+    <div class="form-group col-12">
+      <label for="address">Address</label>
+      <textarea 
+        name="address" 
+        id="address" 
+        class="form-control" 
+        placeholder="Address" 
+        required
+      ><%= module_settings ? module_settings.address : '' %></textarea>
+      <div class="invalid-feedback"></div>
+    </div>
+  </div>
+                     
+ 
                       
                       
-
+<!-- 
                       <div class="form-group">
                         <label for="title">Whatsapp No</label>
                         <input type="text" name="whatsapp" id="whatsapp" class="form-control" onkeypress="return isNumberKey(event)" value="<%= module_settings ? module_settings.whatsapp : '' %>" placeholder="Whatsapp No">
@@ -146,11 +223,11 @@
                           <div class="invalid-feedback"></div>
                           
                         </div>
-                      </div>
+                      </div> -->
 
                     <% } %>
 
-                    <% if (page_name == 'Return & Refund Policy') { %>
+                    <!-- <% if (page_name == 'Return & Refund Policy') { %>
 
                       <div class="col-md-12">
                         <div class="form-group">
@@ -195,7 +272,7 @@
                         </div>
                       </div>
 
-                    <% } %>
+                    <% } %> -->
 
                     <% if (page_name == 'Fcm Server Key') { %>
 
@@ -240,7 +317,7 @@
                     <% } %>
 
 
-                    <% if (page_name == 'Payment Settings') { %>
+                    <!-- <% if (page_name == 'Payment Settings') { %>
 
                       <div class="form-group">
                           <label for="is_gst">Gst</label>
@@ -268,9 +345,10 @@
                         <div class="invalid-feedback"></div> 
                     </div>
 
-                    <% } %>
+                    <% } %> -->
 
-                    <button type="submit" class="btn btn-primary mr-2">Submit</button>
+                 
+                     <button type="submit" class="btn btn-primary mr-2">Update Setting</button>
                     <button class="btn btn-light">Cancel</button>
                   </form>
                 </div>
@@ -278,7 +356,27 @@
             </div>
           </div>
         </div>
+  </div>
        
+<script>
+      CKEDITOR.replace( 'content' );
+      CKEDITOR.replace( 'about_description' );
+      CKEDITOR.replace( 'why_choose_us' );
+      CKEDITOR.replace( 'privacy_policy' );
+      CKEDITOR.replace( 'contact_detail' );
+      CKEDITOR.replace( 'terms_condition' );
+      CKEDITOR.replace( 'cancellation' );
+      CKEDITOR.replace( 'return_refund' );
+
+function isNumberKey(evt) {
+    const charCode = evt.which ? evt.which : evt.keyCode;
+    if (charCode < 48 || charCode > 57) {
+        evt.preventDefault();
+        return false;
+    }
+    return true;
+}
+</script>
 <script>
       CKEDITOR.replace( 'content' );
       CKEDITOR.replace( 'about_description' );
@@ -311,4 +409,6 @@
         });
 </script>
 <%- include('../layouts/footer') %>
+
+
 

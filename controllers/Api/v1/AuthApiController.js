@@ -1,5 +1,6 @@
 const Customer = require("../../../models/customerModel");
 const Restaurant = require("../../../models/restaurantModel");
+const dbPool = require('../../../db/database');
 const jwt = require("jsonwebtoken");
 const {
   validateRequiredFields,
@@ -13,82 +14,83 @@ const JWT_SECRET = "your_jwt_secret_key";
 
 const AuthApiController = {
   register: (req, res) => {
-    const {
-      name,
-      email,
-      mobileNumber,
-      city,
-      category_id,
-      class_id,
-      registration_type,
-      center_id,
-    } = req.body;
+  const {
+    name,
+    email,
+    mobileNumber,
+    city,
+    category_id,
+    class_id,
+    registration_type,
+    center_id,
+  } = req.body;
 
-    // Validation
-    if (!name) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Name is required" });
-    }
+  // Basic validation
+  if (!name) return res.status(400).json({ success: false, error: "Name is required" });
+  if (!email) return res.status(400).json({ success: false, error: "Email is required" });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return res.status(400).json({ success: false, error: "Invalid email format" });
 
-    if (!email) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Email is required" });
-    }
+  if (!mobileNumber) return res.status(400).json({ success: false, error: "Mobile number is required" });
+  if (!/^\d{10}$/.test(mobileNumber))
+    return res.status(400).json({ success: false, error: "Mobile number must be 10 digits" });
 
-    // Simple email regex validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Invalid email format" });
-    }
+  if (!city) return res.status(400).json({ success: false, error: "City is required" });
+  if (!category_id) return res.status(400).json({ success: false, error: "Category ID is required" });
+  if (!class_id) return res.status(400).json({ success: false, error: "Class ID is required" });
+  if (!registration_type) return res.status(400).json({ success: false, error: "Registration type is required" });
+  if (registration_type === "offline" && !center_id)
+    return res.status(400).json({ success: false, error: "Center ID is required for offline registration" });
+ const otp = generateOtp();
+      const otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes from now
+  // Step 1: Check if email or mobile is already registered (verified or not)
+  const checkEmailMobileQuery = `
+    SELECT * FROM front_users 
+    WHERE email = ? OR mobile = ?
+  `;
 
-    if (!mobileNumber) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Mobile number is required" });
-    }
-
-    if (!/^\d{10}$/.test(mobileNumber)) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Mobile number must be 10 digits" });
-    }
-
-    if (!city) {
-      return res
-        .status(400)
-        .json({ success: false, error: "City is required" });
-    }
-
-    if (!category_id) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Category ID is required" });
-    }
-
-    if (!class_id) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Class ID is required" });
-    }
-
-    if (!registration_type) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Registration type is required" });
-    }
-
-    if (registration_type === "offline" && !center_id) {
-      return res.status(400).json({
+  db.query(checkEmailMobileQuery, [email, mobileNumber], (err, existingUsers) => {
+    if (err) {
+      return res.status(500).json({
         success: false,
-        error: "Center ID is required for offline registration",
+        error: "Internal server error while checking email or mobile",
+        details: err.message || err,
       });
     }
 
-    // Find existing customer by mobile
+    if (existingUsers.length > 0) {
+      // Check if any user is verified
+      const verifiedUser = existingUsers.find(u => u.verify_otp_status === 1);
+      if (verifiedUser) {
+        if (verifiedUser.email === email) {
+          return res.status(400).json({ success: false, error: "Email is already registered and verified" });
+        } else {
+          return res.status(400).json({ success: false, error: "Mobile number is already registered and verified" });
+        }
+      }
+
+      // User exists but not verified
+      const unverifiedUser = existingUsers.find(u => u.verify_otp_status === 0);
+     if (unverifiedUser) {
+  if (unverifiedUser.email === email) {
+    return res.status(200).json({
+       success: true,
+      mobile: mobileNumber,
+      message: "OTP send. Please verify OTP.",
+      otp
+    });
+  } else {
+    return res.status(200).json({
+       success: true,
+      mobile: mobileNumber,
+      message: "OTP send. Please verify OTP.",
+      otp
+    });
+  }
+}
+    }
+
+    // Step 2: Proceed to find or insert/update customer
     Customer.findByMobile(mobileNumber, (err, customer) => {
       if (err) {
         return res.status(500).json({
@@ -98,10 +100,11 @@ const AuthApiController = {
         });
       }
 
-      const otp = generateOtp();
+     
 
       const saveOtpCallback = () => {
-        Customer.saveOtp(mobileNumber, otp, (err) => {
+        const otpQuery = `UPDATE front_users SET register_otp = ?, otp_expires = ? WHERE mobile = ?`;
+        db.query(otpQuery, [otp, otpExpires, mobileNumber], (err) => {
           if (err) {
             return res.status(500).json({
               success: false,
@@ -110,21 +113,22 @@ const AuthApiController = {
             });
           }
 
-          res.json({
+          return res.json({
             success: true,
             mobile: mobileNumber,
             message: "OTP sent successfully",
-            otp, // Remove this in production
+            otp, // ⚠️ For development only; remove in production
           });
         });
       };
 
+      // Step 3: If customer doesn't exist, insert
       if (!customer) {
         const sql = `
-    INSERT INTO front_users 
-    (name, email, mobile, city, category_id, class_id, registration_type, center_id, verify_otp_status) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+          INSERT INTO front_users 
+          (name, email, mobile, city, category_id, class_id, registration_type, center_id, verify_otp_status, register_otp, otp_expires) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
 
         const values = [
           name,
@@ -135,7 +139,9 @@ const AuthApiController = {
           class_id,
           registration_type,
           registration_type === "offline" ? center_id : null,
-          0, // default verify_otp_status
+          0, // OTP not verified yet
+          otp,
+          otpExpires,
         ];
 
         db.query(sql, values, (err, result) => {
@@ -144,15 +150,19 @@ const AuthApiController = {
               success: false,
               error: "Failed to create customer",
               details: err.message || err,
-              stack: err.stack,
             });
           }
 
-          // Save OTP after successful insert
-          saveOtpCallback();
+          return res.json({
+            success: true,
+            mobile: mobileNumber,
+            message: "OTP sent successfully",
+            otp, // ⚠️ Remove this in production
+          });
         });
+
       } else {
-        // Update existing customer if not verified
+        // Step 4: If customer exists but not verified, update
         if (customer.verify_otp_status) {
           return res.status(400).json({
             success: false,
@@ -169,24 +179,24 @@ const AuthApiController = {
             center_id: registration_type === "offline" ? center_id : null,
           };
 
-          Customer.updateByMobile(
-            mobileNumber,
-            updateData,
-            (err, updatedCustomer) => {
-              if (err) {
-                return res.status(500).json({
-                  success: false,
-                  error: "Failed to update customer",
-                  details: err.message || err,
-                });
-              }
-              saveOtpCallback();
+          Customer.updateByMobile(mobileNumber, updateData, (err) => {
+            if (err) {
+              return res.status(500).json({
+                success: false,
+                error: "Failed to update customer",
+                details: err.message || err,
+              });
             }
-          );
+
+            // Save OTP after update
+            saveOtpCallback();
+          });
         }
       }
     });
-  },
+  });
+},
+
 
   sendOtp: (req, res) => {
     const { mobileNumber } = req.body;
@@ -238,7 +248,6 @@ const AuthApiController = {
         res.json({
           success: false,
           message: "No User found",
-        
         });
       } else {
         saveOtpCallback();
@@ -247,40 +256,53 @@ const AuthApiController = {
   },
 
   verifyOtp: (req, res) => {
-    const { mobileNumber, otp } = req.body;
+  const { mobileNumber, otp } = req.body;
 
-    if (!mobileNumber || !otp) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Mobile number and OTP are required" });
+  if (!mobileNumber || !otp) {
+    return res
+      .status(400)
+      .json({ success: false, error: "Mobile number and OTP are required" });
+  }
+
+  Customer.verifyOtp(mobileNumber, otp, (err, customer) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        error: "Internal server error",
+        details: err.message || err,
+      });
     }
 
-    Customer.verifyOtp(mobileNumber, otp, (err, customer) => {
-      if (err) {
+    if (!customer) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Invalid OTP or OTP expired" });
+    }
+
+    // ✅ Update verify_otp_status = 1
+    const updateSql = `UPDATE front_users SET verify_otp_status = 1 WHERE mobile = ?`;
+    dbPool.query(updateSql, [mobileNumber], (updateErr, updateResult) => {
+      if (updateErr) {
         return res.status(500).json({
           success: false,
-          error: "Internal server error",
-          details: err.message || err,
+          error: "Failed to update verification status",
+          details: updateErr.message || updateErr,
         });
       }
 
-      if (!customer) {
-        return res
-          .status(400)
-          .json({ success: false, error: "Invalid OTP or OTP expired" });
-      }
-
+      // ✅ Generate JWT token
       const payload = { id: customer.id, mobile: customer.mobile };
-      const access_token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
+      const access_token = jwt.sign(payload, JWT_SECRET);
 
       res.json({
         success: true,
         message: "OTP verified successfully",
         access_token,
-        customer,
+        customer: { ...customer, verify_otp_status: 1 }, // return updated status
       });
     });
-  },
+  });
+},
 
   restaurantRegister: (req, res) => {
     try {

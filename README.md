@@ -1,1 +1,1 @@
-"# bansal-smart-adminn" 
+"# bansal-smart-admin" 

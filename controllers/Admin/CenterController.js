@@ -20,7 +20,7 @@ const renderForm = async (res, options) => {
   const { postId, center, action, formUrl, pageName, error, success } = options; // add center here
   const categories = await Helper.getActiveCategoriesByType();
   const testSeries = await Helper.getActiveTestSeries();
-
+  const service_cities  = await Helper.getServicableCities();
   res.render("admin/center/create", {
     success,
     error,
@@ -28,6 +28,7 @@ const renderForm = async (res, options) => {
     testSeries,
     form_url: formUrl,
     page_name: pageName,
+    service_cities,
     action,
     center, // now center is defined
     image:
@@ -71,7 +72,7 @@ module.exports = {
       if (!center) {
         return handleError(res, req, "Center not found", "/admin/center-list");
       }
-
+      console.log(center);
       res.render("admin/center/show", {
         success: req.flash("success"),
         error: req.flash("error"),
@@ -88,6 +89,7 @@ module.exports = {
   Edit: async (req, res) => {
     try {
       const center = await CenterModels.findById(req.params.postId);
+      const service_cities  = await Helper.getServicableCities();
       console.log(center);
       //   if (!center) {
       //     return handleError(res, req, "Center not found", "/admin/center-list");
@@ -96,6 +98,7 @@ module.exports = {
       await renderForm(res, {
         postId: req.params.postId,
         center: center,
+        service_cities,
         action: "Update",
         formUrl: `/admin/center-update/${req.params.postId}`,
         pageName: "Edit Center",
@@ -111,6 +114,7 @@ module.exports = {
 
   Create: async (req, res) => {
     try {
+      const service_cities  = await Helper.getServicableCities();
       await renderForm(res, {
         course: null,
         action: "Create",
@@ -119,6 +123,7 @@ module.exports = {
         pageName: "Create Center",
         error: req.flash("error"),
         success: req.flash("success"),
+        service_cities,
         data: {},
       });
     } catch (error) {
@@ -313,155 +318,340 @@ module.exports = {
   // },
 
   Update: async (req, res) => {
-    try {
-      const postId = req.params.postId;
-      const {
-        city_id,
-        name,
-        email,
-        mobile,
-        roles,
-        address,
-        map_url,
-        status,
-        password
-      } = req.body;
 
-      if (!city_id || !name || !email || !mobile || !roles || !address || !map_url || !status) {
-        return res.json({ success: false, message: "All fields are required." });
-      }
+ 
+  try {
+    const postId = req.params.postId;
 
-      let hashedPassword = null;
-      let original_password = "";
-      if (password?.trim()) {
-        hashedPassword = await bcrypt.hash(password, 10);
-        original_password = password;
-      }
+    const {
+      city_id,
+      name,
+      email,
+      mobile,
+      roles,
+      address,
+      map_url,
+      status,
+      password,
+      description
+    } = req.body;
 
-      // Handle logo upload
-      let logoPath = null;
-      if (req.files?.logo?.length > 0) {
-        logoPath = `/uploads/centers/${req.files.logo[0].filename}`;
-      }
+    const slug = Helper.generateSlug(name);
 
-      if (!postId) {
-        // ---- CREATE ----
+    if (!city_id || !name || !email || !mobile || !roles || !address || !map_url || !status) {
+      return res.json({ success: false, message: "All fields are required." });
+    }
 
-        // Insert user first
-        const userQuery = `
-  INSERT INTO users (name, email, mobile, password, original_password, role_id, status, created_at, updated_at)
-  VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-`;
+    let hashedPassword = null;
+    let original_password = "";
+    if (password?.trim()) {
+      hashedPassword = await bcrypt.hash(password, 10);
+      original_password = password;
+    }
 
-        const userValues = [name, email, mobile, hashedPassword, original_password, roles, status];
+    // Handle logo upload
+    let logoPath = null;
+    if (req.files?.logo?.length > 0) {
+      logoPath = `/uploads/centers/${req.files.logo[0].filename}`;
+    }
 
-        const userId = await new Promise((resolve, reject) => {
-          pool.query(userQuery, userValues, (err, result) => {
-            if (err) return reject(err);
-            resolve(result.insertId);
-          });
-        });
+    if (!postId) {
+      // ---------- CREATE ----------
 
-        // Insert center
-        const centerQuery = `
-        INSERT INTO centers (user_id, city_id, name, email, mobile, roles, address, map_url, status, logo, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      // Insert into users
+      const userQuery = `
+        INSERT INTO users (name, email, mobile, password, original_password, role_id, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
       `;
-        const centerValues = [
-          userId,
-          city_id,
-          name,
-          email,
-          mobile,
-          roles,
-          address,
-          map_url,
-          status,
-          logoPath
-        ];
+      const userValues = [name, email, mobile, hashedPassword, original_password, roles, status];
 
-        await new Promise((resolve, reject) => {
-          pool.query(centerQuery, centerValues, (err) => {
+      const userId = await new Promise((resolve, reject) => {
+        pool.query(userQuery, userValues, (err, result) => {
+          if (err) return reject(err);
+          resolve(result.insertId);
+        });
+      });
+
+      // Insert into user_roles
+      await new Promise((resolve, reject) => {
+        pool.query(
+          `INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)`,
+          [userId, roles],
+          (err) => {
             if (err) return reject(err);
             resolve();
-          });
+          }
+        );
+      });
+
+      // Insert into centers
+      const centerQuery = `
+        INSERT INTO centers (user_id, city_id, name, slug, email, mobile, roles, address, map_url, status, logo, description, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      `;
+      const centerValues = [
+        userId, city_id, name, slug, email, mobile, roles, address, map_url, status, logoPath, description
+      ];
+
+      await new Promise((resolve, reject) => {
+        pool.query(centerQuery, centerValues, (err) => {
+          if (err) return reject(err);
+          resolve();
         });
+      });
 
-        return res.json({
-          success: true,
-          redirect_url: "/admin/center-list",
-          message: "User and Center created successfully"
+      return res.json({
+        success: true,
+        redirect_url: "/admin/center-list",
+        message: "Center created successfully"
+      });
+
+    } else {
+      // ---------- UPDATE ----------
+
+      // Get user_id from centers
+      const [center] = await new Promise((resolve, reject) => {
+        pool.query(`SELECT user_id FROM centers WHERE id = ?`, [postId], (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
         });
+      });
 
-      } else {
-        // ---- UPDATE ----
+      if (!center) {
+        return res.json({ success: false, message: "Center not found" });
+      }
 
-        // Get user_id from center table using postId
-        const [center] = await new Promise((resolve, reject) => {
-          pool.query(`SELECT user_id FROM centers WHERE id = ?`, [postId], (err, result) => {
+      const userId = center.user_id;
+
+      // Update users table
+      const userUpdateQuery = `
+        UPDATE users SET name = ?, email = ?, mobile = ?, role_id = ?, status = ?, updated_at = NOW()
+        ${hashedPassword ? ", password = ?, original_password = ?" : ""}
+        WHERE id = ?
+      `;
+
+      const userUpdateValues = hashedPassword
+        ? [name, email, mobile, roles, status, hashedPassword, original_password, userId]
+        : [name, email, mobile, roles, status, userId];
+
+      await new Promise((resolve, reject) => {
+        pool.query(userUpdateQuery, userUpdateValues, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+
+      // Update user_roles (replace role if exists)
+      await new Promise((resolve, reject) => {
+        pool.query(
+          `DELETE FROM user_roles WHERE user_id = ?`,
+          [userId],
+          (err) => {
             if (err) return reject(err);
-            resolve(result);
-          });
-        });
+            pool.query(
+              `INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)`,
+              [userId, roles],
+              (err2) => {
+                if (err2) return reject(err2);
+                resolve();
+              }
+            );
+          }
+        );
+      });
 
-        if (!center) {
-          return res.json({ success: false, message: "Center not found" });
-        }
-
-        const userId = center.user_id;
-
-        // Update user
-        const userUpdateQuery = `
-  UPDATE users SET name = ?, email = ?, mobile = ?, role_id = ?, status = ?, updated_at = NOW()
-  ${hashedPassword ? ", password = ?, original_password = ?" : ""}
-  WHERE id = ?
-`;
-
-        const userUpdateValues = hashedPassword
-          ? [name, email, mobile, roles, status, hashedPassword, original_password, userId]
-          : [name, email, mobile, roles, status, userId];
-
-        await new Promise((resolve, reject) => {
-          pool.query(userUpdateQuery, userUpdateValues, (err) => {
-            if (err) return reject(err);
-            resolve();
-          });
-        });
-
-        // Update center
-        const centerUpdateQuery = `
-        UPDATE centers SET city_id = ?, name = ?, email = ?, mobile = ?, roles = ?, address = ?, map_url = ?, status = ?, updated_at = NOW()
+      // Update centers
+      const centerUpdateQuery = `
+        UPDATE centers SET city_id = ?, name = ?, slug = ?, email = ?, mobile = ?, roles = ?, address = ?, map_url = ?, status = ?, description = ?, updated_at = NOW()
         ${logoPath ? ", logo = ?" : ""}
         WHERE id = ?
       `;
 
-        const centerUpdateValues = logoPath
-          ? [city_id, name, email, mobile, roles, address, map_url, status, logoPath, postId]
-          : [city_id, name, email, mobile, roles, address, map_url, status, postId];
+      const centerUpdateValues = logoPath
+        ? [city_id, name, slug, email, mobile, roles, address, map_url, status, description, logoPath, postId]
+        : [city_id, name, slug, email, mobile, roles, address, map_url, status, description, postId];
 
-        await new Promise((resolve, reject) => {
-          pool.query(centerUpdateQuery, centerUpdateValues, (err) => {
-            if (err) return reject(err);
-            resolve();
-          });
+      await new Promise((resolve, reject) => {
+        pool.query(centerUpdateQuery, centerUpdateValues, (err) => {
+          if (err) return reject(err);
+          resolve();
         });
+      });
 
-        return res.json({
-          success: true,
-          redirect_url: "/admin/center-list",
-          message: "User and Center updated successfully"
-        });
-      }
-
-    } catch (error) {
-      console.error("Error:", error);
       return res.json({
-        success: false,
-        message: "Something went wrong",
-        error: error.message
+        success: true,
+        redirect_url: "/admin/center-list",
+        message: "Center updated successfully"
       });
     }
-  },
+
+  } catch (error) {
+    console.error("Error:", error);
+    return res.json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message
+    });
+  }
+},
+//   Update: async (req, res) => {
+
+ 
+//     try {
+//       const postId = req.params.postId;
+    
+//       const {
+//         city_id,
+//         name,
+//         email,
+//         mobile,
+//         roles,
+//         address,
+//         map_url,
+//         status,
+//         password,
+//         description // ✅ Add this
+//       } = req.body;
+
+//         const slug = Helper.generateSlug(name);
+
+//       if (!city_id || !name || !email || !mobile || !roles || !address || !map_url || !status) {
+//         return res.json({ success: false, message: "All fields are required." });
+//       }
+
+//       let hashedPassword = null;
+//       let original_password = "";
+//       if (password?.trim()) {
+//         hashedPassword = await bcrypt.hash(password, 10);
+//         original_password = password;
+//       }
+
+//       // Handle logo upload
+//       let logoPath = null;
+//       if (req.files?.logo?.length > 0) {
+//         logoPath = `/uploads/centers/${req.files.logo[0].filename}`;
+//       }
+
+//       if (!postId) {
+//         // ---- CREATE ----
+
+//         // Insert user first
+//         const userQuery = `
+//   INSERT INTO users (name, email, mobile, password, original_password, role_id, status, created_at, updated_at)
+//   VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+// `;
+
+//         const userValues = [name, email, mobile, hashedPassword, original_password, roles, status];
+
+//         const userId = await new Promise((resolve, reject) => {
+//           pool.query(userQuery, userValues, (err, result) => {
+//             if (err) return reject(err);
+//             resolve(result.insertId);
+//           });
+//         });
+
+//         // Insert center
+//         const centerQuery = `
+//       INSERT INTO centers (user_id, city_id, name, slug, email, mobile, roles, address, map_url, status, logo, description, created_at)
+// VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+//       `;
+//         const centerValues = [
+//           userId,
+//           city_id,
+//           name,
+//            slug,
+//           email,
+//           mobile,
+//           roles,
+//           address,
+//           map_url,
+//           status,
+//           logoPath,
+//           description, 
+//         ];
+
+//         await new Promise((resolve, reject) => {
+//           pool.query(centerQuery, centerValues, (err) => {
+//             if (err) return reject(err);
+//             resolve();
+//           });
+//         });
+
+//         return res.json({
+//           success: true,
+//           redirect_url: "/admin/center-list",
+//           message: "Center created successfully"
+//         });
+
+//       } else {
+//         // ---- UPDATE ----
+
+//         // Get user_id from center table using postId
+//         const [center] = await new Promise((resolve, reject) => {
+//           pool.query(`SELECT user_id FROM centers WHERE id = ?`, [postId], (err, result) => {
+//             if (err) return reject(err);
+//             resolve(result);
+//           });
+//         });
+
+//         if (!center) {
+//           return res.json({ success: false, message: "Center not found" });
+//         }
+
+//         const userId = center.user_id;
+
+//         // Update user
+//         const userUpdateQuery = `
+//   UPDATE users SET name = ?, email = ?, mobile = ?, role_id = ?, status = ?, updated_at = NOW()
+//   ${hashedPassword ? ", password = ?, original_password = ?" : ""}
+//   WHERE id = ?
+// `;
+
+//         const userUpdateValues = hashedPassword
+//           ? [name, email, mobile, roles, status, hashedPassword, original_password, userId]
+//           : [name, email, mobile, roles, status, userId];
+
+//         await new Promise((resolve, reject) => {
+//           pool.query(userUpdateQuery, userUpdateValues, (err) => {
+//             if (err) return reject(err);
+//             resolve();
+//           });
+//         });
+
+//   const centerUpdateQuery = `
+//   UPDATE centers SET city_id = ?, name = ?, slug = ?, email = ?, mobile = ?, roles = ?, address = ?, map_url = ?, status = ?, description = ?, updated_at = NOW()
+//   ${logoPath ? ", logo = ?" : ""}
+//   WHERE id = ?
+// `;
+
+// const centerUpdateValues = logoPath
+//   ? [city_id, name, slug, email, mobile, roles, address, map_url, status, description, logoPath, postId]
+//   : [city_id, name, slug, email, mobile, roles, address, map_url, status, description, postId];
+
+
+//         await new Promise((resolve, reject) => {
+//           pool.query(centerUpdateQuery, centerUpdateValues, (err) => {
+//             if (err) return reject(err);
+//             resolve();
+//           });
+//         });
+
+//         return res.json({
+//           success: true,
+//           redirect_url: "/admin/center-list",
+//           message: "Center updated successfully"
+//         });
+//       }
+
+//     } catch (error) {
+//       console.error("Error:", error);
+//       return res.json({
+//         success: false,
+//         message: "Something went wrong",
+//         error: error.message
+//       });
+//     }
+//   },
 Delete: async (req, res) => {
   try {
     const centerId = req.params.postId;
@@ -498,7 +688,7 @@ Delete: async (req, res) => {
       });
     });
 
-    req.flash("success", "Center and linked user deleted successfully");
+    req.flash("success", "Center  deleted successfully");
     return res.redirect("/admin/center-list");
   } catch (error) {
     console.error("Delete Error:", error);

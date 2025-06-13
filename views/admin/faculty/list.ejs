@@ -73,14 +73,15 @@
                         </td>
 
                         <td>
-                          <% if (post.image) { %>
-                            <a href="<%= post.image %>" target="_blank">
-                              <img src="<%= post.image %>" width="100" />
-                            </a>
-                            <% } else { %>
-                              No Image
-                              <% } %>
-                        </td>
+                      
+  <% if (post.image) { %>
+    <a href="<%= publicUrl + post.image %>" target="_blank">
+      <img src="<%= publicUrl + post.image %>" width="100" />
+    </a>
+  <% } else { %>
+    No Image
+  <% } %>
+</td>
 
 
                         <td>
@@ -113,6 +114,7 @@
         </div>
       </div>
     </div>
+</div>
 
     <%- include('../layouts/footer') %>
 

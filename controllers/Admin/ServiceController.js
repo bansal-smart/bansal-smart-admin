@@ -99,7 +99,7 @@ const Edit = async (req, res) => {
       success: req.flash("success"),
       error: req.flash("error"),
       post: post || {}, // Make sure post is defined, even if empty
-      image: imageExists
+      image: post.image
         ? post.image
         : "admin/images/default-featured-image.png",
       form_url: "/admin/service-update/" + serviceId,

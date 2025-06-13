@@ -1,0 +1,171 @@
+<div class="deznav">
+  <div class="deznav-scroll">
+    <ul class="metismenu" id="menu">
+
+<!-- 
+    <li class="nav-item nav-profile">
+      <div class="nav-link">
+        <div class="profile-name">
+          <p class="name"><%= userRole %></p>
+          <p class="designation"><%= userRole %></p>
+        </div>
+      </div>
+    </li> -->
+
+
+    <li>
+      <a href="/admin/dashboard" class="ai-icon" aria-expanded="false">
+        <i class="flaticon-381-settings-2"></i>
+        <span class="nav-text">Dashboard</span>
+      </a>
+    </li>
+
+    <% if (permissions.includes('User List')) { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/customer-list">
+          <i class="fab fa-trello menu-icon"></i>
+          <span class="menu-title">Student Management</span>
+        </a>
+      </li>
+    <% } %>
+
+    <% if (permissions.includes('Course List')) { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/course-list/all">
+          <i class="fab fa-trello menu-icon"></i>
+          <span class="menu-title">Course Management</span>
+        </a>
+      </li>
+    <% } %>
+
+    <% if (permissions.includes('Service Master')) { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/service-list">
+          <i class="fab fa-trello menu-icon"></i>
+          <span class="menu-title">Service Management</span>
+        </a>
+      </li>
+    <% } %>
+
+    <% if (permissions.includes('Coupon Master')) { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/coupon-list">
+          <i class="fab fa-trello menu-icon"></i>
+          <span class="menu-title">Coupon Management</span>
+        </a>
+      </li>
+    <% } %>
+
+    <% if (permissions.includes('Faculty Master')) { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/faculty-list">
+          <i class="fab fa-trello menu-icon"></i>
+          <span class="menu-title">Faculty Management</span>
+        </a>
+      </li>
+    <% } %>
+
+    <% if (permissions.includes('Test Series Master') || permissions.includes('Exam Master')) { %>
+      <li class="has-menu">
+        <a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
+          <i class="flaticon-381-internet"></i>
+          <span class="nav-text">Test Series Management</span>
+        </a>
+        <ul aria-expanded="false">
+          <% if (permissions.includes('Test Series Master')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/test-series-list">Test Series List</a>
+            </li>
+          <% } %>
+          <% if (permissions.includes('Exam Master')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/exam-list">Exam List</a>
+            </li>
+          <% } %>
+        </ul>
+      </li>
+    <% } %>
+
+    <% if (permissions.includes('Live Test Master')) { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/live-test-list">
+          <i class="fab fa-trello menu-icon"></i>
+          <span class="menu-title">Live Test Management</span>
+        </a>
+      </li>
+    <% } %>
+<li class="nav-item">
+              <a class="nav-link" href="/admin/roles-list">Roles Permission List</a>
+            </li>
+    <% if (permissions.includes('Role Master') || permissions.includes('Banner Master') ||
+          permissions.includes('Category Master') || permissions.includes('CMS Master') ||
+          permissions.includes('Blog Master') || permissions.includes('FAQ Master')) { %>
+      <li class="has-menu">
+        <a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
+          <i class="flaticon-381-internet"></i>
+          <span class="nav-text">Setting</span>
+        </a>
+        <ul aria-expanded="false">
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/roles-list">Roles Permission List</a>
+            </li>
+        
+          <% if (permissions.includes('Banner Master')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/banner-list">Banner List</a>
+            </li>
+          <% } %>
+          <% if (permissions.includes('Category Master')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/category-list">Category List</a>
+            </li>
+          <% } %>
+          <% if (permissions.includes('Service City Master')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/service-city-list">Service City List</a>
+            </li>
+          <% } %>
+          <% if (permissions.includes('CMS Master')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/cms-list">CMS Page List</a>
+            </li>
+          <% } %>
+          <% if (permissions.includes('Blog Master')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/blog-list">Blog List</a>
+            </li>
+          <% } %>
+          <% if (permissions.includes('FAQ Master')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/faq-list">FAQ List</a>
+            </li>
+          <% } %>
+        </ul>
+      </li>
+    <% } %>
+
+    <% if (permissions.includes('Course Booking') || permissions.includes('Test Series Booking')) { %>
+      <li class="has-menu">
+        <a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
+          <i class="flaticon-381-internet"></i>
+          <span class="nav-text">Booking</span>
+        </a>
+        <ul aria-expanded="false">
+          <% if (permissions.includes('Course Booking')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/course-booking-list">Course Booking</a>
+            </li>
+          <% } %>
+          <% if (permissions.includes('Test Series Booking')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/test-series-booking-list">Test Series Booking</a>
+            </li>
+          <% } %>
+        </ul>
+      </li>
+    <% } %>
+
+  </ul>
+</nav>
+

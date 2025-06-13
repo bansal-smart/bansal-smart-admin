@@ -1,0 +1,122 @@
+<%- include('../layouts/header') %>
+
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div
+            class="card-header d-flex align-items-center justify-content-between"
+          >
+            <h4 class="card-title mb-0"><%= page_name %></h4>
+
+            <div class="row">
+              <div class="col-12 text-end">
+                <% if (req.query.status==='trashed' ) { %>
+                <a class="btn btn-primary" href="<%= list_url %>">
+                  <i class="fas fa-list"></i>
+                </a>
+                <% } else { %>
+                <a class="btn btn-danger btn-sm" href="<%= trashed_list_url %>">
+                  <i class="fas fa-trash"></i>
+                </a>
+                <% } %>
+
+                <a class="btn btn-info btn-sm" href="<%= create_url %>">
+                  <i class="fas fa-plus"></i>
+                </a>
+                <button
+                  type="button"
+                  id="backButton"
+                  class="btn btn-primary btn-sm"
+                >
+                  <i class="fa fa-arrow-left"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="example3" class="display table-responsive-lg">
+                <thead>
+                  <tr>
+                    <th>Sr.No #</th>
+
+                    <th>Title</th>
+                    <% if (userRole == "Super Admin") { %>
+                    <th>Center Name</th>
+                    <% } %>
+
+                    <th>Gallery</th>
+
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% data.forEach((post, index) => { %>
+                  <tr>
+
+                    <td><%= index + 1 %></td>
+
+                    <td><%= post.title || '-' %></td>
+                    <% if (userRole == "Super Admin") { %>
+                    <td><%= post.center_name || '-' %></td>
+                    <% } %>
+
+                    <td>
+                      <% if (post.gallery) { %>
+                      <a href="<%= publicUrl + post.gallery %>" target="_blank">
+                        <img
+                          src="<%= publicUrl + post.gallery %>"
+                          width="100"
+                        />
+                      </a>
+                      <% } else { %> No Image <% } %>
+                    </td>
+                    <!-- <td>
+                      <% if (post.status == 1) { %>
+                      <span class="badge badge-success">Active</span>
+                      <% } else { %>
+                      <span class="badge badge-danger">Inactive</span>
+                      <% } %>
+                    </td> -->
+
+                    <td>
+                      <a
+                        href="/admin/gallery-delete/<%= post.id %>"
+                        class="btn btn-danger shadow btn-xs sharp deleteButton"
+                        onclick="return confirm('Are you sure you want to delete this gallery?');"
+                      >
+                        <i class="fa fa-trash"></i>
+                      </a>
+                      <!-- <a
+                        href="javascript:void(0);"
+                        class="btn btn-danger shadow btn-xs sharp deleteButton"
+                        data-url="/admin/banner-delete/<%= post.id %>"
+                      >
+                        <i class="fa fa-trash"></i>
+                      </a> -->
+                    </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../layouts/footer') %>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $("#order-listing").DataTable();
+  });
+</script>

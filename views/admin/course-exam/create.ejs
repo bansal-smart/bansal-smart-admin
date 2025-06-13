@@ -1,0 +1,143 @@
+<%- include('../layouts/header') %>
+
+    <section class="content-body">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h4 class="card-title mb-0">
+                                <%= page_name %> <%= course?.course_name %>
+                            </h4>
+
+
+                            <button type="button" id="backButton" class="btn btn-primary btn-sm"> <i
+                                    class="fa fa-arrow-left"></i> Back</button>
+
+                        </div>
+                        <div class="card-body">
+
+                            <form id="submitForm" method="post" action="<%= form_url %>" enctype="multipart/form-data">
+
+                                <div class="row">
+                                   
+
+
+                                    <div class="col-md-4">
+                                 
+                                        <div class="form-group">
+                                            <label class="form-label"> Name *</label>
+                                            <input type="text" class="form-control" name="test_name" id="test_name"
+                                                placeholder="Name.." value="<%= post?.test_name %>" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <input type="hidden" name="id" value="<%= post?.id %>">
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="form-label">Instruction*</label>
+                                            <textarea class="form-control ckeditor" name="instruction" id="instruction"
+                                                placeholder="Instruction"><%= post?.instruction %></textarea>
+                                        </div>
+                                    </div>
+<div class="col-md-12">
+                                <div class="row">
+
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Marks * </label>
+                                            <input type="number" class="form-control" name="marks" id="marks"  value="<%= post?.marks %>">
+                                        </div>
+                                    </div>
+
+
+                                   
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Start Date &amp; Time *</label>
+                                            <input class="form-control"   value="<%= post?.start_date_time %>" type="datetime-local" name="start_date_time" id="start_date_time">
+                                        </div>
+                                    </div>
+
+                                     <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">End Date &amp; Time *</label>
+                                            <input class="form-control"  value="<%= post?.end_date_time %>" type="datetime-local" name="end_date_time" id="end_date_time">
+                                        </div>
+                                    </div>
+                                     <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Duration (In Minutes) *</label>
+                                            <input type="text" class="form-control"  value="<%= post?.duration_test %>" name="duration_test" placeholder="Duration" id="duration_test">
+                                        </div>
+                                    </div>
+                                     <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Result Declare Time *</label>
+                                            <input class="form-control"  value="<%= post?.result_date %>" type="datetime-local" name="result_date" id="result_date">
+                                        </div>
+                                    </div>  
+
+
+
+                                </div>
+
+                            </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Image *</label>
+                                            <input type="file" class="form-control" name="image"
+                                                onchange="readURL(this, 'image_view');" id="image" accept="image/*" />
+
+                                            <!-- Use the course image or fallback to the default image -->
+
+
+                                            <img id="image_view"
+                                                src="<%= post?.image ? publicUrl  + course.image : base_url + 'admin/images/default-featured-image.png' %>"
+                                                width="150px" />
+
+                                        </div>
+                                    </div>
+  <div class="form-group col-sm-4">
+                                        <label class="form-label">Exam Type</label>
+                                        <select name="test_type" id="test_type" class="form-control custom-select">
+                                             <option value="" >Select Exam type
+                                            </option>
+                                            <option value="free" <%=post?.test_type=="free" ? 'selected' : '' %>>Free
+                                            </option>
+                                            <option value="paid" <%=post?.test_type=="paid" ? 'selected' : '' %>>Paid
+                                            </option>
+                                        </select>
+                                    </div>
+
+
+                                    <div class="form-group col-sm-4">
+                                        <label class="form-label">Status</label>
+                                        <select name="status" id="status" class="form-control custom-select">
+                                            <option value="1" <%=post?.status==1 ? 'selected' : '' %>>Active
+                                            </option>
+                                            <option value="0" <%=post?.status==0 ? 'selected' : '' %>>Inactive
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-12">
+
+                                    <button type="submit" id="submitButton" class="btn btn-primary float-right"
+                                        data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..."
+                                        data-rest-text="<%= action %>">
+                                        <%= action %>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div></div>
+            </div></div></section>
+
+        <%- include('../layouts/footer') %>
