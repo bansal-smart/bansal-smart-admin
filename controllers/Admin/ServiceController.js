@@ -8,6 +8,9 @@ const { validateRequiredFields } = require("../../helpers/validationsHelper");
 const List = async (req, res) => {
   try {
     // Determine the filter condition based on status
+
+    const status = req.query.status || "active";
+
     const where =
       req.query.status === "trashed"
         ? "WHERE services.deleted_at IS NOT NULL"
@@ -41,7 +44,9 @@ const List = async (req, res) => {
       services,
       req,
       page_name,
+      status,
       list_url: "/admin/service-list",
+      actions_url: "/admin/service", // pass this to dynamically build URLs in EJS
       trashed_list_url: "/admin/service-list/?status=trashed",
       create_url: "/admin/service-create",
     });
@@ -378,9 +383,9 @@ const Delete = async (req, res) => {
   try {
     const serviceId = req.params.serviceId;
 
-    const softDeleteQuery =
-      "UPDATE services SET deleted_at = NOW() WHERE id = ?";
-
+    const softDeleteQuery = `
+      UPDATE services SET deleted_at = NOW(), status = 0 WHERE id = ?
+    `;
     pool.query(softDeleteQuery, [serviceId], (error, result) => {
       if (error) {
         console.error(error);
@@ -402,8 +407,9 @@ const Restore = async (req, res) => {
   try {
     const serviceId = req.params.serviceId;
 
-    const restoreQuery = "UPDATE services SET deleted_at = null WHERE id = ?";
-
+    const restoreQuery = `
+        UPDATE services SET deleted_at = NULL WHERE id = ?
+      `;
     pool.query(restoreQuery, [serviceId], (error, result) => {
       if (error) {
         console.error(error);

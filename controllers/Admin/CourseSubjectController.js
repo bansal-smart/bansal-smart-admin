@@ -32,7 +32,7 @@ const List = async (req, res) => {
         resolve(result);
       });
     });
-
+    
     const course = await Helper.getCourseDetails(courseId);
     const subjectCount = await Helper.getSubjectCountByCourseId(courseId);
     const chapterCount = await Helper.getChapterCountByCourseId(courseId);
@@ -40,6 +40,9 @@ const List = async (req, res) => {
      const videoCount = await Helper.getVideoCountByCourseId(courseId);
          const bookingCount = await Helper.getBookingCountByCourseId(courseId);
          const testCount = await Helper.getTestCountByCourseId(courseId);
+const liveClassCount = 0;
+          liveClassCount  = await Helper.getLiveClassCountByCourseId(courseId);
+
     res.render("admin/course-subject/list", {
       success: req.flash("success"),
       error: req.flash("error"),
@@ -53,6 +56,7 @@ const List = async (req, res) => {
       videoCount,
        bookingCount,
        testCount,
+       liveClassCount,
       list_url: `/admin/course-subject-list/${courseId}`,
       trashed_list_url: `/admin/course-subject-list/${courseId}?status=trashed`,
       create_url: `/admin/course-subject-create/${courseId}`,
@@ -258,24 +262,37 @@ const courseId = req.params.course_id || req.body.course_id; // or wherever you 
 
 const Delete = async (req, res) => {
   try {
-    const categorieId = req.params.postId;
+    const subjectId = req.params.postId;
 
+    // Step 1: Get course_id from the course_subjects table
+    const getCourseQuery = "SELECT course_id FROM course_subjects WHERE id = ?";
+    const courseResult = await new Promise((resolve, reject) => {
+      pool.query(getCourseQuery, [subjectId], (error, result) => {
+        if (error) return reject(error);
+        resolve(result[0]); // assuming one row is returned
+      });
+    });
+
+    const courseId = courseResult?.course_id || null;
+
+    // Step 2: Soft delete the subject
     const softDeleteQuery = "UPDATE course_subjects SET deleted_at = NOW() WHERE id = ?";
-
-    pool.query(softDeleteQuery, [categorieId], (error, result) => {
-      if (error) {
-        console.error(error);
-        return req.flash("success", "Internal server error");
-      }
+    await new Promise((resolve, reject) => {
+      pool.query(softDeleteQuery, [subjectId], (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      });
     });
 
     req.flash("success", "Course Subject soft deleted successfully");
-    return res.redirect("/admin/course-subject-list");
+    return res.redirect(`/admin/course-subject-list/${courseId}`);
   } catch (error) {
-    req.flash("error", error.message);
+    console.error(error);
+    req.flash("error", "Internal server error");
     return res.redirect(`/admin/course-subject-list`);
   }
 };
+
 
 const Restore = async (req, res) => {
   try {
@@ -359,7 +376,25 @@ const Show = async (req, res) => {
     return res.redirect("/admin/course-subject-list");
   }
 };
+const getChapters = async (req, res) => {
+try {
+    const subjectId = req.params.postId;
+  
+    if (!subjectId) {
+      return res.status(400).json({ success: false, message: "Subject ID is required" });
+    }
 
+    const [chapters] = await pool.promise().query(
+      "SELECT id, chapter_name FROM course_chapters WHERE subject_id = ? AND deleted_at IS NULL ORDER BY chapter_name ASC",
+      [subjectId]
+    );
+
+    res.json(chapters);
+  } catch (error) {
+    console.error("Error fetching chapters:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
 
 module.exports = {
   Create,
@@ -370,4 +405,5 @@ module.exports = {
   Restore,
   PermanentDelete,
   Show,
+  getChapters,
 };

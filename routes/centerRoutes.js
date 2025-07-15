@@ -67,4 +67,6 @@ router.get(
   controller.Show
 );
 
+router.get("/admin/center-enquiries-list", adminauthenticateCustomer, controller.centerEnquiriesList);
+// router.get("/admin/contact-enquiries-list", adminauthenticateCustomer, controller.centerEnquiriesList);
 module.exports = router;

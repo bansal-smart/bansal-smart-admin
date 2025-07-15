@@ -1,6 +1,6 @@
 <%- include('../layouts/header') %>
 
-<div class="content-body">
+<section class="content-body">
   <div class="container-fluid">
     <div class="row">
       <div class="col-12">
@@ -14,9 +14,9 @@
                 action="<%= form_url %>"
                 method="post"
                 enctype="multipart/form-data">
-
+         <input type="hidden" name="course_id" value="<%=course.id%>">
             <div class="row">
-              <div class="form-group col-sm-6">
+              <!-- <div class="form-group col-sm-6">
                 <label class="form-label">Course *</label>
                 <select name="course_id" id="course_id" class="form-control" required>
                   <option value="">Select Course</option>
@@ -26,12 +26,16 @@
                     </option>
                   <% }); %>
                 </select>
-              </div>
+              </div> -->
               
               <div class="form-group col-sm-6">
-                <label class="form-label">Subject *</label>
+                <label class="form-label">Subject *
+
+
+                </label>
                 <select name="subject_id" id="subject_id" class="form-control" required>
                   <option value="">Select Subject</option>
+                  
                   <% subjects.forEach(function(subject) { %>
                     <option value="<%= subject.id %>" <% if (post && post.subject_id == subject.id) { %> selected <% } %>>
                       <%= subject.subject_name %>
@@ -82,10 +86,7 @@
           
         </div>
       </div>
-    </div>
-  </div>
-</div>
-
+      </div></div></div></section>
 <%- include('../layouts/footer') %>
 
   <script>

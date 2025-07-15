@@ -8,38 +8,40 @@ const List = async (req, res) => {
   try {
     const status = req.query.status;
   const courseId = req.params.courseId;
-  console.log(courseId);
-    let where =
-      status === "trashed"
-        ? `WHERE ch.deleted_at IS NOT NULL`
-        : `WHERE ch.deleted_at IS NULL`;
+  let where = `WHERE ch.course_id = ?`;
 
-    const query = `
-      SELECT 
-        ch.*, 
-        c.course_name, 
-        s.subject_name
-        
-      FROM course-pdf ch
-      LEFT JOIN courses c ON ch.course_id = c.id
-      LEFT JOIN course_subjects s ON ch.subject_id = s.id
-     
-      ${where}
-      ORDER BY ch.id DESC
-    `;
+  if (status === "trashed") {
+    where += ` AND ch.deleted_at IS NOT NULL`;
+  } else {
+    where += ` AND ch.deleted_at IS NULL`;
+  }
 
-    const page_name =
-      status === "trashed" ? "Trashed PDF List" : "Course PDF List";
+  const query = `
+  SELECT 
+    ch.*, 
+    c.course_name, 
+    s.subject_name, 
+    cc.chapter_name  -- or any other field from course_chapters
+  FROM course_pdf ch
+  LEFT JOIN courses c ON ch.course_id = c.id
+  LEFT JOIN course_subjects s ON ch.subject_id = s.id
+  LEFT JOIN course_chapters cc ON ch.chapter_id = cc.id
+  ${where}
+  ORDER BY ch.id DESC
+`;
 
-    const chapters = await new Promise((resolve, reject) => {
-      pool.query(query, (err, result) => {
-        if (err) {
-          req.flash("error", err.message);
-          return reject(err);
-        }
-        resolve(result);
-      });
+  const page_name =
+    status === "trashed" ? "Trashed PDF List" : "Course PDF List";
+
+  const chapters = await new Promise((resolve, reject) => {
+    pool.query(query, [courseId], (err, result) => {
+      if (err) {
+        req.flash("error", err.message);
+        return reject(err);
+      }
+      resolve(result);
     });
+  });
   const course = await Helper.getCourseDetails(courseId);
     const subjectCount = await Helper.getSubjectCountByCourseId(courseId);
     const chapterCount = await Helper.getChapterCountByCourseId(courseId);
@@ -47,6 +49,9 @@ const List = async (req, res) => {
      const videoCount = await Helper.getVideoCountByCourseId(courseId);
          const bookingCount = await Helper.getBookingCountByCourseId(courseId);
          const testCount = await Helper.getTestCountByCourseId(courseId);
+
+        const  liveClassCount  = await Helper.getLiveClassCountByCourseId(courseId);
+       
     res.render("admin/course-pdf/list", {
       success: req.flash("success"),
       error: req.flash("error"),
@@ -61,10 +66,11 @@ const List = async (req, res) => {
       videoCount,
        bookingCount,
        testCount,
+       liveClassCount,
       title : "Chapter PDF List",
       list_url: "/admin/course-pdf-list",
       trashed_list_url: "/admin/course-pdf-list/?status=trashed",
-      create_url: "/admin/course-pdf-create",
+      create_url: `/admin/course-pdf-create/${courseId}`,
     });
   } catch (error) {
     console.error("Chapter List Error:", error);
@@ -73,19 +79,42 @@ const List = async (req, res) => {
   }
 };
 
+const getSubjectFromTable = async (course_id) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT * FROM course_subjects 
+      WHERE status = 1 AND course_id = ? AND deleted_at IS NULL
+    `;
+    pool.query(query, [course_id], (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
 
 
 const Create = async (req, res) => {
   try {
+    const courseId = req.params.courseId;
+
+    console.log(courseId);
     const categories = await getCategoriesFromTable();
     const courses = await getCourseFromTable();
-    const subjects = await getSubjectFromTable();
-    const chapters = await getChapterDataFromTable();
+    const subjects = await getSubjectFromTable(courseId);
+    
+   // const chapters = await getChapterDataFromTable(courseId);
+
+        const chapters = [];
     const topics = await getTopicFromTable();
    
-     const courseId = req.params.courseId;
+
     let post = {};
      const course = await Helper.getCourseDetails(courseId);
+
+     console.log(courseId);
 
     res.render("admin/course-pdf/create", {
       success: req.flash("success"),
@@ -134,18 +163,6 @@ const getCourseFromTable = async () => {
     });
   });
 };
-const getSubjectFromTable = async () => {
-  return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM course_subjects WHERE status = 1 AND deleted_at IS NULL`;
-    pool.query(query, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
-};
 
 const getTopicFromTable = async () => {
   return new Promise((resolve, reject) => {
@@ -159,10 +176,10 @@ const getTopicFromTable = async () => {
     });
   });
 };
-const getChapterDataFromTable = async () => {
+const getChapterDataFromTable = async (course_id) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM course_chapters WHERE status = 1 AND deleted_at IS NULL`;
-    pool.query(query, (err, result) => {
+    const query = `SELECT * FROM course_chapters WHERE status = 1 AND course_id = ? AND deleted_at IS NULL`;
+     pool.query(query, [course_id], (err, result) => {
       if (err) {
         reject(err);
       } else {
@@ -171,6 +188,22 @@ const getChapterDataFromTable = async () => {
     });
   });
 };
+
+
+const getChapterDataBySubject = async (subject_id) => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT * FROM course_chapters WHERE status = 1 AND subject_id = ? AND deleted_at IS NULL`;
+     pool.query(query, [subject_id], (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
+
+
 
 const fs = require("fs");
 const path = require("path");
@@ -190,8 +223,8 @@ const checkImagePath = (relativePath) => {
 const Edit = async (req, res) => {
   try {
     const postId = req.params.postId;
-
-    const getCourseSubjectQuery = "SELECT * FROM course-pdf WHERE id = ?";
+     
+    const getCourseSubjectQuery = "SELECT * FROM course_pdf WHERE id = ?";
 
     const post = await new Promise((resolve, reject) => {
       pool.query(getCourseSubjectQuery, [postId], (error, result) => {
@@ -214,19 +247,23 @@ const Edit = async (req, res) => {
         resolve(result);
       });
     });
-    const subjects = await new Promise((resolve, reject) => {
-      pool.query("SELECT id, subject_name FROM course_subjects WHERE deleted_at IS NULL", (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      });
-    });
+   const subjects = await new Promise((resolve, reject) => {
+  pool.query(
+    "SELECT id, subject_name FROM course_subjects WHERE course_id = ? AND deleted_at IS NULL",
+    [post.course_id], // parameterized query to prevent SQL injection
+    (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    }
+  );
+});
     const topics = await new Promise((resolve, reject) => {
       pool.query("SELECT id, topic_name FROM course_topics WHERE deleted_at IS NULL", (err, result) => {
         if (err) return reject(err);
         resolve(result);
       });
     });
-        const chapters = await getChapterDataFromTable();
+       const chapters = await getChapterDataBySubject(post.subject_id);
     const categories = await new Promise((resolve, reject) => {
       pool.query("SELECT id, category_name FROM categories WHERE deleted_at IS NULL", (err, result) => {
         if (err) return reject(err);
@@ -234,6 +271,8 @@ const Edit = async (req, res) => {
       });
     });
      const course = await Helper.getCourseDetails(post.course_id);
+
+     console.log(course); 
     res.render("admin/course-pdf/create", {
       success: req.flash("success"),
       error: req.flash("error"),
@@ -261,7 +300,7 @@ const Update = async (req, res) => {
   const chapter_pdfId = req.params.postId;
   const isInsert = !chapter_pdfId || chapter_pdfId === "null" || chapter_pdfId === "0";
 
-  const { course_id, subject_id, chapter_id, status } = req.body;
+  const { course_id, subject_id, chapter_id, title,  status } = req.body;
   const pdfFile = req?.files?.pdf?.[0];
 
   const errors = {};
@@ -287,13 +326,13 @@ const Update = async (req, res) => {
       const pdfPath = pdfFile ? `/uploads/course-pdf/${pdfFile.filename}` : null;
 
       const insertQuery = `
-        INSERT INTO course-pdf (course_id, subject_id, chapter_id, status, pdf)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO course_pdf (course_id, subject_id, chapter_id, title,status, pdf)
+        VALUES (?, ?, ?, ?, ?,?)
       `;
 
       pool.query(
         insertQuery,
-        [course_id.trim(), subject_id.trim(), chapter_id.trim(), status, pdfPath],
+        [course_id.trim(), subject_id.trim(), chapter_id.trim(), title,status, pdfPath],
         (err) => {
           if (err) {
             console.error(err);
@@ -326,7 +365,7 @@ const Update = async (req, res) => {
       values.push(chapter_pdfId); // ID for WHERE clause
 
       const setClause = updateFields.map(field => `${field} = ?`).join(", ");
-      const updateQuery = `UPDATE course-pdf SET ${setClause} WHERE id = ?`;
+      const updateQuery = `UPDATE course_pdf SET ${setClause} WHERE id = ?`;
 
       pool.query(updateQuery, values, (err) => {
         if (err) {
@@ -348,24 +387,35 @@ const Update = async (req, res) => {
 };
 
 
-
 const Delete = async (req, res) => {
   try {
-    const categorieId = req.params.postId;
+    const pdfId = req.params.postId;
 
-    const softDeleteQuery = "UPDATE course-pdf SET deleted_at = NOW() WHERE id = ?";
+    // Get course_id from course_pdf table
+    const getCourseQuery = "SELECT course_id FROM course_pdf WHERE id = ?";
+    const courseResult = await new Promise((resolve, reject) => {
+      pool.query(getCourseQuery, [pdfId], (error, result) => {
+        if (error) return reject(error);
+        resolve(result[0]); // assuming one row
+      });
+    });
 
-    pool.query(softDeleteQuery, [categorieId], (error, result) => {
-      if (error) {
-        console.error(error);
-        return req.flash("success", "Internal server error");
-      }
+    const courseId = courseResult?.course_id || null;
+
+    // Soft delete the course_pdf entry
+    const softDeleteQuery = "UPDATE course_pdf SET deleted_at = NOW() WHERE id = ?";
+    await new Promise((resolve, reject) => {
+      pool.query(softDeleteQuery, [pdfId], (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      });
     });
 
     req.flash("success", "Chapter PDF soft deleted successfully");
-    return res.redirect("/admin/course-pdf-list");
+    return res.redirect(`/admin/course-pdf-list/${courseId}`);
   } catch (error) {
-    req.flash("error", error.message);
+    console.error(error);
+    req.flash("error", "Internal server error");
     return res.redirect(`/admin/course-pdf-list`);
   }
 };
@@ -374,7 +424,7 @@ const Restore = async (req, res) => {
   try {
     const chapterId = req.params.chapterId;
 
-    const restoreQuery = "UPDATE course-pdf SET deleted_at = NULL WHERE id = ?";
+    const restoreQuery = "UPDATE course_pdf SET deleted_at = NULL WHERE id = ?";
 
     pool.query(restoreQuery, [chapterId], (error, result) => {
       if (error) {
@@ -396,7 +446,7 @@ const PermanentDelete = async (req, res) => {
   try {
     const chapterId = req.params.chapterId;
 
-    const deleteQuery = "DELETE FROM course-pdf WHERE id = ?";
+    const deleteQuery = "DELETE FROM course_pdf WHERE id = ?";
 
     pool.query(deleteQuery, [chapterId], (error, result) => {
       if (error) {
@@ -422,13 +472,13 @@ const Show = async (req, res) => {
   try {
     const query = `
       SELECT 
-        course-pdf.*, 
+        course_pdf.*, 
         courses.course_name,
         subjects.subject_name
-      FROM course-pdf
-      LEFT JOIN courses ON course-pdf.course_id = courses.id
-      LEFT JOIN subjects ON course-pdf.subject_id = course_subjects.id
-      WHERE course-pdf.id = ?
+      FROM course_pdf
+      LEFT JOIN courses ON course_pdf.course_id = courses.id
+      LEFT JOIN subjects ON course_pdf.subject_id = course_subjects.id
+      WHERE course_pdf.id = ?
       LIMIT 1
     `;
 

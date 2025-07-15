@@ -16,6 +16,13 @@ router.get(
   adminauthenticateCustomer,
   BannerController.List
 );
+
+
+router.get(
+  "/admin/banner-list3",
+  adminauthenticateCustomer,
+  BannerController.List
+);
 router.get(
   "/admin/banner-create",
   adminauthenticateCustomer,

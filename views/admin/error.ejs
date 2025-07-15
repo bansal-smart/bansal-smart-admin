@@ -1,0 +1,14 @@
+<%- include('layouts/header') %>
+
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="alert alert-danger">
+      <h4><i class="fa fa-exclamation-triangle"></i> <%= title %></h4>
+      <p><strong>Page:</strong> <%= page_name %></p>
+      <p><strong>Error Message:</strong> <%= error_message %></p>
+      <pre><code><%= stack %></code></pre>
+    </div>
+  </div>
+</section>
+
+<%- include('layouts/footer') %>

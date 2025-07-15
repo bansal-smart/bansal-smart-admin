@@ -1,0 +1,73 @@
+<%- include('../layouts/header') %>
+
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title mb-0"><%= page_name %></h4>
+       <button type="button" id="backButton" class="btn btn-primary btn-sm">
+  <i class="fa fa-arrow-left"></i> Back
+</button>
+      </div>
+
+      <div class="card-body">
+        <table class="table table-bordered">
+          <tbody>
+            <tr>
+              <th>Title</th>
+              <td><%= post.title %></td>
+            </tr>
+            <tr>
+              <th>Course</th>
+              <td><%= post.course_name %></td>
+            </tr>
+            <tr>
+              <th>Subject</th>
+              <td><%= post.subject_name %></td>
+            </tr>
+            <tr>
+              <th>Chapter</th>
+              <td><%= post.chapter_name %></td>
+            </tr>
+            <tr>
+              <th>Class Time</th>
+              <td><%= new Date(post.class_time).toLocaleString() %></td>
+            </tr>
+            <tr>
+              <th>Link</th>
+              <td><a href="<%= post.link %>" target="_blank"><%= post.link %></a></td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td>
+                <% if (post.status == 1) { %>
+                  <span class="badge badge-success">Active</span>
+                <% } else { %>
+                  <span class="badge badge-danger">Inactive</span>
+                <% } %>
+              </td>
+            </tr>
+            <tr>
+              <th>Created At</th>
+              <td><%= new Date(post.created_at).toLocaleString() %></td>
+            </tr>
+            <tr>
+              <th>Updated At</th>
+              <td><%= new Date(post.updated_at).toLocaleString() %></td>
+            </tr>
+            <% if (post.image) { %>
+              <tr>
+                <th>Image</th>
+                <td>
+                  <img src="<%= post.image %>" alt="Image" style="max-width: 200px;">
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../layouts/footer') %>

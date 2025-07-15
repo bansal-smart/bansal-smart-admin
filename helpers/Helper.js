@@ -26,10 +26,10 @@ async function getActiveCourseClasses(category_id = null) {
     let query = `SELECT * FROM course_classes WHERE status = 1 AND deleted_at IS NULL`;
     const params = [];
 
-    if (category_id) {
-      query += ` AND category_id = ?`;
-      params.push(category_id);
-    }
+    // if (category_id) {
+    //   query += ` AND category_id = ?`;
+    //   params.push(category_id);
+    // }
 
     const [rows] = await pool.promise().execute(query, params);
     return rows;
@@ -266,20 +266,20 @@ async function getOtherActiveTestSeries(slug) {
 }
 const getCoursesByCategoryId = async (categoryId, columns = []) => {
   try {
-    // Select only requested columns or all
     const courseFields =
       columns.length > 0
         ? columns.map((col) => `c.\`${col}\``).join(", ")
         : "c.*";
 
-    const selectFields = `${courseFields}, cat.category_name`;
+    const selectFields = `${courseFields}, cat.category_name, cls.name AS class_name`;
 
     const query = `
       SELECT ${selectFields}
       FROM courses c
       JOIN categories cat ON c.category_id = cat.id
+      LEFT JOIN course_classes cls ON cls.id = c.course_class_id
       WHERE c.category_id = ? AND c.status = 1 AND c.deleted_at IS NULL
-      ORDER BY c.id DESC
+      ORDER BY c.course_serial_no asc
     `;
 
     const [courses] = await pool.promise().query(query, [categoryId]);
@@ -366,18 +366,33 @@ const getServicableCities = async (columns = []) => {
   }
 };
 
-// Fetch all testimonials with optional selected columns
-const getTestimonials = async (columns = []) => {
+const getTestimonials = async (columns = [], filters = {}, orderBy = "id DESC") => {
   try {
     const selectFields = columns.length > 0 ? columns.join(", ") : "*";
-    const query = `SELECT ${selectFields} FROM testimonials WHERE 1`; // Add conditions if needed
-    const [testimonials] = await pool.promise().query(query);
+
+    // Start query
+    let query = `SELECT ${selectFields} FROM testimonials WHERE status = 1`;
+    const queryParams = [];
+
+    // Add dynamic filters
+    for (const [key, value] of Object.entries(filters)) {
+      query += ` AND ${key} = ?`;
+      queryParams.push(value);
+    }
+
+    // Add ordering
+    if (orderBy) {
+      query += ` ORDER BY ${orderBy}`;
+    }
+
+    const [testimonials] = await pool.promise().query(query, queryParams);
     return testimonials;
   } catch (error) {
     console.error("Error fetching testimonials:", error);
     throw error;
   }
 };
+
 
 // Fetch all FAQs with optional selected columns
 const getFaqs = async (columns = []) => {
@@ -391,6 +406,20 @@ const getFaqs = async (columns = []) => {
     throw error;
   }
 };
+
+// Fetch all services with optional selected columns
+const getServices = async (columns = []) => {
+  try {
+    const selectFields = columns.length > 0 ? columns.join(", ") : "*";
+    const query = `SELECT ${selectFields} FROM services WHERE status = 1 AND (deleted_at IS NULL OR deleted_at = '0')`;
+    const [services] = await pool.promise().query(query);
+    return services;
+  } catch (error) {
+    console.error("Error fetching services:", error);
+    throw error;
+  }
+};
+
 
 // Fetch all banners with optional selected columns
 const getBanners = async (columns = [], filters = {}) => {
@@ -659,7 +688,26 @@ const getCenterDetailsById = async (centerId, columns = []) => {
     throw error;
   }
 };
+const getCenterDetailsBySlug = async (slug, columns = []) => {
+  try {
+    const selectFields =
+      columns.length > 0
+        ? `c.${columns.join(", c.")}`
+        : "c.*";
 
+    const query = `
+      SELECT ${selectFields}
+      FROM centers c
+      WHERE c.slug = ? AND (c.deleted_at IS NULL OR c.deleted_at = '0')
+    `;
+
+    const [centerDetails] = await pool.promise().query(query, [slug]);
+    return centerDetails[0] || null;
+  } catch (error) {
+    console.error("Error fetching center details:", error);
+    throw error;
+  }
+};
 
 const getCMSContentBySlug = async (slug) => {
   try {
@@ -830,6 +878,20 @@ const getTestCountByCourseId = async (courseId) => {
     });
   });
 };
+
+const getLiveClassCountByCourseId = async (courseId) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT COUNT(*) AS count 
+      FROM live_classes
+      WHERE course_id = ?`;
+    pool.query(query, [courseId], (err, results) => {
+      if (err) return reject(err);
+      resolve(results[0].count);
+    });
+  });
+};
+
 const getBlogs = async () => {
   return new Promise((resolve, reject) => {
     const query = `
@@ -897,6 +959,249 @@ const getBlogDetails = async (slug) => {
 };
 
 
+const getMyLiveTestOrders = async (userId) => {
+  try {
+    const [orders] = await pool.promise().query(
+      `
+      SELECT co.*, ts.test_name, ts.image, ts.start_time,ts.end_time
+      FROM live_test_orders co
+      JOIN live_test ts ON co.test_id = ts.id
+      WHERE co.user_id = ?
+      ORDER BY co.created_at DESC
+      `,
+      [userId]
+    );
+    return orders;
+  } catch (error) {
+    console.error("Error fetching live test orders:", error);
+    throw error;
+  }
+};
+
+const getMyBooksOrders = async (userId) => {
+  try {
+    const promisePool = pool.promise();
+
+    const [rows] = await promisePool.query(
+      `
+      SELECT 
+        bod.order_id,
+        bo.order_id AS order_code,
+        bo.total_amount,
+        bo.payment_status,
+        bo.created_at AS order_date,
+
+        bod.book_id,
+        bod.book_name,
+        bod.book_price,
+        bod.offer_price,
+        bod.quantity,
+        bod.total_price,
+
+        b.image AS book_image
+
+      FROM book_order_details bod
+      JOIN book_orders bo ON bod.order_id = bo.id
+      JOIN books b ON b.id = bod.book_id
+      WHERE bo.user_id = ?
+      ORDER BY bo.created_at DESC
+      `,
+      [userId]
+    );
+
+    // Group by order_id
+    const ordersMap = {};
+    for (const row of rows) {
+      if (!ordersMap[row.order_id]) {
+        ordersMap[row.order_id] = {
+          order_id: row.order_id,
+          order_code: row.order_code,
+          total_amount: row.total_amount,
+          payment_status: row.payment_status,
+          order_date: row.order_date,
+          items: [],
+        };
+      }
+
+      ordersMap[row.order_id].items.push({
+        book_id: row.book_id,
+        book_name: row.book_name,
+        book_price: row.book_price,
+        offer_price: row.offer_price,
+        quantity: row.quantity,
+        total_price: row.total_price,
+        book_image: row.book_image,
+      });
+    }
+
+    return Object.values(ordersMap);
+  } catch (error) {
+    console.error("Error fetching book orders:", error);
+    throw error;
+  }
+};
+const getStudentDetails = async (user_id) => {
+  const promisePool = pool.promise();
+  const [rows] = await promisePool.query(
+    `SELECT id, name, email FROM front_users WHERE id = ? LIMIT 1`,
+    [user_id]
+  );
+  return rows[0] || null;
+};
+const sendOtp = async (customer, otp, res) => {
+  try {
+    const SMS_USERNAME = "20190320";
+    const SMS_PASSWORD = "Bansal@1234";
+    const SENDER_ID = "VBNSAL"; // Use the correct approved sender ID
+
+    const User = customer.name;
+
+    //const message = `Dear ${User}, Download our app BANSAL LIVE ADMISSION from Playstore to appear in BOOST. Your registered number is ${mobileNumber}. You can login via OTP. Team BANSAL`;
+    const message =  `Dear Applicant, ${otp} is your verification code for Online Application at Bansal Classes.Team Bansal`;
+    const encodedMsg = encodeURIComponent(message);
+    const smsApiUrl = `http://164.52.195.161/API/SendMsg.aspx?uname=${SMS_USERNAME}&pass=${SMS_PASSWORD}&send=${SENDER_ID}&dest=${mobileNumber}&msg=${encodedMsg}&priority=1`;
+
+    const response = await axios.get(smsApiUrl);
+
+   
+    
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Error sending OTP",
+      
+    });
+  }
+};
+
+const handleTableAction = async ({
+  req,
+  res,
+  action = "soft-delete", // "restore" | "delete"
+  table_name,
+  idField = "id",
+  redirectUrl,
+  title = "Record"
+}) => {
+  const id = req.params.postId || req.params.id || req.params[`${table_name}_id`];
+  let query = "";
+  let successMsg = "";
+  let errorMsg = "";
+
+  switch (action) {
+    case "soft-delete":
+      query = `UPDATE ${table_name} SET deleted_at = NOW(), status = 0 WHERE ${idField} = ?`;
+      successMsg = `${title} soft deleted successfully`;
+      errorMsg = `Failed to soft delete ${title}`;
+      break;
+    case "restore":
+      query = `UPDATE ${table_name} SET deleted_at = NULL WHERE ${idField} = ?`;
+      successMsg = `${title} restored successfully`;
+      errorMsg = `Failed to restore ${title}`;
+      break;
+    case "delete":
+      query = `DELETE FROM ${table_name} WHERE ${idField} = ?`;
+      successMsg = `${title} deleted permanently`;
+      errorMsg = `Failed to delete ${title}`;
+      break;
+  }
+
+  try {
+    await pool.promise().query(query, [id]);
+    req.flash("success", successMsg);
+  } catch (err) {
+    console.error(`[${action.toUpperCase()} ERROR]`, err);
+    req.flash("error", `${errorMsg}. ${err.message}`);
+  }
+
+  return res.redirect(redirectUrl);
+};
+
+const getLiveClassDetails = async (id) => {
+  try {
+    const query = `
+      SELECT 
+        lc.*, 
+        c.course_name, 
+        cs.subject_name, 
+        cc.chapter_name
+      FROM live_classes lc
+      LEFT JOIN courses c ON lc.course_id = c.id
+      LEFT JOIN course_subjects cs ON lc.subject_id = cs.id
+      LEFT JOIN course_chapters cc ON lc.chapter_id = cc.id
+      WHERE lc.id = ?
+      LIMIT 1
+    `;
+
+    const [rows] = await pool.promise().query(query, [id]);
+
+    if (!rows || rows.length === 0) {
+      throw new Error("Live class not found");
+    }
+
+    return rows[0];
+  } catch (error) {
+    console.error("getLiveLiveDetails Error:", error.message);
+    throw error;
+  }
+};
+
+
+
+const getBookDetails = async (slug, userId = 0) => {
+  const [bookResult] = await pool.promise().query(
+    `SELECT * FROM books WHERE slug = ? AND status = 1 AND deleted_at IS NULL`,
+    [slug]
+  );
+ console.log(userId);
+  if (bookResult.length === 0) {
+    return null; // handle in controller
+  }
+
+  const bookId = bookResult[0].id;
+
+  let is_cart = 0;
+  if (userId) {
+    const [cart] = await pool.promise().query(
+      `SELECT 1 FROM carts WHERE user_id = ? AND item_id = ? AND item_type = 'book'`,
+      [userId, bookId]
+    );
+    is_cart = cart.length > 0 ? 1 : 0;
+  }
+
+  return { ...bookResult[0], is_cart };
+};
+
+
+  const getCartData = async (userId) => {
+  const [rows] = await pool
+    .promise()
+    .query(
+      `SELECT 
+        id AS cart_id,
+        user_id,
+        item_id,
+        item_type,
+        item_quantity,
+        item_price
+      FROM carts
+      WHERE user_id = ? AND item_type = 'book'`,
+      [userId]
+    );
+
+  return rows.map((item) => ({
+    cart_id: item.cart_id,
+    user_id: item.user_id,
+    item_id: item.item_id,
+    item_type: item.item_type,
+    quantity: item.item_quantity,
+    item_price: Number(item.item_price || 0),
+    cart_price: Number(item.item_price || 0), // For consistency with previous usage
+  }));
+};
+
+
+
 module.exports = {
   formatDate,
   getActiveCategoriesByType,
@@ -914,6 +1219,7 @@ module.exports = {
   getCenters,
   getCategoryDetailsById,
   getCenterDetailsById,
+    getCenterDetailsBySlug,
   getCourseClassDetailsById,
   getCMSContentBySlug,
   checkImagePath,
@@ -935,7 +1241,18 @@ module.exports = {
   generateSlug,
   getTestSeriesByCategoryId,
   getTestCountByCourseId,
+  getLiveClassCountByCourseId,
   getActiveGallery,
   getLiveTestByCategoryId,
-  getLiveTestDetails
+  getLiveTestDetails,
+  getMyLiveTestOrders,
+  getStudentDetails,
+  sendOtp,
+  getServices,
+  handleTableAction,
+  getLiveClassDetails,
+  getBookDetails,
+  getCartData,
+  getMyBooksOrders,
+  
 };

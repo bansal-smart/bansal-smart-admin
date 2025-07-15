@@ -9,6 +9,7 @@ const base_url = process.env.BASE_URL;
 // List Coupons
 const List = async (req, res) => {
   try {
+    const status = req.query.status || "active";
     const where =
       req.query.status === "trashed"
         ? "WHERE coupons.deleted_at IS NOT NULL"
@@ -39,7 +40,9 @@ const List = async (req, res) => {
       coupons,
       req,
       page_name,
-        list_url: "/admin/coupon-list",
+      list_url: "/admin/coupon-list",
+      actions_url: "/admin/coupon", // pass this to dynamically build URLs in EJS
+      status,
       trashed_list_url: "/admin/coupon-list/?status=trashed",
       create_url: "/admin/coupon-create",
     });
@@ -71,7 +74,7 @@ const Create = async (req, res) => {
 const Edit = async (req, res) => {
   try {
     const couponId = req.params.couponId;
-    console.log(couponId); 
+    console.log(couponId);
     const post = await new Promise((resolve, reject) => {
       pool.query(
         "SELECT * FROM coupons WHERE id = ?",
@@ -91,12 +94,12 @@ const Edit = async (req, res) => {
     });
 
     const imageExists = checkImagePath(post.coupon_image); // use post.coupon_image
-    
+
     res.render("admin/coupons/create", {
       success: req.flash("success"),
       error: req.flash("error"),
       post,
-    image: `${post.coupon_image}`,
+      image: `${post.coupon_image}`,
       form_url: "/admin/coupon-update/" + couponId,
       page_name: "Edit",
       title: "Coupon",
@@ -110,7 +113,7 @@ const Edit = async (req, res) => {
 const Update = async (req, res) => {
   const couponId = req.params.couponId;
   const body = req.body;
- const isInsert = !couponId || couponId === "null" || couponId === "0";
+  const isInsert = !couponId || couponId === "null" || couponId === "0";
   console.log(req.body);
 
   // Destructure and sanitize fields
@@ -149,9 +152,8 @@ const Update = async (req, res) => {
   if (!["0", "1"].includes(status))
     errors.status = ["Status must be '0' or '1'"];
 
-   if (isInsert) {
+  if (isInsert) {
     if (!imageFile) errors.image = ["Coupon image is required"];
-
   }
   if (Object.keys(errors).length > 0) {
     return res.status(422).json({
@@ -177,8 +179,7 @@ const Update = async (req, res) => {
   };
 
   try {
-
-      if (imageFile) data.coupon_image = `/uploads/coupons/${imageFile.filename}`;
+    if (imageFile) data.coupon_image = `/uploads/coupons/${imageFile.filename}`;
     if (couponId) {
       // Update query
       const fields = Object.keys(data);
@@ -218,12 +219,12 @@ const Update = async (req, res) => {
       pool.query(insertQuery, values, (err, result) => {
         if (err) {
           console.error(err);
-       
-            return res.status(500).json({
-  success: false,
-  message: "Insert failed",
-  error: err.message, // Only message
-});
+
+          return res.status(500).json({
+            success: false,
+            message: "Insert failed",
+            error: err.message, // Only message
+          });
         }
 
         return res.json({
@@ -238,8 +239,6 @@ const Update = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-
 
 // const checkImagePath = (filePath) => {
 //     const normalizedPath = filePath.normalize(filePath); // converts \ to /
@@ -411,7 +410,8 @@ const Delete = async (req, res) => {
   try {
     const couponId = req.params.couponId;
     const softDeleteQuery =
-      "UPDATE coupons SET deleted_at = NOW() WHERE id = ?";
+      "UPDATE coupons SET deleted_at = NOW(), status = 0 WHERE id = ?";
+      
 
     pool.query(softDeleteQuery, [couponId], (error, result) => {
       if (error) {

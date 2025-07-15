@@ -135,3 +135,31 @@
     window.history.back();
   });
 </script>
+
+<script>
+  $(document).ready(function () {
+    $('#subject_id').on('change', function () {
+      const subjectId = $(this).val();
+      $('#chapter_id').html('<option value="">Loading...</option>');
+
+      if (subjectId) {
+        $.ajax({
+          url: '/admin/course-subject-get-chapters/' + subjectId,
+          type: 'GET',
+          success: function (response) {
+            let options = '<option value="">Select Chapter</option>';
+            response.forEach(ch => {
+              options += `<option value="${ch.id}">${ch.chapter_name}</option>`;
+            });
+            $('#chapter_id').html(options);
+          },
+          error: function () {
+            $('#chapter_id').html('<option value="">Error loading chapters</option>');
+          }
+        });
+      } else {
+        $('#chapter_id').html('<option value="">Select Chapter</option>');
+      }
+    });
+  });
+</script>

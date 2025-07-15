@@ -16,7 +16,9 @@ const cors = require("cors");
 
 const mysql = require("mysql2/promise");
 const app = express();
-
+const actions_url = "/admin/test-series";
+const table_name = "live_test";
+const module_title = "Test Series";
 // Helper functions
 const checkImagePath = (relativePath) => {
   if (!relativePath) return false;
@@ -398,6 +400,147 @@ module.exports = {
 
   QuestionUpload: async (req, res) => {
     try {
+     // console.log(":inbox_tray: Upload started");
+      // Setup upload folder
+      const uploadDir = path.join(__dirname, "public", "uploads");
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      //  console.log(":open_file_folder: Upload folder created:", uploadDir);
+      }
+      // Convert DOCX to HTML + extract images
+      // const result = await mammoth.convertToHtml(
+      //   { path: req.file.path },
+      //   {
+      //     convertImage: mammoth.images.inline(async function (image) {
+      //       try {
+      //         const imageBuffer = await image.read("base64");
+      //         const imageName = `img_${Date.now()}.png`;
+      //         const imagePath = path.join(uploadDir, imageName);
+      //         fs.writeFileSync(imagePath, Buffer.from(imageBuffer, "base64"));
+      //         console.log(":white_check_mark: Image extracted:", imageName);
+      //         return { src: `/uploads/${imageName}` };
+      //       } catch (err) {
+      //         console.error(":x: Image extraction failed:", err.message);
+      //         return { src: "" };
+      //       }
+      //     }),
+      //   }
+      // );
+      const result = await mammoth.convertToHtml(
+        { path: req.file.path },
+        {
+          convertImage: mammoth.images.inline(async function (image) {
+            try {
+              const buffer = await image.read("base64");
+              const contentType = image.contentType; // like "image/png" or "image/jpeg"
+              const base64Src = `data:${contentType};base64,${buffer}`;
+           //   console.log(":paperclip: Base64 image embedded");
+              return { src: base64Src };
+            } catch (err) {
+              console.error(":x: Failed to read base64 image:", err.message);
+              return { src: "" };
+            }
+          }),
+        }
+      );
+      const testId = req.body.test_id;
+      const html = result.value;
+      const $ = cheerio.load(html);
+      const questions = [];
+      $("table").each((index, table) => {
+        const questionData = {};
+        const rows = $(table).find("tr");
+        const rowData = [];
+        rows.each((i, row) => {
+          const cell = $(row).find("td").eq(1);
+          // Extract text + image
+          const text = cell.text().trim();
+          const imgSrc = cell.find("img").attr("src");
+          let finalValue = "";
+          // if (imgSrc && text) {
+          //   finalValue = `<p>${text}</p><img src="${imgSrc}" />`;
+          // } else if (imgSrc) {
+          //   finalValue = `<img src="${imgSrc}" />`;
+          // } else {
+          //   finalValue = text;
+          // }
+          if (imgSrc && text) {
+            finalValue = `<p>${text}</p><img class="question-image-item" src="${imgSrc}" />`;
+          } else if (imgSrc) {
+            finalValue = `<img src="${imgSrc}" class="question-image-item"/>`;
+          } else {
+            finalValue = text;
+          }
+
+          rowData.push(finalValue);
+        });
+        // Map rowData to question fields
+
+        let answerRaw = rowData[6] || "";
+        let answer = answerRaw
+          .split(",")
+          .map((opt) => opt.trim().toUpperCase())
+          .filter((opt) => opt !== "")
+          .join(",");
+        questionData.question_no = rowData[0] || "";
+        questionData.subject = rowData[1] || "";
+        questionData.question = rowData[2] || "";
+        questionData.question_type = rowData[3] || "";
+        questionData.correct_marks = rowData[4] || "";
+        questionData.marks = rowData[4] || "";
+        questionData.incorrect_marks = rowData[5] || "";
+        questionData.answer = answer;
+        questionData.partial_marks = rowData[7] || 0;
+        questionData.test_id = testId;
+        questionData.created_at = new Date();
+        questionData.updated_at = new Date();
+        questions.push(questionData);
+      });
+      if (questions.length === 0) {
+        console.log(":warning: No valid questions parsed.");
+        return res
+          .status(400)
+          .json({ success: false, message: "No valid questions found" });
+      }
+      // Remove previous test questions
+      console.log(":wastebasket: Removing old questions for test_id:", testId);
+      await pool
+        .promise()
+        .query("DELETE FROM live_test_questions WHERE test_id = ?", [testId]);
+      // Insert new questions
+      for (const [index, q] of questions.entries()) {
+        const keys = Object.keys(q);
+        const fields = keys.map((k) => `\`${k}\``).join(",");
+        const placeholders = keys.map(() => "?").join(",");
+        const values = keys.map((k) => q[k] ?? null);
+        console.log(
+          `:floppy_disk: Inserting Q${index + 1}:`,
+          q.question?.slice(0, 50)
+        );
+        await pool
+          .promise()
+          .query(
+            `INSERT INTO live_test_questions (${fields}) VALUES (${placeholders})`,
+            values
+          );
+      }
+      fs.unlinkSync(req.file.path);
+      console.log(":broom: Cleaned up uploaded file");
+      return res.status(200).json({
+        success: true,
+        message: "Questions uploaded with text/image successfully.",
+        redirect_url: `/admin/exam-question-list/${testId}`,
+      });
+    } catch (err) {
+      console.error(":x: Error uploading questions:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Error processing file." });
+    }
+  },
+
+  QuestionUploads: async (req, res) => {
+    try {
       const testId = req.body.test_id;
       const result = await mammoth.convertToHtml({ path: req.file.path });
       const html = result.value;
@@ -693,10 +836,7 @@ module.exports = {
       const [exams] = await poolPromise.query(
         "SELECT * FROM live_test WHERE id = ?",
         [testId]
-        
       );
-
-      
 
       const exam = exams.length > 0 ? exams[0] : null;
       res.render("admin/exam/question-list", {
@@ -768,6 +908,8 @@ module.exports = {
         error: req.flash("error"),
         customers: tests,
         req,
+        actions_url: actions_url, // pass this to dynamically build URLs in EJS
+        status,
         page_name: status === "trashed" ? "Trashed Exam List" : "Exam List",
         list_url: "/admin/exam-list",
         trashed_list_url: "/admin/exam-list/?status=trashed",
@@ -938,6 +1080,119 @@ module.exports = {
     } catch (error) {
       console.error("PermanentDelete Error:", error);
       handleError(res, req, "Error permanently deleting Exam");
+    }
+  },
+  ExamAnalysis: async (req, res) => {
+    try {
+      const test_id = req.params.postId;
+      const promisePool = pool.promise();
+
+      // ✅ Get exam details from live_test
+      const [examData] = await promisePool.query(
+        `SELECT * FROM live_test WHERE id = ? LIMIT 1`,
+        [test_id]
+      );
+
+      if (examData.length === 0) {
+        return res
+          .status(404)
+          .render("admin/404", { message: "Exam not found" });
+      }
+
+      const exam = examData[0];
+
+      // ✅ Get result summary from live_test_result
+      const [results] = await promisePool.query(
+        `SELECT * FROM live_test_result WHERE test_id = ?`,
+        [test_id]
+      );
+
+      // ✅ Define headers
+      const headers = [
+        "Student Name",
+        "Correct",
+        "Wrong",
+        "Skipped",
+        "Correct Score",
+        "Wrong Score",
+        "Total Score",
+        "Rank",
+        "Accuracy",
+        "Attempted Time",
+      ];
+
+      // ✅ Format rows
+      let rows = await Promise.all(
+        results.map(async (r) => {
+          const student = await Helper.getStudentDetails(r.frontuser_id);
+          const correct = r.correct || 0;
+          const wrong = r.wrong || 0;
+          const skipped = r.skipped || 0;
+          const correct_score = parseFloat(r.correct_score || 0);
+          const wrong_score = parseFloat(r.wrong_score || 0);
+          const totalScore = correct_score - wrong_score;
+          const accuracy =
+            correct + wrong > 0
+              ? ((correct / (correct + wrong)) * 100).toFixed(2) + "%"
+              : "0%";
+
+          // ✅ Format attempt time
+          const attemptedTime = r.created_at
+            ? new Date(r.created_at).toLocaleString("en-IN", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+              })
+            : "N/A";
+
+          return {
+            user_id: r.frontuser_id,
+            user_name: student ? student.name : "N/A",
+            correct,
+            wrong,
+            skipped,
+            correct_score,
+            wrong_score,
+            totalScore: totalScore.toFixed(2),
+            accuracy,
+            attempted_time: attemptedTime,
+          };
+        })
+      );
+
+      // ✅ Sort rows by totalScore descending
+      rows.sort((a, b) => b.totalScore - a.totalScore);
+
+      // ✅ Assign rank
+      rows = rows.map((row, index) => ({
+        ...row,
+        rank: index + 1,
+      }));
+
+      // ✅ Render result-analysis view
+      res.render("admin/exam/result-analysis", {
+        success: req.flash("success"),
+        error: req.flash("error"),
+        headers,
+        rows,
+        req,
+        results,
+        exam,
+        page_name: "Result Analysis",
+        list_url: "/admin/exam-list",
+        trashed_list_url: "/admin/exam-list/?status=trashed",
+        create_url: "/admin/exam-create",
+      });
+    } catch (error) {
+      console.error("Error in ExamAnalysis:", error);
+      res.status(500).json({
+        status: false,
+        message: "Server Error",
+      });
     }
   },
 };

@@ -51,7 +51,21 @@
                   </select>
                 </div>
               </div>
+   <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Image *</label>
+                                        <input type="file" class="form-control" name="image"
+                                        accept="image/*" 
+                                            onchange="readURL(this, 'image_view');" id="image" />
+                                        <!-- Use the course image or fallback to the default image -->
+                                        
 
+                                        <img id="image_view"
+                                            src="<%= category.image ? publicUrl + category.image : base_url + 'admin/images/default-featured-image.png' %>"
+                                            width="150px" />
+
+                                    </div>
+                                </div>
               <!-- Hidden Fields -->
               <input type="hidden" name="slug" value="<%= category.slug %>">
               <input type="hidden" name="id" value="<%= category.id %>">

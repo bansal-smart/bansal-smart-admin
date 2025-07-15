@@ -1,6 +1,8 @@
 const pool = require("../../db/database");
 const randomstring = require("randomstring");
 const jwt = require("jsonwebtoken");
+const path = require("path");
+const fs = require("fs");
 const { validateRequiredFields } = require("../../helpers/validationsHelper");
 
 // List Categories
@@ -118,33 +120,22 @@ const slugify = (text) => {
     .replace(/[^\w\-]+/g, '')     // Remove all non-word chars
     .replace(/\-\-+/g, '-');      // Replace multiple - with single -
 };
-
 const Update = async (req, res) => {
   const categoryId = req.params.categoryId;
-  let { category_name, category_type, status } = req.body;
+  const isInsert = !categoryId || categoryId === "null" || categoryId === "0";
 
-  // Trim inputs
+  let { category_name, category_type, status } = req.body;
+  const imageFile = req.file || (req.files?.image?.[0]);
+
   category_name = category_name?.trim();
   category_type = category_type?.trim();
 
   const errors = {};
-
-  // Validation
-  if (!category_name) {
-    errors.category_name = ["Category name is required"];
-  }
-
-  if (!category_type) {
-    errors.category_type = ["Category type is required"];
-  }
-
-  if (status !== undefined && status !== null && status !== "") {
-    if (!["0", "1"].includes(status.toString())) {
-      errors.status = ["Status must be 0 or 1"];
-    }
-  } else {
-    status = "1"; // Default if not provided
-  }
+  if (isInsert && !imageFile) errors.image = ["Category image is required"];
+  if (!category_name) errors.category_name = ["Category name is required"];
+  if (!category_type) errors.category_type = ["Category type is required"];
+  if (status === undefined || status === null || status === "") status = "1";
+  else if (!["0", "1"].includes(status.toString())) errors.status = ["Status must be 0 or 1"];
 
   if (Object.keys(errors).length > 0) {
     return res.status(422).json({
@@ -156,63 +147,52 @@ const Update = async (req, res) => {
 
   try {
     const slug = slugify(category_name);
-
     const data = { category_name, category_type, status, slug };
-    const setClauses = [];
-    const values = [];
 
-    for (const key in data) {
-      if (data[key] !== undefined && data[key] !== null) {
-        setClauses.push(`${key} = ?`);
-        values.push(data[key]);
+    if (imageFile) {
+      const imageName = imageFile.filename;
+      //data.image = imageName; // Only store filename
+
+
+    data.image = `/uploads/category/${imageFile.filename}`;
+
+
+      if (!isInsert) {
+        // Delete old image if it's different from new
+        const [rows] = await pool.promise().query(
+          `SELECT image FROM categories WHERE id = ?`,
+          [categoryId]
+        );
+        const oldImage = rows?.[0]?.image;
+
+        if (oldImage && oldImage !== imageName) {
+          const oldPath = path.join(__dirname, "../../public/uploads/category", oldImage);
+          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        }
       }
     }
 
-    if (setClauses.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No valid fields provided",
-      });
-    }
+    if (isInsert) {
+      const insertQuery = `INSERT INTO categories (${Object.keys(data).join(", ")}) VALUES (${Object.keys(data).map(() => "?").join(", ")})`;
+      const values = Object.values(data);
 
-    if (categoryId) {
-      // UPDATE
-      values.push(categoryId);
-      const query = `UPDATE categories SET ${setClauses.join(", ")} WHERE id = ?`;
+      await pool.promise().query(insertQuery, values);
 
-      pool.query(query, values, (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({
-            success: false,
-            message: "Category update failed",
-          });
-        }
-
-        return res.status(200).json({
-          success: true,
-          redirect_url: "/admin/category-list",
-          message: "Category updated successfully",
-        });
+      return res.status(200).json({
+        success: true,
+        redirect_url: "/admin/category-list",
+        message: "Category created successfully",
       });
     } else {
-      // INSERT
-      const insertQuery = `INSERT INTO categories (${Object.keys(data).join(", ")}) VALUES (${Object.keys(data).map(() => "?").join(", ")})`;
+      const updateQuery = `UPDATE categories SET ${Object.keys(data).map(k => `${k} = ?`).join(", ")} WHERE id = ?`;
+      const values = [...Object.values(data), categoryId];
 
-      pool.query(insertQuery, values, (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({
-            success: false,
-            message: "Category creation failed",
-          });
-        }
+      await pool.promise().query(updateQuery, values);
 
-        return res.status(200).json({
-          success: true,
-          redirect_url: "/admin/category-list",
-          message: "Category created successfully",
-        });
+      return res.status(200).json({
+        success: true,
+        redirect_url: "/admin/category-list",
+        message: "Category updated successfully",
       });
     }
   } catch (error) {
@@ -220,12 +200,10 @@ const Update = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Something went wrong",
-      errors: [{ message: error.message || 'Unexpected server error' }],
+      errors: [{ message: error.message }],
     });
   }
 };
-
-
 
 // Soft Delete Category
 const Delete = async (req, res) => {

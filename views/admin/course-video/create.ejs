@@ -87,11 +87,12 @@
                 </div>
 
                <div class="form-group col-sm-6">
-  <label class="form-label">Video *</label>
-  <input type="file" class="form-control" name="video" id="video" accept="video/*">
+  <!-- <label class="form-label">Video *</label>
+  <input type="file" class="form-control" name="video" id="video" accept="video/*"> -->
+  <label class="form-label">Video URL *</label>
+  <input type="text" placeholder="Youtube URL" class="form-control" name="video_url" id="video_url" value="<%= post.video_url %>" >
 
-  <!-- Video Preview -->
-  <video id="videoPreview" width="100%" height="240" style="display:none;" controls></video>
+  <!-- <video id="videoPreview" width="100%" height="240" style="display:none;" controls></video>
 
   <% if (post.video) { %>
     <p class="mt-2">Current Video:</p>
@@ -99,7 +100,7 @@
       <source src="<%= public_url + post.video %>" type="video/mp4">
       Your browser does not support the video tag.
     </video>
-  <% } %>
+  <% } %> -->
 </div>
 
                 <div class="form-group col-sm-6">
@@ -138,5 +139,34 @@
   // Back button to go to previous page
   document.getElementById('backButton').addEventListener('click', () => {
     window.history.back();
+  });
+</script>
+
+
+<script>
+  $(document).ready(function () {
+    $('#subject_id').on('change', function () {
+      const subjectId = $(this).val();
+      $('#chapter_id').html('<option value="">Loading...</option>');
+
+      if (subjectId) {
+        $.ajax({
+          url: '/admin/course-subject-get-chapters/' + subjectId,
+          type: 'GET',
+          success: function (response) {
+            let options = '<option value="">Select Chapter</option>';
+            response.forEach(ch => {
+              options += `<option value="${ch.id}">${ch.chapter_name}</option>`;
+            });
+            $('#chapter_id').html(options);
+          },
+          error: function () {
+            $('#chapter_id').html('<option value="">Error loading chapters</option>');
+          }
+        });
+      } else {
+        $('#chapter_id').html('<option value="">Select Chapter</option>');
+      }
+    });
   });
 </script>

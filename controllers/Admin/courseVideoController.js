@@ -55,7 +55,8 @@ const List = async (req, res) => {
     const videoCount = await Helper.getVideoCountByCourseId(courseId);
              const bookingCount = await Helper.getBookingCountByCourseId(courseId);
              const testCount = await Helper.getTestCountByCourseId(courseId);
-console.log(videos);
+              const  liveClassCount  = await Helper.getLiveClassCountByCourseId(courseId);
+
     res.render("admin/course-video/list", {
       success: req.flash("success"),
       error: req.flash("error"),
@@ -70,6 +71,7 @@ console.log(videos);
       videoCount,
       bookingCount,
       testCount,
+      liveClassCount,
       title: "Course Video List",
       list_url: `/admin/course-video-list/${courseId}`,
       trashed_list_url: `/admin/course-video-list/${courseId}?status=trashed`,
@@ -87,13 +89,14 @@ console.log(videos);
 
 const Create = async (req, res) => {
   try {
+    const courseId = req.params.courseId;
     const categories = await getCategoriesFromTable();
     const courses = await getCourseFromTable();
-    const subjects = await getSubjectFromTable();
-    const chapters = await getChapterDataFromTable();
+    const subjects = await getSubjectFromTable(courseId);
+    const chapters = [];
     const topics = await getTopicFromTable();
 
-    const courseId = req.params.courseId;
+   
     let post = {};
     const course = await Helper.getCourseDetails(courseId);
 
@@ -144,10 +147,13 @@ const getCourseFromTable = async () => {
     });
   });
 };
-const getSubjectFromTable = async () => {
+const getSubjectFromTable = async (course_id) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM course_subjects WHERE status = 1 AND deleted_at IS NULL`;
-    pool.query(query, (err, result) => {
+    const query = `
+      SELECT * FROM course_subjects 
+      WHERE status = 1 AND course_id = ? AND deleted_at IS NULL
+    `;
+    pool.query(query, [course_id], (err, result) => {
       if (err) {
         reject(err);
       } else {
@@ -157,10 +163,10 @@ const getSubjectFromTable = async () => {
   });
 };
 
-const getTopicFromTable = async () => {
+const getChapterDataFromTable = async (course_id) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM course_topics WHERE status = 1 AND deleted_at IS NULL`;
-    pool.query(query, (err, result) => {
+    const query = `SELECT * FROM course_chapters WHERE status = 1 AND course_id = ? AND deleted_at IS NULL`;
+     pool.query(query, [course_id], (err, result) => {
       if (err) {
         reject(err);
       } else {
@@ -169,9 +175,25 @@ const getTopicFromTable = async () => {
     });
   });
 };
-const getChapterDataFromTable = async () => {
+
+const getChapterDataBySubject = async (subject_id) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM course_chapters WHERE status = 1 AND deleted_at IS NULL`;
+    const query = `SELECT * FROM course_chapters WHERE status = 1 AND subject_id = ? AND deleted_at IS NULL`;
+     pool.query(query, [subject_id], (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
+
+
+
+const getTopicFromTable = async () => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT * FROM course_topics WHERE status = 1 AND deleted_at IS NULL`;
     pool.query(query, (err, result) => {
       if (err) {
         reject(err);
@@ -224,19 +246,23 @@ const Edit = async (req, res) => {
         resolve(result);
       });
     });
-    const subjects = await new Promise((resolve, reject) => {
-      pool.query("SELECT id, subject_name FROM course_subjects WHERE deleted_at IS NULL", (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      });
-    });
+      const subjects = await new Promise((resolve, reject) => {
+  pool.query(
+    "SELECT id, subject_name FROM course_subjects WHERE course_id = ? AND deleted_at IS NULL",
+    [post.course_id], // parameterized query to prevent SQL injection
+    (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    }
+  );
+});
     const topics = await new Promise((resolve, reject) => {
       pool.query("SELECT id, topic_name FROM course_topics WHERE deleted_at IS NULL", (err, result) => {
         if (err) return reject(err);
         resolve(result);
       });
     });
-    const chapters = await getChapterDataFromTable();
+    const chapters = await getChapterDataBySubject(post.subject_id);
     const categories = await new Promise((resolve, reject) => {
       pool.query("SELECT id, category_name FROM categories WHERE deleted_at IS NULL", (err, result) => {
         if (err) return reject(err);
@@ -272,7 +298,7 @@ const Update = async (req, res) => {
   console.log(req.body);
   const isInsert = !postId || postId === "null" || postId === "0";
 
-  const { category_id, course_id, subject_id, chapter_id, video_title, status } = req.body;
+  const { category_id, course_id, subject_id, chapter_id, video_title,video_url, status } = req.body;
   const video = req?.files?.video?.[0];
 
   const errors = {};
@@ -282,8 +308,9 @@ const Update = async (req, res) => {
   if (!subject_id?.trim()) errors.subject_id = ["Subject is required"];
   if (!chapter_id?.trim()) errors.chapter_id = ["Chapter is required"];
   if (!video_title?.trim()) errors.video_title = ["Video Title is required"];
+    if (!video_url?.trim()) errors.video_url = ["Video URL is required"];
   if (!["0", "1"].includes(status)) errors.status = ["Status must be '0' or '1'"];
-  if (isInsert && !video) errors.video = ["Video file is required"];
+  //if (isInsert && !video) errors.video = ["Video file is required"];
 
   if (Object.keys(errors).length > 0) {
     return res.status(422).json({
@@ -299,7 +326,7 @@ const Update = async (req, res) => {
     if (isInsert) {
       // ✅ INSERT mode
       const insertQuery = `
-        INSERT INTO course_video (category_id, course_id, subject_id, chapter_id, video_title, status, video)
+        INSERT INTO course_video (category_id, course_id, subject_id, chapter_id, video_title, video_url,status)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
       const values = [
@@ -308,8 +335,9 @@ const Update = async (req, res) => {
         subject_id?.trim(),
         chapter_id?.trim(),
          video_title?.trim(),
+         video_url?.trim(),
         status,
-        videoPath,
+      //  videoPath,
       ];
 
       pool.query(insertQuery, values, (err) => {
@@ -325,13 +353,14 @@ const Update = async (req, res) => {
       });
     } else {
       // ✅ UPDATE mode
-      const updateFields = ["category_id", "course_id", "subject_id", "chapter_id", "video_title", "status"];
+      const updateFields = ["category_id", "course_id", "subject_id", "chapter_id", "video_title","video_url", "status"];
       const values = [
         category_id?.trim(),
         course_id?.trim(),
         subject_id?.trim(),
         chapter_id?.trim(),
          video_title?.trim(),
+          video_url?.trim(),
         status,
       ];
 
@@ -367,21 +396,35 @@ const Update = async (req, res) => {
 
 const Delete = async (req, res) => {
   try {
-    const categorieId = req.params.postId;
+    const courseVideoId = req.params.postId;
 
+    // Soft delete the course video
     const softDeleteQuery = "UPDATE course_video SET deleted_at = NOW() WHERE id = ?";
-
-    pool.query(softDeleteQuery, [categorieId], (error, result) => {
-      if (error) {
-        console.error(error);
-        return req.flash("success", "Internal server error");
-      }
+    
+    // Use a Promise wrapper for pool.query
+    await new Promise((resolve, reject) => {
+      pool.query(softDeleteQuery, [courseVideoId], (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      });
     });
 
+    // Get course ID from the course_video (assuming foreign key exists)
+    const getCourseQuery = "SELECT course_id FROM course_video WHERE id = ?";
+    const courseResult = await new Promise((resolve, reject) => {
+      pool.query(getCourseQuery, [courseVideoId], (error, result) => {
+        if (error) return reject(error);
+        resolve(result[0]); // assuming one row
+      });
+    });
+
+    const courseId = courseResult?.course_id || null;
+
     req.flash("success", "Course Video soft deleted successfully");
-    return res.redirect("/admin/course-video-list");
+    return res.redirect(`/admin/course-video-list/${courseId}`);
   } catch (error) {
-    req.flash("error", error.message);
+    console.error(error);
+    req.flash("error", "Internal server error");
     return res.redirect(`/admin/course-video-list`);
   }
 };

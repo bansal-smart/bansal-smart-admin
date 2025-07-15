@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const { setupStorage } = require("../storage");
 const multer = require('multer');
 const CategoryController = require('../controllers/Admin/CategoryController');
 const adminauthenticateCustomer = require('../middlewares/adminauthenticateCustomer');
 
-const upload = multer();  // No storage configuration needed for `upload.none()`
+
+const FileUploadPath = `public/uploads/category/`;
+const storage = setupStorage(FileUploadPath);
+const upload = multer({ storage });
 
 router.get(
   "/admin/category-list",
@@ -29,7 +33,9 @@ router.get(
 router.post(
   "/admin/category-update/:categoryId?", // Use categoryId instead of courseId
   adminauthenticateCustomer,
-  upload.none(), // use .none() if you're not uploading files
+  upload.fields([
+    { name: "image", maxCount: 1 },
+  ]),
   CategoryController.Update
 );
 

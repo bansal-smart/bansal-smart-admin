@@ -59,4 +59,10 @@ router.get(
   courseSubjectController.Show
 );
 
+router.get(
+  "/admin/course-subject-get-chapters/:postId",
+  adminauthenticateCustomer,
+  courseSubjectController.getChapters
+);
+
 module.exports = router;

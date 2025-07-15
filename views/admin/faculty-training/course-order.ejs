@@ -1,0 +1,135 @@
+<%- include('../layouts/header') %>
+
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <h4 class="card-title mb-0"><%= page_name %></h4>
+            <div class="row">
+              <div class="col-12 text-end">
+               
+                
+                <button type="button" id="backButton" class="btn btn-primary btn-sm">
+                  <i class="fa fa-arrow-left"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+           <div class="row align-items-end g-2 mb-3 filter-tab">
+  <div class="col-md-2">
+    <label>From</label>
+    <input type="date" id="from_date" class="form-control" value="<%= req.query.from_date || '' %>">
+  </div>
+  <div class="col-md-2">
+    <label>To</label>
+    <input type="date" id="to_date" class="form-control" value="<%= req.query.to_date || '' %>">
+  </div>
+  <div class="col-md-2">
+    <label>Payment Status</label>
+    <select id="status" class="form-control">
+      <option value="">All</option>
+      <option value="completed" <%= req.query.status === 'completed' ? 'selected' : '' %> >Paid</option>
+      <option value="pending" <%= req.query.status === 'pending' ? 'selected' : '' %>>Unpaid</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label>Course Name</label>
+    <select id="course" class="form-control">
+      <option value="">All</option>
+      <% courses.forEach(course => { %>
+        <option value="<%= course.id %>" <%= req.query.course == course.id ? 'selected' : '' %>><%= course.course_name %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label>Student Name</label>
+    <select id="student" class="form-control">
+      <option value="">All</option>
+      <% students.forEach(student => { %>
+        <option value="<%= student.id %>" <%= req.query.student == student.id ? 'selected' : '' %>><%= student.name %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label>Coupon Code</label>
+    <select id="coupon" class="form-control">
+      <option value="">All</option>
+      <% coupons.forEach(coupon => { %>
+        <option value="<%= coupon.code %>" <%= req.query.coupon == coupon.code ? 'selected' : '' %>><%= coupon.coupon_code %></option>
+      <% }) %>
+    </select>
+  </div>
+  </br>
+  <div class="col-md-12 mt-2 text-center">
+    <button id="filterBtn" class="btn btn-primary me-2">Filter</button>
+    <a href="/admin/course-booking-list" class="btn btn-secondary">Reset</a>
+  </div>
+</div>
+            <div class="table-responsive">
+              <table id="example3" class="display table-responsive-lg">
+                <thead>
+                  <tr>
+                    <th>Sr.No #</th>
+                    <th>Customer Name</th>
+                    <th>Transaction Id</th>
+                    <th>Course Name</th>
+                    <th>Price</th>
+                    <th>Order Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% bookings.forEach((booking, index) => { %>
+                    <tr>
+                      <td><%= index + 1 %></td>
+                      <td><%= booking.customer_name %></td>
+                      <td><%= booking.transaction_id %></td>
+                      <td><%= booking.course_name %></td>
+                      <td><%= booking.total_amount.toFixed(2) %></td>
+                      <td><%= new Date(booking.created_at).toLocaleDateString("en-GB") %></td>
+                      <td><%= booking.payment_status === 'pending' ? 'Unpaid' : 'Paid' %></td>
+                      <td>
+                        <a href="/admin/booking-details/<%= booking.id %>" class="btn btn-primary shadow btn-xs sharp me-1">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../layouts/footer') %>
+
+<script>
+  document.getElementById("filterBtn").addEventListener("click", () => {
+    const params = new URLSearchParams();
+
+    const from_date = document.getElementById("from_date").value;
+    const to_date = document.getElementById("to_date").value;
+    const status = document.getElementById("status").value;
+    const course = document.getElementById("course").value;
+    const student = document.getElementById("student").value;
+    const coupon = document.getElementById("coupon").value;
+
+    if (from_date) params.append("from_date", from_date);
+    if (to_date) params.append("to_date", to_date);
+    if (status) params.append("status", status);
+    if (course) params.append("course", course);
+    if (student) params.append("student", student);
+    if (coupon) params.append("coupon", coupon);
+
+    window.location.href = "/admin/course-booking-list?" + params.toString();
+  });
+</script>

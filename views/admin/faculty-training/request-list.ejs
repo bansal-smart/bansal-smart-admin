@@ -1,0 +1,115 @@
+<%- include('../layouts/header') %>
+
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <h4 class="card-title mb-0"><%= title %></h4>
+            <div class="row">
+              <div class="col-12 text-end">
+
+                <button type="button" id="backButton" class="btn btn-primary btn-sm">
+                  <i class="fa fa-arrow-left"></i>
+                </button>
+              
+              </div>
+            
+            </div>
+          
+          </div>
+
+          <div class="card-body">
+           <div class="row align-items-end g-2 mb-3 filter-tab">
+  <div class="col-md-2">
+    <label>From</label>
+    <input type="date" id="from_date" class="form-control" value="<%= req.query.from_date || '' %>">
+  </div>
+  <div class="col-md-2">
+    <label>To</label>
+    <input type="date" id="to_date" class="form-control" value="<%= req.query.to_date || '' %>">
+  </div>
+ 
+  <div class="col-md-3">
+  <label>Program</label>
+  <select id="program_id" class="form-control">
+    <option value="">-- All Programs --</option>
+    <% if (programs && programs.length > 0) { %>
+      <% programs.forEach((p) => { %>
+        <option value="<%= p.id %>" <%= req.query.program_id == p.id ? "selected" : "" %>>
+          <%= p.title %> (<%= p.training_code %>)
+        </option>
+      <% }) %>
+    <% } %>
+  </select>
+</div>
+
+  </br>
+
+  <div class="col-md-2  text-center">
+    <button id="filterBtn" class="btn btn-primary me-2">Filter</button>
+    <a href="/admin/faculty-training-request-list" class="btn btn-secondary">Reset</a>
+  </div>
+</div>
+            <div class="table-responsive">
+              <table id="example3" class="display table-responsive-lg">
+                <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Mobile</th>
+      <th>Training Name</th>
+      <th>Training Code</th>
+      <th>Message</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (request_data && request_data.length > 0) { %>
+      <% request_data.forEach((r) => { %>
+        <tr>
+          <td><%= r.id %></td>
+          <td><%= r.name %></td>
+          <td><%= r.email %></td>
+          <td><%= r.mobile %></td>
+          <td><%= r.training_name %></td>
+          <td><%= r.training_code %></td>
+          <td><%= r.message %></td>
+          <td><%= new Date(r.created_at).toLocaleString() %></td>
+        </tr>
+      <% }) %>
+    <% } else { %>
+      <tr>
+        <td colspan="8" style="text-align: center;">No records found.</td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../layouts/footer') %>
+
+<script>
+document.getElementById("filterBtn").addEventListener("click", () => {
+  const params = new URLSearchParams();
+
+  const from_date = document.getElementById("from_date").value;
+  const to_date = document.getElementById("to_date").value;
+  const program_id = document.getElementById("program_id").value;
+
+  if (from_date) params.append("from_date", from_date);
+  if (to_date) params.append("to_date", to_date);
+  if (program_id) params.append("program_id", program_id);
+
+  window.location.href = "/admin/faculty-training-request-list?" + params.toString();
+});
+</script>
+

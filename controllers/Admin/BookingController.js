@@ -382,6 +382,49 @@ const whereClause = "WHERE order_type = 'test'";
     res.redirect(req.get("Referrer") || "/");
   }
 }
+
+
+  static async facultyTrainingRequestList(req, res) {
+  try {
+    const { from_date, to_date, program_id } = req.query;
+
+    let query = `SELECT * FROM faculty_training_requests WHERE 1=1`;
+    const values = [];
+
+    if (from_date) {
+      query += ` AND DATE(created_at) >= ?`;
+      values.push(from_date);
+    }
+
+    if (to_date) {
+      query += ` AND DATE(created_at) <= ?`;
+      values.push(to_date);
+    }
+
+    if (program_id) {
+      query += ` AND training_id = ?`;
+      values.push(program_id);
+    }
+
+    query += ` ORDER BY created_at DESC`;
+
+    const [rows] = await pool.promise().execute(query, values);
+    const [programs] = await pool
+  .promise()
+  .query("SELECT * FROM faculty_trainings WHERE apply_date > CURDATE() AND status = 1 ORDER BY id ASC");
+    console.log(programs); 
+    return res.render("admin/faculty-training/request-list", {
+      title: "Faculty Training Request List",
+      request_data: rows,
+      programs,
+      req,
+    });
+
+  } catch (error) {
+    console.error("Error fetching faculty training requests:", error);
+    return res.status(500).send("Internal Server Error");
+  }
+}
 }
 
 module.exports = BookingController;

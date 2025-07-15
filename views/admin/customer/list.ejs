@@ -128,7 +128,8 @@
                     <th>Sr.No #</th>
                     <th>Student UID</th>
                     <th>Student Name</th>
-                     <th>Mobile</th>
+                     
+                       <th>Counse</th>
                     <th>City</th>
                    
                     <th>Category</th>
@@ -146,12 +147,10 @@
                   <tr>
                     <td><%= index + 1 %></td>
                     <td>BNS-<%= customer.id %></td>
-                    <td><%= customer.name %></td>
+                    <td><%= customer.name %> ( <%= customer.mobile %> )</td>
                    
-                    <td>
-                      
-                    
-                      <%= customer.mobile %></td>
+                  
+                      <td><%= customer.ordersCount %></td>
                         <td><%= customer.city %></td>
                     <td><%= customer.category_name %></td> 
                      <td><%= customer.class_name %></td> 

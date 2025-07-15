@@ -30,7 +30,7 @@ const Customer = {
  verifyOtp: (mobileNumber, otp, callback) => {
     const currentTime = Date.now();
     dbPool.query(
-        'SELECT * FROM front_users WHERE mobile = ? AND register_otp = ? AND otp_expires > ?',
+        'SELECT * FROM front_users WHERE mobile = ? AND register_otp = ?',
         [mobileNumber, otp, currentTime],
         (error, results) => {
             if (error) return callback(error, null);

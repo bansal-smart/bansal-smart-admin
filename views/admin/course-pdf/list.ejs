@@ -43,7 +43,7 @@
  <th>Title</th>
                 <th>Course</th>
                 <th>Subject</th>
-                <th>Topic</th>
+                <th>Chapter</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -51,10 +51,11 @@
           <tbody>
             <% chapters.forEach((post, index) => { %>
             <tr>
+              <td><%= ++index %></td>
               <td><%= post.title %></td>
               <td><%= post.course_name %></td>
               <td><%= post.subject_name %></td>
-              <td><%= post.topic_name %></td>
+              <td><%= post.chapter_name %></td>
               <td>
                 <% if (post.status == 1) { %>
                 <span class="badge badge-success">Active</span>
@@ -67,7 +68,7 @@
   <% if (req.query.status === 'trashed') { %>
     <!-- Restore Button -->
     <a
-      href="/admin/chapter-pdf-restore/<%= post.id %>"
+      href="/admin/course-pdf-restore/<%= post.id %>"
       class="btn btn-success shadow btn-xs sharp me-1"
       title="Restore"
     >
@@ -76,9 +77,9 @@
 
     <!-- Permanent Delete Button -->
     <a
-      href="/admin/chapter-pdf-permanent-delete/<%= post.id %>"
+      href="/admin/course-pdf-permanent-delete/<%= post.id %>"
       class="btn btn-danger shadow btn-xs sharp"
-      onclick="return confirm('Are you sure you want to permanently delete this chapter? This action cannot be undone.');"
+      onclick="return confirm('Are you sure you want to permanently delete this chapter PDF? This action cannot be undone.');"
       title="Delete Permanently"
     >
       <i class="fa fa-trash"></i>
@@ -86,7 +87,7 @@
   <% } else { %>
     <!-- Edit Button -->
     <a
-      href="/admin/chapter-pdf-edit/<%= post.id %>"
+      href="/admin/course-pdf-edit/<%= post.id %>"
       class="btn btn-primary shadow btn-xs sharp me-1"
       title="Edit"
     >
@@ -95,7 +96,7 @@
 
     <!-- Soft Delete Button -->
     <a
-      href="/admin/chapter-pdf-delete/<%= post.id %>"
+      href="/admin/course-pdf-delete/<%= post.id %>"
       class="btn btn-warning shadow btn-xs sharp"
       title="Soft Delete"
     >

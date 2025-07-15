@@ -1,0 +1,49 @@
+<%- include('../layouts/header') %>
+
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0"><%= page_name %></h4>
+            <a href="/admin/<%= route %>-list/all" class="btn btn-primary btn-sm">
+              <i class="fa fa-arrow-left"></i> Back
+            </a>
+          </div>
+
+          <div class="card-body">
+            <div class="row">
+
+              <!-- Module Name & Slug -->
+              <div class="col-md-6">
+                <div class="form-group border rounded p-3 mb-3">
+                  <label><strong><%= module_name %> Name</strong></label>
+                  <p class="mb-0 text-muted"><%= post.book_name %></p>
+                </div>
+              </div>
+
+           
+              <!-- Other Fields -->
+             
+              <% infoFields.forEach(field => { %>
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong><%= field.label %></strong></label>
+                    <p class="mb-0 text-muted"><%= field.value %></p>
+                  </div>
+                </div>
+              <% }); %>
+
+            
+         
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>

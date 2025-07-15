@@ -1,0 +1,110 @@
+<%- include('../layouts/header') %>
+<style>
+    *,
+    tr,
+    td,
+    p,
+    small {
+        font-size: 14px
+    }
+    td p{display: inline-flex!important;}
+     td img{width: 60px; height:60px;}
+    mjx-container[jax="CHTML"][display="true"]{display: inline;}
+</style>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<section class="content-body">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                                                   <ul class="nav nav-pills">
+ <li class="nav-item">
+     <a class="nav-link" href="/admin/exam-show/<%= exam.id %>">Exam Details</a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link"  href="/admin/exam-question-list/<%= exam.id %>">Question List</a>
+  </li>
+    <li class="nav-item">
+    <a class="nav-link"  href="/admin/exam-result-analysis/<%= exam.id %>">Exam Analysis</a>
+  </li>
+
+</ul>
+
+                        <div class="row">
+                            <div class="col-12 text-end">
+
+<!-- 
+                                <a class="btn btn-info btn-sm" href="<%= create_url %>">
+                                    <i class="fas fa-plus"></i>
+                                </a> -->
+                            <button type="button" id="backButton" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-arrow-left"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h4>Result Analysis of Exam : <%= exam.test_name %></h4>
+                        <hr>
+                        <div class="table-responsive">
+
+  <table class="table table-bordered">
+    <thead class="table-secondary">
+      <tr>
+        <% headers.forEach(h => { %>
+          <th><%- h %></th>
+        <% }) %>
+       
+      </tr>
+    </thead>
+    <tbody>
+  <% rows.forEach(row => { %>
+      <tr>
+         <td><%= row.user_name %></td>
+        <td><%= row.correct %></td>
+        <td><%= row.wrong %></td>
+        <td><%= row.skipped %></td>
+        <td><%= row.correct_score %></td>
+        <td><%= row.wrong_score %></td>
+          <td><%= row.totalScore %></td>
+           <td><%= row.rank %></td>
+           <td><%= row.accuracy %></td>
+             <td><%= row.attempted_time %></td>
+      </tr>
+    <% }) %>
+</tbody>
+
+  </table>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+</div>
+<%- include('../layouts/footer') %>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll(".nav-link");
+    console.log(currentPath);
+    links.forEach(link => {
+      const linkPath = new URL(link.href).pathname;
+        console.log(linkPath);
+      if (currentPath === linkPath) {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+  });
+</script>

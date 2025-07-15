@@ -1,125 +1,116 @@
 <%- include('../layouts/header') %>
-<style>
+  <style>
     *,
     tr,
     td,
     p,
     small {
-        font-size: 14px
+      font-size: 14px
     }
-    td p{display: inline-flex!important;}
-     td img{width: 60px; height:60px;}
-    mjx-container[jax="CHTML"][display="true"]{display: inline;}
-</style>
-<script type="text/javascript" id="MathJax-script" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-</script>
-<section class="content-body">
+    td p {
+      display: inline-flex !important;
+    }
+    img {
+      max-width: 100%;
+      width: 100%;
+    }
+    mjx-container[jax="CHTML"][display="true"] {
+      display: inline;
+    }
+  </style>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
+  <section class="content-body">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                                                   <ul class="nav nav-pills">
-  <li class="nav-item">
-     <a class="nav-link" href="/admin/exam-show/<%= exam.id %>">Exam Details</a>
-  </li>
-   <!-- <li class="nav-item">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+              <ul class="nav nav-pills">
+                <li class="nav-item">
+                  <a class="nav-link" href="/admin/exam-show/<%= exam.id %>">Exam Details</a>
+                </li>
+                <!-- <li class="nav-item">
      <a class="nav-link" href="/admin/exam-list">Exam List</a>
   </li> -->
-  <li class="nav-item">
-    <a class="nav-link"  href="/admin/exam-question-list/<%= exam.id %>">Question List</a>
-  </li>
-
-</ul>
-
-                        <div class="row">
-                            <div class="col-12 text-end">
-
-<!-- 
+                <li class="nav-item">
+                  <a class="nav-link" href="/admin/exam-question-list/<%= exam.id %>">Question List</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/admin/exam-result-analysis/<%= exam.id %>">Exam Analysis</a>
+                </li>
+              </ul>
+              <div class="row">
+                <div class="col-12 text-end">
+                  <!--
                                 <a class="btn btn-info btn-sm" href="<%= create_url %>">
                                     <i class="fas fa-plus"></i>
                                 </a> -->
-                            <button type="button" id="backButton" class="btn btn-primary btn-sm">
-                                    <i class="fa fa-arrow-left"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <h4>Question List of Exam : <%= exam.test_name %></h4>
-                        <hr>
-                        <div class="table-responsive">
-
-  <table class="table table-bordered">
-    <thead class="table-secondary">
-      <tr>
-        <% headers.forEach(h => { %>
-          <th><%- h %></th>
-        <% }) %>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-  <% rows.forEach(row => { %>
-    <tr>
-      <td><%= row.id %></td>
-
-      <td>
-        <div><%- row['question'] || '' %></div>
-      <%= row['Question image'] %>
-       
-      </td>
-
-      <td><%- row['question_type'] || '' %></td>
-      <td><%- row['optionA'] || '' %></td>
-      <td><%- row['optionB'] || '' %></td>
-      <td><%- row['optionC'] || '' %></td>
-      <td><%- row['optionD'] || '' %></td>
-      <td><%- row['answer'] || '' %></td>
-       <td>
-        
-            <a class="btn btn-sm btn-danger ms-2" href="/delete/<%= row.id %>">Delete</a>
-          </td>
-    </tr>
-  <% }) %>
-</tbody>
-    <!-- <tbody>
-      <% rows.forEach(row => { %>
-        <tr>
-          <% headers.forEach(h => { %>
-            <td><%- row[h] || '' %></td>
-          <% }) %>
-          <td>
-        
-            <a class="btn btn-sm btn-danger ms-2" href="/delete/<%= row.id %>">Delete</a>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody> -->
-  </table>
-                            
-                        </div>
-                    </div>
+                  <button type="button" id="backButton" class="btn btn-primary btn-sm">
+                    <i class="fa fa-arrow-left"></i>
+                  </button>
                 </div>
+              </div>
             </div>
+            <div class="card-body">
+              <h4>Question List of Exam : <%= exam.test_name %>
+              </h4>
+              <hr>
+              <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-4">
+                <% rows.forEach(row=> { %>
+                  <div class="col">
+                    <div class="card h-100 shadow-sm border">
+                      <div class="card-body">
+                        <h6 class="card-title mb-2">Question ID: <%= row.id %>
+                        </h6>
+                        <div class="mb-2">
+                          <strong>Question:</strong>
+                          <div><%- row['question'] || '' %></div>
+                        </div>
+                        <% if (row['question_image']) { %>
+                          <div class="mb-2">
+                            <%- row['question_image'] %>
+                          </div>
+                          <% } %>
+                            <div class="mb-2">
+                              <strong>Type:</strong>
+                              <%= row['question_type'] || 'N/A' %>
+                            </div>
+                            <div class="mb-2">
+                              <strong>Correct Answer:</strong>
+                              <%= row['answer'] || '' %>
+                            </div>
+                            <div class="mb-2">
+                              <strong>Correct Marks:</strong>
+                              <%= row['correct_marks'] || '0' %> |
+                                <strong>Incorrect Marks:</strong>
+                                <%= row['incorrect_marks'] || '0' %>
+                            </div>
+                      </div>
+                      <div class="card-footer text-end">
+                        <a class="btn btn-sm btn-danger" href="/delete/<%= row.id %>">Delete</a>
+                      </div>
+                    </div>
+                  </div>
+                  <% }) %>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
-</section>
-
-
-</div>
-<%- include('../layouts/footer') %>
-<script>
+  </section>
+  </div>
+  <%- include('../layouts/footer') %>
+    <script>
       // Re-render MathJax after DOM load
       window.addEventListener('DOMContentLoaded', () => {
         if (window.MathJax) MathJax.typeset();
       });
     </script>
-
-     <script>
+    <script>
       const editors = {};
-
       class MyBase64UploadAdapter {
         constructor(loader) { this.loader = loader; }
         upload() {
@@ -132,15 +123,13 @@
             });
           });
         }
-        abort() {}
+        abort() { }
       }
-
       function MyCustomUploadAdapterPlugin(editor) {
         editor.plugins.get('FileRepository').createUploadAdapter = loader => {
           return new MyBase64UploadAdapter(loader);
         };
       }
-
       document.querySelectorAll('textarea').forEach(textarea => {
         ClassicEditor.create(textarea, {
           extraPlugins: [MyCustomUploadAdapterPlugin],
@@ -152,7 +141,6 @@
           editors[textarea.id] = editor;
         }).catch(console.error);
       });
-
       function submitEditors() {
         for (const id in editors) {
           const data = editors[id].getData();
@@ -161,19 +149,17 @@
         return true;
       }
     </script>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const currentPath = window.location.pathname;
-    const links = document.querySelectorAll(".nav-link");
-
-    links.forEach(link => {
-      const linkPath = new URL(link.href).pathname;
-
-      if (currentPath === linkPath) {
-        link.classList.add("active");
-      } else {
-        link.classList.remove("active");
-      }
-    });
-  });
-</script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const currentPath = window.location.pathname;
+        const links = document.querySelectorAll(".nav-link");
+        links.forEach(link => {
+          const linkPath = new URL(link.href).pathname;
+          if (currentPath === linkPath) {
+            link.classList.add("active");
+          } else {
+            link.classList.remove("active");
+          }
+        });
+      });
+    </script>

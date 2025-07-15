@@ -8,7 +8,7 @@ const controller = require("../controllers/Admin/BookingController");
 
 // List
 router.get(
-  "/admin/course-booking-list",
+  "/admin/course-bookings",
   adminauthenticateCustomer,
   controller.CourseBooking
 );
@@ -22,5 +22,7 @@ router.get(
   adminauthenticateCustomer,
   controller.bookingDetails
 );
+
+router.get("/admin/faculty-training-request-list", adminauthenticateCustomer, controller.facultyTrainingRequestList);
 
 module.exports = router;

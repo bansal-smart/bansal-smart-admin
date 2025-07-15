@@ -518,11 +518,13 @@ module.exports = {
       const videoCount = await Helper.getVideoCountByCourseId(courseId);
       const bookingCount = await Helper.getBookingCountByCourseId(courseId);
       const testCount = await Helper.getTestCountByCourseId(courseId);
+       const  liveClassCount  = await Helper.getLiveClassCountByCourseId(courseId);
       const course = await Helper.getCourseDetails(courseId);
       res.render("admin/course-exam/list", {
         success: req.flash("success"),
         error: req.flash("error"),
         customers: tests,
+        liveClassCount,
         req,
         subjectCount,
         chapterCount,
@@ -530,7 +532,9 @@ module.exports = {
         videoCount,
         bookingCount,
         testCount,
+        course,
         page_name:
+        
           status === "trashed"
             ? `Trashed Exam List in course :${course.course_name}`
             : `Exam List in course : ${course.course_name}`,
@@ -735,7 +739,7 @@ module.exports = {
         errors.end_date_time = ["End date is required"];
       if (!duration_test?.trim())
         errors.duration_test = ["Duration is required"];
-       if (!data.image) errors.image = ["Image is required"];
+      if (!data.image) errors.image = ["Image is required"];
       // if (!result_date?.trim()) errors.result_date = ["Result date is required"];
 
       if (Object.keys(errors).length > 0) {
@@ -876,4 +880,132 @@ module.exports = {
       handleError(res, req, "Error permanently deleting Exam");
     }
   },
-};
+  ExamAnalysis: async (req, res) => {
+  try {
+    const test_id = req.params.postId;
+    const promisePool = pool.promise();
+
+    // ✅ Get exam details from live_test
+    const [examData] = await promisePool.query(
+      `SELECT * FROM live_test WHERE id = ? LIMIT 1`,
+      [test_id]
+    );
+
+    if (examData.length === 0) {
+      return res
+        .status(404)
+        .render("admin/404", { message: "Exam not found" });
+    }
+
+    const exam = examData[0];
+
+    // ✅ Get result summary from live_test_result
+    const [results] = await promisePool.query(
+      `SELECT * FROM live_test_result WHERE test_id = ?`,
+      [test_id]
+    );
+
+    const headers = [
+      "Student Name",
+      "Correct",
+      "Wrong",
+      // "Skipped",
+      "Correct Score",
+      "Wrong Score",
+      "Total Score",
+      "Rank",
+      "Accuracy",
+      "Attempted Time",
+    ];
+
+    // ✅ Format rows
+    let rows = await Promise.all(
+      results.map(async (r) => {
+        const student = await Helper.getStudentDetails(r.frontuser_id);
+
+        // ✅ Fetch question-wise result details
+        const [details] = await promisePool.query(
+          `SELECT * FROM live_test_result_details WHERE result_id = ?`,
+          [r.id]
+        );
+
+        // ✅ Calculate scores
+        const correct_score = details
+          .filter((d) => parseFloat(d.marks) >= 0)
+          .reduce((sum, d) => sum + parseFloat(d.marks), 0);
+
+        const wrong_score = details
+          .filter((d) => parseFloat(d.marks) < 0)
+          .reduce((sum, d) => sum + parseFloat(d.marks), 0);
+
+        const totalScore = correct_score + wrong_score;
+
+        const correct = r.correct || 0;
+        const wrong = r.wrong || 0;
+        const skipped = r.skipped || 0;
+
+        const accuracy =
+          correct + wrong > 0
+            ? ((correct / (correct + wrong)) * 100).toFixed(2) + "%"
+            : "0%";
+
+        const attemptedTime = r.created_at
+          ? new Date(r.created_at).toLocaleString("en-IN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: true,
+            })
+          : "N/A";
+
+        return {
+          user_id: r.frontuser_id,
+          user_name: student ? student.name : "N/A",
+          correct,
+          wrong,
+          skipped,
+          correct_score: correct_score.toFixed(2),
+          wrong_score: wrong_score.toFixed(2),
+          totalScore: totalScore.toFixed(2),
+          accuracy,
+          attempted_time: attemptedTime,
+          result_details: details, // optional: for drill-down
+        };
+      })
+    );
+
+    // ✅ Sort rows by totalScore descending
+    rows.sort((a, b) => b.totalScore - a.totalScore);
+
+    // ✅ Assign rank
+    rows = rows.map((row, index) => ({
+      ...row,
+      rank: index + 1,
+    }));
+
+    // ✅ Render result-analysis view
+    res.render("admin/course-exam/result-analysis", {
+      success: req.flash("success"),
+      error: req.flash("error"),
+      headers,
+      rows,
+      req,
+      results,
+      exam,
+      page_name: "Result Analysis",
+      list_url: "/admin/course-exam-list",
+      trashed_list_url: "/admin/course-exam-list/?status=trashed",
+      create_url: "/admin/course-exam-create",
+    });
+  } catch (error) {
+    console.error("Error in ExamAnalysis:", error);
+    res.status(500).json({
+      status: false,
+      message: "Server Error",
+    });
+  }
+}
+}

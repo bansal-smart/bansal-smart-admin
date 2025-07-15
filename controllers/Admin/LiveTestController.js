@@ -201,10 +201,7 @@ if (discount_type?.trim() && (!discount?.trim() || discount == 0)) {
 if (
   (discount?.trim() && !discount_type?.trim()) || 
   (discount_type?.trim() && (!discount?.trim() || discount == 0))
-) {
-  errors.discount = ["Both discount type and discount value are required"];
-}
-
+) 
   if (isInsert) {
     if (!imageFile) errors.banner = ["Course image is required"];
   }
@@ -511,8 +508,124 @@ const QuestionList = async (req, res) => {
     } catch (err) {
       console.error("List Error:", err);
       handleError(res, req, "Server error in listing data");
-    }
+    };
+    
   };
+const ExamAnalysis = async (req, res) => {
+  try {
+    const test_id = req.params.postId;
+    const promisePool = pool.promise();
+
+    // ✅ Get exam details from live_test
+    const [examData] = await promisePool.query(
+      `SELECT * FROM live_test WHERE id = ? LIMIT 1`,
+      [test_id]
+    );
+
+    if (examData.length === 0) {
+      return res.status(404).render("admin/404", { message: "Exam not found" });
+    }
+
+    const exam = examData[0];
+
+    // ✅ Get result summary from live_test_result
+    const [results] = await promisePool.query(
+      `SELECT * FROM live_test_result WHERE test_id = ?`,
+      [test_id]
+    );
+
+    // ✅ Define headers
+    const headers = [
+  "Student Name",
+  "Correct",
+  "Wrong",
+  "Skipped",
+  "Correct Score",
+  "Wrong Score",
+  "Total Score",
+  "Rank",
+  "Accuracy",
+  "Attempted Time"
+];
+
+// ✅ Format rows
+let rows = await Promise.all(
+  results.map(async (r) => {
+    const student = await Helper.getStudentDetails(r.frontuser_id);
+    const correct = r.correct || 0;
+    const wrong = r.wrong || 0;
+    const skipped = r.skipped || 0;
+    const correct_score = parseFloat(r.correct_score || 0);
+    const wrong_score = parseFloat(r.wrong_score || 0);
+    const totalScore = correct_score - wrong_score;
+    const accuracy = correct + wrong > 0
+      ? ((correct / (correct + wrong)) * 100).toFixed(2) + "%"
+      : "0%";
+
+    // ✅ Format attempt time
+    const attemptedTime = r.created_at
+      ? new Date(r.created_at).toLocaleString("en-IN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true
+        })
+      : "N/A";
+
+    return {
+      user_id: r.frontuser_id,
+      user_name: student ? student.name : "N/A",
+      correct,
+      wrong,
+      skipped,
+      correct_score,
+      wrong_score,
+      totalScore: totalScore.toFixed(2),
+      accuracy,
+      attempted_time: attemptedTime
+    };
+  })
+);
+
+    // ✅ Sort rows by totalScore descending
+    rows.sort((a, b) => b.totalScore - a.totalScore);
+
+    // ✅ Assign rank
+    rows = rows.map((row, index) => ({
+      ...row,
+      rank: index + 1
+    }));
+
+    // ✅ Render result-analysis view
+    res.render("admin/live-test/result-analysis", {
+      success: req.flash("success"),
+      error: req.flash("error"),
+      headers,
+      rows,
+      req,
+      results,
+      exam,
+      page_name: "Result Analysis",
+      list_url: "/admin/live-test-list",
+      trashed_list_url: "/admin/live-test-list/?status=trashed",
+      create_url: "/admin/live-test-create"
+    });
+
+  } catch (error) {
+    console.error("Error in ExamAnalysis:", error);
+    res.status(500).json({
+      status: false,
+      message: "Server Error"
+    });
+  }
+};
+
+
+
+
 module.exports = {
   Create,
   List,
@@ -523,4 +636,5 @@ module.exports = {
   PermanentDelete,
   Show,
   QuestionList,
+  ExamAnalysis,
 };

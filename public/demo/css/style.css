@@ -8126,12 +8126,10 @@ p {
   box-shadow: none !important; }
 
 #main-wrapper {
-  opacity: 0;
-  transition12: all 0.25s ease-in;
+  opacity: 1;
   overflow: hidden;
   position: relative; }
-  #main-wrapper.show {
-    opacity: 1; }
+
 
 .rounded-lg {
   border-radius: 0.625rem; }

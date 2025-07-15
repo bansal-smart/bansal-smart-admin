@@ -1,0 +1,134 @@
+<%- include('../layouts/header') %>
+
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0"><%= title %></h4>
+            <button type="button" id="backButton" class="btn btn-primary btn-sm">
+              <i class="fa fa-arrow-left"></i> Back
+            </button>
+          </div>
+          <div class="card-body">
+            <form id="submitForm" class="forms-sample"
+                  action="<%= form_url %>"
+                  method="post"
+                  enctype="multipart/form-data">
+              <div class="row">
+
+                <!-- Hidden fields -->
+                <input type="hidden" name="category_id" value="<%= course?.category_id %>">
+                <input type="hidden" name="course_id" value="<%= course?.id %>">
+
+                <!-- Subject -->
+                <div class="form-group col-sm-6">
+                  <label class="form-label">Subject *</label>
+                  <select name="subject_id" id="subject_id" class="form-control" required>
+                    <option value="">Select Subject</option>
+                    <% subjects.forEach(subject => { %>
+                      <option value="<%= subject.id %>" <%= post?.subject_id == subject.id ? 'selected' : '' %>>
+                        <%= subject.subject_name %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div>
+
+                <!-- Chapter -->
+                <div class="form-group col-sm-6">
+                  <label class="form-label">Chapter *</label>
+                  <select name="chapter_id" id="chapter_id" class="form-control" required>
+                    <option value="">Select Chapter</option>
+                    <% chapters.forEach(chapter => { %>
+                      <option value="<%= chapter.id %>" <%= post?.chapter_id == chapter.id ? 'selected' : '' %>>
+                        <%= chapter.chapter_name %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div>
+
+                <!-- Title -->
+                <div class="form-group col-sm-6">
+                  <label class="form-label">Title *</label>
+                  <input type="text" class="form-control" name="title" id="title" placeholder="Enter title" value="<%= post?.title || '' %>">
+                </div>
+
+               <div class="form-group col-sm-6">
+  <label class="form-label">Class Time *</label>
+  <input type="datetime-local" class="form-control" name="class_time" id="class_time" required
+         value="<%= post?.class_time ? post.class_time.toISOString().slice(0, 16) : '' %>">
+</div
+
+                <!-- Link -->
+                <div class="form-group col-sm-6">
+                  <label class="form-label">Class Link *</label>
+                  <input type="text" class="form-control" name="link" id="link" placeholder="Enter class link" value="<%= post?.link || '' %>">
+                </div>
+
+                <!-- Status -->
+                <div class="form-group col-sm-6">
+                  <label class="form-label">Status</label>
+                  <select name="status" id="status" class="form-control">
+                    <option value="1" <%= post?.status == 1 ? 'selected' : '' %>>Active</option>
+                    <option value="0" <%= post?.status == 0 ? 'selected' : '' %>>Inactive</option>
+                  </select>
+                </div>
+
+                <% if (post?.id) { %>
+                  <input type="hidden" name="id" value="<%= post.id %>">
+                <% } %>
+
+                <!-- Submit Button -->
+                <div class="col-md-12 mt-3">
+                  <button type="submit" id="submitButton" class="btn btn-primary float-right"
+                          data-loading-text="<i class='fa fa-spinner fa-spin'></i> Sending..."
+                          data-rest-text="<%= post?.id ? 'Update' : 'Create' %>">
+                    <%= post?.id ? 'Update' : 'Create' %>
+                  </button>
+                </div>
+
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../layouts/footer') %>
+
+<script>
+  document.getElementById('backButton').addEventListener('click', () => {
+    window.history.back();
+  });
+</script>
+
+<script>
+  $(document).ready(function () {
+    $('#subject_id').on('change', function () {
+      const subjectId = $(this).val();
+      $('#chapter_id').html('<option value="">Loading...</option>');
+
+      if (subjectId) {
+        $.ajax({
+          url: '/admin/course-subject-get-chapters/' + subjectId,
+          type: 'GET',
+          success: function (response) {
+            let options = '<option value="">Select Chapter</option>';
+            response.forEach(ch => {
+              options += `<option value="${ch.id}">${ch.chapter_name}</option>`;
+            });
+            $('#chapter_id').html(options);
+          },
+          error: function () {
+            $('#chapter_id').html('<option value="">Error loading chapters</option>');
+          }
+        });
+      } else {
+        $('#chapter_id').html('<option value="">Select Chapter</option>');
+      }
+    });
+  });
+</script>

@@ -8,6 +8,8 @@ const List = async (req, res) => {
   try {
     const table_name = "galleries";
     const status = req.query.status;
+    const user_Role = req.session.userRole[0];
+
 
     let where =
       status === "trashed"
@@ -77,6 +79,7 @@ const Create = async (req, res) => {
       title: "Gallery",
       post: post,
       centers,
+      user_Role : req.session.userRole[0]
 
       
     });

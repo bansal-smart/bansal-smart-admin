@@ -118,4 +118,12 @@ router.get(
 //   adminauthenticateCustomer,
 //   controller.deleteQuestion
 // );
+
+router.get(
+  "/admin/course-exam-result-analysis/:postId?",
+  adminauthenticateCustomer,
+  controller.ExamAnalysis
+);
+
+
 module.exports = router;

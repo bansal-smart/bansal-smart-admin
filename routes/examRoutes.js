@@ -111,4 +111,11 @@ router.get(
 //   adminauthenticateCustomer,
 //   controller.deleteQuestion
 // );
+
+router.get(
+  "/admin/exam-result-analysis/:postId?",
+  adminauthenticateCustomer,
+  controller.ExamAnalysis
+);
+
 module.exports = router;

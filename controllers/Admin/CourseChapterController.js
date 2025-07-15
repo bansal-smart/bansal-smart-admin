@@ -1,7 +1,7 @@
 const pool = require("../../db/database");
 const randomstring = require("randomstring");
 const jwt = require("jsonwebtoken");
-const Helper = require('../../helpers/Helper')
+const Helper = require("../../helpers/Helper");
 const { validateRequiredFields } = require("../../helpers/validationsHelper");
 const List = async (req, res) => {
   try {
@@ -9,20 +9,17 @@ const List = async (req, res) => {
     const courseId = req.params.postId;
     console.log(courseId);
     // Build WHERE clause safely
-    let deletedCondition = status === 'trashed' ? 'IS NOT NULL' : 'IS NULL';
-
+    let deletedCondition = status === "trashed" ? "IS NOT NULL" : "IS NULL";
     const query = `
-      SELECT cs.*, c.course_name
-      FROM course_chapters cs
-      LEFT JOIN courses c ON cs.course_id = c.id
-      WHERE cs.deleted_at ${deletedCondition} AND cs.course_id = ?
-      ORDER BY cs.id DESC
-    `;
+  SELECT cs.*, c.course_name, s.subject_name
+  FROM course_chapters cs
+  LEFT JOIN courses c ON cs.course_id = c.id
+  LEFT JOIN course_subjects s ON cs.subject_id = s.id
+  WHERE cs.deleted_at ${deletedCondition} AND cs.course_id = ?
+  ORDER BY cs.id DESC
+`;
 
-    const page_name =
-      status === "trashed" ? "Trashed Course Chapter  List" : "Course Chapter List";
-
-    // Use prepared statement with parameter for courseId
+    // Execute query using prepared statement
     const course_subjects = await new Promise((resolve, reject) => {
       pool.query(query, [courseId], (err, result) => {
         if (err) {
@@ -32,44 +29,52 @@ const List = async (req, res) => {
         resolve(result);
       });
     });
+  
+    const page_name = "Course Chapter";
+    const course = await Helper.getCourseDetails(courseId);
+    const subjectCount = await Helper.getSubjectCountByCourseId(courseId);
 
-   const course = await Helper.getCourseDetails(courseId);
-     const subjectCount = await Helper.getSubjectCountByCourseId(courseId);
-   const chapterCount = await Helper.getChapterCountByCourseId(courseId);
+    const chapterCount = await Helper.getChapterCountByCourseId(courseId);
     const pdfCount = await Helper.getPdfCountByCourseId(courseId);
-     const videoCount = await Helper.getVideoCountByCourseId(courseId);
-       const bookingCount = await Helper.getBookingCountByCourseId(courseId);
-       const testCount = await Helper.getTestCountByCourseId(courseId);
-   res.render("admin/course-chapter/list", {
+    const videoCount = await Helper.getVideoCountByCourseId(courseId);
+    const bookingCount = await Helper.getBookingCountByCourseId(courseId);
+    const testCount = await Helper.getTestCountByCourseId(courseId);
+
+    const liveClassCount  = await Helper.getLiveClassCountByCourseId(courseId);
+    res.render("admin/course-chapter/list", {
       success: req.flash("success"),
       error: req.flash("error"),
       data: course_subjects,
       req,
       page_name,
       course,
-       subjectCount,
+      subjectCount,
       chapterCount,
-         pdfCount,
+      pdfCount,
       videoCount,
       testCount,
       bookingCount,
+      liveClassCount,
       list_url: `/admin/course-chapter-list/${courseId}`,
       trashed_list_url: `/course-chapter-list/${courseId}?status=trashed`,
       create_url: `/admin/course-chapter-create/${courseId}`,
     });
-
   } catch (error) {
     console.error("Course chapter List Error:", error);
     req.flash("error", error.message);
-    res.redirect(req.get("Referrer") || `/admin/course-chapter-list/${req.params.postId}`);
+    res.redirect(
+      req.get("Referrer") || `/admin/course-chapter-list/${req.params.postId}`
+    );
   }
 };
 
 const Create = async (req, res) => {
   try {
+    const courseId = req.params.postId;
     const categories = await getCategoriesFromTable();
     const courses = await getCourseFromTable();
-    const subjects = await getSubjectFromTable();
+    const subjects = await getSubjectFromTable(courseId);
+    const course = await Helper.getCourseDetails(courseId);
     let post = {};
 
     res.render("admin/course-chapter/create", {
@@ -80,6 +85,7 @@ const Create = async (req, res) => {
       action: "Create",
       title: "Course Chapter",
       post: post,
+      course,
       categories: categories,
       courses: courses,
       subjects: subjects,
@@ -116,10 +122,13 @@ const getCourseFromTable = async () => {
     });
   });
 };
-const getSubjectFromTable = async () => {
+const getSubjectFromTable = async (course_id) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM course_subjects WHERE status = 1 AND deleted_at IS NULL`;
-    pool.query(query, (err, result) => {
+    const query = `
+      SELECT * FROM course_subjects 
+      WHERE status = 1 AND course_id = ? AND deleted_at IS NULL
+    `;
+    pool.query(query, [course_id], (err, result) => {
       if (err) {
         reject(err);
       } else {
@@ -143,7 +152,6 @@ const checkImagePath = (relativePath) => {
   return fs.existsSync(fullPath);
 };
 
-
 const Edit = async (req, res) => {
   try {
     const postId = req.params.postId;
@@ -163,26 +171,34 @@ const Edit = async (req, res) => {
         resolve(result[0]);
       });
     });
-   
+
     // Also fetch all courses for dropdown
     const courses = await new Promise((resolve, reject) => {
-      pool.query("SELECT id, course_name FROM courses WHERE deleted_at IS NULL", (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      });
+      pool.query(
+        "SELECT id, course_name FROM courses WHERE deleted_at IS NULL",
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        }
+      );
     });
     const subjects = await new Promise((resolve, reject) => {
-      pool.query("SELECT id, subject_name FROM course_subjects WHERE deleted_at IS NULL", (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      });
+      pool.query(
+        "SELECT id, subject_name FROM course_subjects WHERE course_id = ? AND deleted_at IS NULL",
+        [post.course_id],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        }
+      );
     });
-
+    const course = await Helper.getCourseDetails(post.course_id);
     res.render("admin/course-chapter/create", {
       success: req.flash("success"),
       error: req.flash("error"),
       post,
       courses,
+      course,
       form_url: "/admin/course-chapter-update/" + postId,
       page_name: "Edit",
       action: "Update",
@@ -199,7 +215,10 @@ const Edit = async (req, res) => {
 
 const Update = async (req, res) => {
   const course_chapterId = req.params.postId;
-  const isInsert = !course_chapterId || course_chapterId === "null" || course_chapterId === "0";
+  const isInsert =
+    !course_chapterId ||
+    course_chapterId === "null" ||
+    course_chapterId === "0";
 
   const { course_id, subject_id, chapter_name, status } = req.body;
 
@@ -209,11 +228,15 @@ const Update = async (req, res) => {
   if (!subject_id?.trim()) errors.subject_id = ["Subject is required"];
 
   if (isInsert) {
-    if (!Array.isArray(chapter_name) || chapter_name.some(name => !name.trim())) {
+    if (
+      !Array.isArray(chapter_name) ||
+      chapter_name.some((name) => !name.trim())
+    ) {
       errors.chapter_name = ["All chapter names are required"];
     }
   } else {
-    if (!chapter_name?.trim()) errors.chapter_name = ["Chapter name is required"];
+    if (!chapter_name?.trim())
+      errors.chapter_name = ["Chapter name is required"];
   }
 
   if (!["0", "1"].includes(status)) {
@@ -230,15 +253,22 @@ const Update = async (req, res) => {
 
   try {
     if (isInsert) {
-      const values = chapter_name.map(name => [course_id, subject_id, name.trim(), status]);
+      const values = chapter_name.map((name) => [
+        course_id,
+        subject_id,
+        name.trim(),
+        status,
+      ]);
       const insertQuery = `INSERT INTO course_chapters (course_id, subject_id, chapter_name, status) VALUES ?`;
 
       pool.query(insertQuery, [values], (err) => {
         if (err) {
           console.error(err);
-          return res.status(500).json({ success: false, message: "Insert failed" });
+          return res
+            .status(500)
+            .json({ success: false, message: "Insert failed" });
         }
-         const courseId = req.params.course_id || req.body.course_id; // or wherever you get it from
+        const courseId = req.params.course_id || req.body.course_id; // or wherever you get it from
         return res.json({
           success: true,
           redirect_url: `/admin/course-chapter-list/${courseId}`,
@@ -247,19 +277,27 @@ const Update = async (req, res) => {
       });
     } else {
       const updateQuery = `UPDATE course_chapters SET course_id = ?, subject_id = ?, chapter_name = ?, status = ? WHERE id = ?`;
-      const values = [course_id, subject_id, chapter_name.trim(), status, course_chapterId];
+      const values = [
+        course_id,
+        subject_id,
+        chapter_name.trim(),
+        status,
+        course_chapterId,
+      ];
 
       pool.query(updateQuery, values, (err) => {
         if (err) {
           console.error(err);
-          return res.status(500).json({ success: false, message: "Update failed" });
+          return res
+            .status(500)
+            .json({ success: false, message: "Update failed" });
         }
-          const courseId = req.params.course_id || req.body.course_id; // or wherever you get it from
+        const courseId = req.params.course_id || req.body.course_id; // or wherever you get it from
         return res.json({
           success: true,
-          
-         // redirect_url: "/admin/course-chapter-list",
-               redirect_url: `/admin/course-chapter-list/${courseId}`,
+
+          // redirect_url: "/admin/course-chapter-list",
+          redirect_url: `/admin/course-chapter-list/${courseId}`,
           message: "Chapter updated successfully",
         });
       });
@@ -270,24 +308,36 @@ const Update = async (req, res) => {
   }
 };
 
-
 const Delete = async (req, res) => {
   try {
-    const categorieId = req.params.postId;
+    const chapterId = req.params.postId;
 
-    const softDeleteQuery = "UPDATE course_chapters SET deleted_at = NOW() WHERE id = ?";
+    // Step 1: Get course_id from the course_chapters table
+    const getCourseQuery = "SELECT course_id FROM course_chapters WHERE id = ?";
+    const courseResult = await new Promise((resolve, reject) => {
+      pool.query(getCourseQuery, [chapterId], (error, result) => {
+        if (error) return reject(error);
+        resolve(result[0]); // assuming one record
+      });
+    });
 
-    pool.query(softDeleteQuery, [categorieId], (error, result) => {
-      if (error) {
-        console.error(error);
-        return req.flash("success", "Internal server error");
-      }
+    const courseId = courseResult?.course_id || null;
+
+    // Step 2: Soft delete the chapter
+    const softDeleteQuery =
+      "UPDATE course_chapters SET deleted_at = NOW() WHERE id = ?";
+    await new Promise((resolve, reject) => {
+      pool.query(softDeleteQuery, [chapterId], (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      });
     });
 
     req.flash("success", "Course Chapter soft deleted successfully");
-    return res.redirect("/admin/course-chapter-list");
+    return res.redirect(`/admin/course-chapter-list/${courseId}`);
   } catch (error) {
-    req.flash("error", error.message);
+    console.error(error);
+    req.flash("error", "Internal server error");
     return res.redirect(`/admin/course-chapter-list`);
   }
 };
@@ -296,7 +346,8 @@ const Restore = async (req, res) => {
   try {
     const chapterId = req.params.chapterId;
 
-    const restoreQuery = "UPDATE course_chapters SET deleted_at = NULL WHERE id = ?";
+    const restoreQuery =
+      "UPDATE course_chapters SET deleted_at = NULL WHERE id = ?";
 
     pool.query(restoreQuery, [chapterId], (error, result) => {
       if (error) {
@@ -335,8 +386,6 @@ const PermanentDelete = async (req, res) => {
     return res.redirect("/admin/course-chapter-list");
   }
 };
-
-
 
 const Show = async (req, res) => {
   const chapterId = req.params.chapterId;

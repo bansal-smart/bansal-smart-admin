@@ -1,0 +1,93 @@
+<%- include('../layouts/header') %>
+
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0"><%= page_name %></h4>
+            <a href="/admin/<%= route %>-list/all" class="btn btn-primary btn-sm">
+              <i class="fa fa-arrow-left"></i> Back
+            </a>
+          </div>
+
+          <div class="card-body">
+            <div class="row">
+
+              <!-- Module Name & Slug -->
+              <div class="col-md-6">
+                <div class="form-group border rounded p-3 mb-3">
+                  <label><strong><%= module_name %> Name</strong></label>
+                  <p class="mb-0 text-muted"><%= post.book_name %></p>
+                </div>
+              </div>
+
+           
+              <!-- Other Fields -->
+              <% const infoFields = [
+                { label: 'Title Heading', value: post.title_heading },
+                { label: 'Slug', value: post.slug },
+                { label: 'Category', value: post.category_name },
+                
+                { label: 'Price', value: `₹${post.price}` },
+                { label: 'Discount', value: `${post.discount}%` },
+                { label: 'Offer Price', value: `₹${post.offer_price}` },
+             
+           
+                { label: module_name + ' Type', value: post.book_type },
+              
+                { label: 'Batch Year', value: post.batch_year },
+                { label: 'Status', value: post.status == 1 ? 'Active' : 'Inactive' }
+              ]; %>
+
+              <% infoFields.forEach(field => { %>
+                <div class="col-md-3">
+                  <div class="form-group border rounded p-3 mb-3">
+                    <label><strong><%= field.label %></strong></label>
+                    <p class="mb-0 text-muted"><%= field.value %></p>
+                  </div>
+                </div>
+              <% }); %>
+
+              <!-- Media -->
+              <div class="col-12 mt-4">
+                <h5 class="border-bottom pb-2">Media</h5>
+              </div>
+
+              <!-- Thumbnail Image -->
+              <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                  <label><strong>Thumbnail Image</strong></label><br />
+                  <% if (post.image) { %>
+                    <img src="<%= publicUrl + post.image %>" class="img-fluid rounded-3" style="width: 150px; aspect-ratio: 1 / 0.7; object-fit: cover;" />
+                  <% } else { %>
+                    <p>No image uploaded</p>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- Details Image -->
+              <div class="col-md-3">
+                <div class="form-group border rounded p-3 mb-3">
+                  <label><strong>Details Image</strong></label><br />
+                  <% if (post.details_image) { %>
+                    <img src="<%= publicUrl + post.details_image %>" style="width: 150px; aspect-ratio: 1 / 0.7; object-fit: cover;" />
+                  <% } else { %>
+                    <p>No details image uploaded</p>
+                  <% } %>
+                </div>
+              </div>
+
+             
+         
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>

@@ -15,25 +15,32 @@ class TestSeriesTest {
 
  static async list(status = "active") {
   try {
-    // Define the WHERE condition based on the status
-    let where =
-      status === "trashed"
-        ? "WHERE tst.deleted_at IS NOT NULL"
-        : "WHERE tst.deleted_at IS NULL";
-
     const queryParams = [];
 
-    // Add test_location filter
-    where += " AND tst.test_location = ?";
-    queryParams.push("test-series");
+    // Base WHERE clause
+    let where = "WHERE tst.test_location = ?";
+    queryParams.push("test_series");
 
-    // Final query with dynamic WHERE and params
+    // Filter based on trash status
+    if (status === "trashed") {
+      where += " AND tst.deleted_at IS NOT NULL";
+    } else {
+      where += " AND tst.deleted_at IS NULL";
+
+      if (status === "active") {
+        where += " AND tst.status = 1";
+      } else if (status === "inactive") {
+        where += " AND tst.status = 0";
+      }
+    }
+
+    // Always enforce test_series (ts) status and deletion
+    where += " AND ts.status = 1 AND ts.deleted_at IS NULL";
+
     const query = `${this.withCategory()} ${where} ORDER BY tst.id DESC`;
 
-    // Fetch the test series data
     const [testSeriesRows] = await pool.promise().query(query, queryParams);
 
-    // Fetch questions for each test series
     const testSeriesWithQuestions = await Promise.all(
       testSeriesRows.map(async (testSeries) => {
         const [questionRows] = await pool.promise().query(
@@ -51,6 +58,7 @@ class TestSeriesTest {
     throw err;
   }
 }
+
 
 
   // static async questionLists() {

@@ -11,19 +11,32 @@ const List = async (req, res) => {
     const search = req.query.search;
     const searchTerm = `%${search}%`;
 
-
+    const userRoles = req.session.userRole || [];
+  const userId = req.user.id;
     const queryParams = [];
 
     let getQuery = `
-      SELECT 
-        fu.*,
-        c.category_name,
-        cl.name AS class_name
-      FROM front_users fu
-      LEFT JOIN categories c ON fu.category_id = c.id
-      LEFT JOIN course_classes cl ON fu.class_id = cl.id
-      WHERE 1 = 1
-    `;
+  SELECT 
+    fu.*,
+    c.category_name,
+    cl.name AS class_name,
+    (
+      SELECT COUNT(*) 
+      FROM course_orders co 
+      WHERE co.user_id = fu.id 
+        AND co.payment_status = 'complete'
+        AND co.order_type = 'course'
+    ) AS ordersCount
+  FROM front_users fu
+  LEFT JOIN categories c ON fu.category_id = c.id
+  LEFT JOIN course_classes cl ON fu.class_id = cl.id
+  WHERE 1 = 1
+`;
+
+ if (userRoles.includes("Center")) {
+      getQuery += ` AND fu.center_id = ? `;
+      queryParams.push(userId);
+    }
 
     if (status1 === "trashed") {
       getQuery += ` AND fu.deleted_at IS NOT NULL `;
@@ -56,7 +69,7 @@ const List = async (req, res) => {
         resolve(result);
       });
     });
-
+    courses = await Helper.getActiveCourses();
     res.render("admin/customer/list", {
       success: req.flash("success"),
       error: req.flash("error"),
@@ -65,6 +78,7 @@ const List = async (req, res) => {
       page_name,
       status1,
       search,
+      courses
     });
   } catch (error) {
     req.flash("error", error.message);
@@ -102,6 +116,7 @@ const Create = async (req, res) => {
     const categories = await getCategoriesFromTable();
     const course_classes = await getCourseClassesFromTable();
     const centers = await Helper.getCenters();
+    const courses = await Helper.getActiveCourses();
     res.render("admin/customer/create", {
       success: req.flash("success"),
       error: req.flash("error"),
@@ -109,6 +124,7 @@ const Create = async (req, res) => {
       categories: categories,
       course_classes: course_classes,
       centers: centers,
+      courses,
       form_url: "/admin/student-store",
       page_name: "Create Student",
       action: "Create",
@@ -268,6 +284,7 @@ const Edit = async (req, res) => {
     const customerId = req.params.customerId;
 
     const getCustomerQuery = "SELECT * FROM front_users WHERE id = ?";
+
     const customer = await new Promise((resolve, reject) => {
       pool.query(getCustomerQuery, [customerId], function (error, result) {
         if (error) {
@@ -284,6 +301,28 @@ const Edit = async (req, res) => {
     const categories = await getCategoriesFromTable();
     const course_classes = await getCourseClassesFromTable();
     const centers = await Helper.getCenters();
+   // const courses = await Helper.getActiveCourses();
+
+    const [courses] = await pool.promise().query(
+  `SELECT 
+     c.id,
+     c.course_name,
+     c.offer_price,
+     c.course_type,
+     c.duration,
+     CASE 
+       WHEN co.id IS NOT NULL THEN 1
+       ELSE 0
+     END AS is_paid
+   FROM courses c
+   LEFT JOIN course_orders co 
+     ON co.course_id = c.id 
+     AND co.user_id = ? 
+     AND co.payment_status = 'complete'
+     AND co.assign_by = 'admin'
+   WHERE c.status = 1 AND c.deleted_at IS NULL`,
+  [customerId]
+);
     res.render("admin/customer/create", {
       success: req.flash("success"),
       error: req.flash("error"),
@@ -291,6 +330,7 @@ const Edit = async (req, res) => {
       categories: categories,
       course_classes: course_classes,
       centers: centers,
+      courses,
       form_url: "/admin/student-update/" + customerId,
       page_name: "Edit Student",
       action: "Update ",
@@ -299,143 +339,154 @@ const Edit = async (req, res) => {
     console.log(error.message);
   }
 };
-
 const Update = async (req, res) => {
+  const userId = req.params.customerId;
+  let {
+    name,
+    email,
+    mobile,
+    category_id,
+    class_id,
+    registration_type,
+    center_id,
+    status,
+    course,
+    city
+  } = req.body;
+
+  // Trim inputs
+  name = name?.trim();
+  email = email?.trim();
+  mobile = mobile?.trim();
+  registration_type = registration_type?.trim();
+  center_id = center_id?.trim();
+
+  const errors = {};
+
+  // Validations
+  if (!name) errors.name = ["Name is required"];
+  if (!email) errors.email = ["Email is required"];
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = ["Invalid email format"];
+  if (!mobile) errors.mobile = ["Mobile is required"];
+  else if (!/^\d{10}$/.test(mobile)) errors.mobile = ["Mobile number must be 10 digits"];
+  if (!category_id) errors.category_id = ["Category is required"];
+  if (!class_id) errors.class_id = ["Class is required"];
+  if (!registration_type) errors.registration_type = ["Registration Type is required"];
+  if (status === undefined || status === null || status === "") errors.status = ["Status is required"];
+ if (!city) errors.city = ["City is required"];
+  if (Object.keys(errors).length > 0) {
+    return res.status(422).json({
+      success: false,
+      errors,
+      message: Object.values(errors)[0][0]
+    });
+  }
+
   try {
-    const userId = req.params.customerId;
-    let { name, email, mobile, category_id, class_id, registration_type, center_id, status } = req.body;
 
-    // Trim the input fields
-    name = name?.trim();
-    email = email?.trim();
-    mobile = mobile?.trim();
+    if(!userId)
+    {
+    const [emailCheck] = await pool.promise().query(
+      "SELECT COUNT(*) AS email_count FROM front_users WHERE email = ? AND id != ?",
+      [email, userId]
+    );
 
-    registration_type = registration_type?.trim();
-    center_id = center_id?.trim();
-
-
-
-    const errors = {};
-
-    // Validation checks
-    if (!name) {
-      errors.name = errors.name || [];
-      errors.name.push("Name is required");
-    }
-
-    if (!email) {
-      errors.email = errors.email || [];
-      errors.email.push("Email is required");
-    }
-
-    if (!mobile) {
-      errors.mobile = errors.mobile || [];
-      errors.mobile.push("Mobile is required");
-    } else if (!/^\d{10}$/.test(mobile)) {
-      errors.mobile = errors.mobile || [];
-      errors.mobile.push("Mobile number must be 10 digits");
-    }
-
-    if (!category_id) {
-      errors.category_id = errors.category_id || [];
-      errors.category_id.push("Category is required");
-    }
-
-    if (!class_id) {
-      errors.class_id = errors.class_id || [];
-      errors.class_id.push("Class is required");
-    }
-
-    if (!registration_type) {
-      errors.registration_type = errors.registration_type || [];
-      errors.registration_type.push("Registration Type is required");
-    }
-
-    if (status === undefined || status === null || status === "") {
-      errors.status = errors.status || [];
-      errors.status.push("Status is required");
-    }
-
-    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-    if (email && !isValidEmail) {
-      errors.email = errors.email || [];
-      errors.email.push("Invalid email format");
-    }
-
-    // If there are validation errors, return them
-    if (Object.keys(errors).length > 0) {
-      return res.status(422).json({
+    if (emailCheck[0].email_count > 0) {
+      return res.status(409).json({
         success: false,
-        errors,
-        message: Object.values(errors)[0][0], // Return the first error message
+        errors: { email: ["Email already exists"] },
+        message: "Email already exists"
       });
     }
+  }
 
-    // Check if the email already exists (excluding the current user's email)
-    pool.query(
-      "SELECT COUNT(*) AS email_count FROM front_users WHERE email = ? AND id != ?",
-      [email, userId],
-      (err, results) => {
-        if (err) {
-          console.error("Error executing query:", err); // Log the full error
-          return res.status(500).json({
-            success: false,
-            errors: [
-              { message: `Database error: ${err.message || err.sqlMessage}` },
-            ],
-          });
-        }
-
-        // If email already exists, return error
-        // if (results[0].email_count > 0) {
-        //   return res.status(409).json({
-        //     success: false,
-        //     errors: [{ field: "email", message: "Email already exists" }],
-        //   });
-        // }
-
-        // Proceed with updating the customer
-        const updateQuery = `
-            UPDATE front_users
-            SET name = ?, email = ?, mobile = ?, category_id = ?, class_id = ?,registration_type = ?,center_id = ?, status = ?
-            WHERE id = ?
-          `;
-
-        pool.query(
-          updateQuery,
-          [name, email, mobile, category_id, class_id, registration_type, center_id, status, userId],
-          (err) => {
-            if (err) {
-              console.error("Error executing query:", err); // Log the full error
-              return res.status(500).json({
-                success: false,
-                errors: [
-                  {
-                    message: `Database error: ${err.message || err.sqlMessage}`,
-                  },
-                ],
-              });
-            }
-
-            // Return success response
-            return res.status(200).json({
-              success: true,
-              redirect_url: "/admin/student-list", // Or you can return a success message
-              message: "Student updated successfully",
-            });
-          }
-        );
-      }
+    // Update front_users
+    await pool.promise().query(
+      `UPDATE front_users
+       SET name = ?, email = ?, mobile = ?, category_id = ?, class_id = ?, city = ?,  registration_type = ?, center_id = ?, status = ?
+       WHERE id = ?`,
+      [name, email, mobile, category_id, class_id, city, registration_type, center_id, status, userId]
     );
+
+    // Handle course re-assignment
+    const dayjs = require("dayjs");
+const durationPlugin = require("dayjs/plugin/duration");
+const advancedFormat = require("dayjs/plugin/advancedFormat");
+const utc = require("dayjs/plugin/utc");
+const timezone = require("dayjs/plugin/timezone");
+
+dayjs.extend(durationPlugin);
+dayjs.extend(advancedFormat);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// ✅ Inside the function
+if (Array.isArray(course) && course.length > 0) {
+  await pool.promise().query(
+    "DELETE FROM course_orders WHERE user_id = ? AND assign_by = 'admin'",
+    [userId]
+  );
+
+  for (const courseId of course) {
+    try {
+      const [courseRows] = await pool.promise().query(
+        "SELECT course_name, offer_price, course_type, duration FROM courses WHERE id = ?",
+        [courseId]
+      );
+
+      if (courseRows.length === 0) continue;
+
+      const courseData = courseRows[0];
+      const transactionId = "admin" + Math.floor(100000 + Math.random() * 900000);
+      const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000) + "-admin";
+
+      const durationInMonths = parseInt(courseData.duration);
+      const safeDuration = isNaN(durationInMonths) ? 0 : durationInMonths;
+      const expiredDate = dayjs().add(safeDuration, 'month').format('YYYY-MM-DD');
+
+      await pool.promise().query(
+        `INSERT INTO course_orders (
+          user_id, course_id, transaction_id, course_name, course_expired_date,
+          course_amount, total_amount, payment_type, order_status,
+          source, assign_by, payment_status, order_id, order_type
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          userId,
+          courseId,
+          transactionId,
+          courseData.course_name,
+          expiredDate,
+          courseData.offer_price,
+          0,
+          "online",
+          "complete",
+          "web",
+          "admin",
+          "complete",
+          orderId,
+          "course"
+        ]
+      );
+    } catch (err) {
+      console.error(`Error inserting course order for course ID ${courseId}:`, err.message);
+    }
+  }
+}
+
+    return res.status(200).json({
+      success: true,
+      redirect_url: "/admin/student-list",
+      message: "Student updated successfully"
+    });
   } catch (error) {
-    console.error("Unexpected error:", error); // Log the actual error for debugging
+    console.error("Update Error:", error);
     return res.status(500).json({
       success: false,
-      errors: [{ message: error.message || "Unexpected server error" }],
+      errors: { message: error.message || "Unexpected server error" }
     });
   }
 };
+
 
 const Delete = async (req, res) => {
   try {
@@ -467,7 +518,7 @@ const Restore = async (req, res) => {
     const customerId = req.params.customerId;
 
     const restoreQuery = `
-      UPDATE front_users SET deleted_at = NULL, status = 1 WHERE id = ?
+      UPDATE front_users SET deleted_at = NULL, status = 0 WHERE id = ?
     `;
 
     pool.query(restoreQuery, [customerId], (error, result) => {

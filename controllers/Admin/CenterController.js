@@ -16,6 +16,19 @@ const checkImagePath = (relativePath) => {
   return fs.existsSync(fullPath);
 };
 
+const module_name = "Center enquiries";
+
+const handleError = (res, error, context = "Unknown") => {
+  console.error(`Error in ${context}:`, error);
+  res.status(500).render("admin/error", {
+    title: "Server Error",
+    page_name: `${module_name} - ${context}`,
+    error_message: error.message,
+    stack: error.stack,
+    full_error: error,
+  });
+};
+
 const renderForm = async (res, options) => {
   const { postId, center, action, formUrl, pageName, error, success } = options; // add center here
   const categories = await Helper.getActiveCategoriesByType();
@@ -38,10 +51,10 @@ const renderForm = async (res, options) => {
   });
 };
 
-const handleError = (res, req, message, redirectUrl = "back") => {
-  req.flash("error", message);
-  return res.redirect(redirectUrl);
-};
+// const handleError = (res, req, message, redirectUrl = "back") => {
+//   req.flash("error", message);
+//   return res.redirect(redirectUrl);
+// };
 
 
 module.exports = {
@@ -718,4 +731,63 @@ Delete: async (req, res) => {
       handleError(res, req, "Error permanently deleting Center", "/admin/center-list?status=trashed");
     }
   },
+
+centerEnquiriesList: async (req, res) => {
+  try {
+
+    const { from_date, to_date, center_id } = req.query;
+
+    let query = `
+      SELECT ce.*, c.name AS center_name 
+      FROM center_enquiries ce 
+      LEFT JOIN centers c ON ce.center_id = c.id 
+      WHERE 1=1
+    `;
+    const values = [];
+
+    if (from_date) {
+      query += ` AND DATE(ce.created_at) >= ?`;
+      values.push(from_date);
+    }
+
+    if (to_date) {
+      query += ` AND DATE(ce.created_at) <= ?`;
+      values.push(to_date);
+    }
+
+    if (center_id) {
+      query += ` AND ce.center_id = ?`;
+      values.push(center_id);
+    }
+
+    query += ` ORDER BY ce.created_at DESC`;
+
+    const [rows] = await pool.promise().execute(query, values);
+
+    const [centers] = await pool
+      .promise()
+      .query(`
+        SELECT DISTINCT c.id, c.name, c.mobile 
+        FROM centers c
+        INNER JOIN center_enquiries ce ON c.id = ce.center_id
+        ORDER BY c.name ASC
+      `);
+
+
+    const center_enquiries_list = '/admin/center-enquiries-list'
+
+    return res.render("admin/center/enquiry-list", {
+      title: "Center Enquiry List",
+      request_data: rows,
+      req,
+      centers,
+      center_enquiries_list
+    });
+
+  } catch (error) {
+    handleError(res, error, "List");
+  }
+}
+
+
 }

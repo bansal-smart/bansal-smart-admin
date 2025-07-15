@@ -39,6 +39,7 @@
               <th>Category Name</th>
                <th>Category Slug</th>
               <th>Category Type</th>
+                <th>Image</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -50,6 +51,14 @@
               <td><%= category.category_name %></td>
                <td><%= category.slug %></td>
               <td><%= category.category_type %></td>
+               <td>
+                      <% if (category.image) { %>
+                      <a href="<%= publicUrl + category.image %>" target="_blank">
+                        <img src="<%= publicUrl + category.image %>" width="100" />
+                      </a>
+                      <% } else { %> No Category Image <% } %>
+                    </td>
+
               <td>
                 <% if (category.status==1) { %>
                 <span class="badge badge-success">Active</span>

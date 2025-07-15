@@ -1,10 +1,15 @@
 const pool = require("../../db/database");
 const randomstring = require("randomstring");
+const Helper = require("../../helpers/Helper");
 const jwt = require("jsonwebtoken");
 const { validateRequiredFields } = require("../../helpers/validationsHelper");
+
+const actions_url =  "/admin/faculty";
+const table_name =  "faculties";
+const module_title =  "Faculty";
 const List = async (req, res) => {
   try {
-    // Building where condition based on status query parameter
+     const status = req.query.status || "active";
     let where =
       req.query.status === "trashed"
         ? "WHERE faculties.deleted_at IS NOT NULL"
@@ -40,6 +45,8 @@ const List = async (req, res) => {
       req,
       page_name,
       list_url: "/admin/faculty-list",
+        actions_url: actions_url, // pass this to dynamically build URLs in EJS
+      status,
       trashed_list_url: "/admin/faculty-list/?status=trashed",
       create_url: "/admin/faculty-create",
     });
@@ -275,69 +282,6 @@ const Update = async (req, res) => {
   }
 };
 
-const Delete = async (req, res) => {
-  try {
-    const categorieId = req.params.postId;
-
-    const softDeleteQuery =
-      "UPDATE faculties SET deleted_at = NOW() WHERE id = ?";
-
-    pool.query(softDeleteQuery, [categorieId], (error, result) => {
-      if (error) {
-        console.error(error);
-        return req.flash("success", "Internal server error");
-      }
-    });
-
-    req.flash("success", "Faculty deleted successfully");
-    return res.redirect("/admin/faculty-list");
-  } catch (error) {
-    req.flash("error", error.message);
-    return res.redirect(`/admin/faculty-list`);
-  }
-};
-
-const Restore = async (req, res) => {
-  try {
-    const categorieId = req.params.categorieId;
-
-    const RestoreQuery = "UPDATE customers SET deleted_at = null WHERE id = ?";
-
-    pool.query(RestoreQuery, [categorieId], (error, result) => {
-      if (error) {
-        console.error(error);
-        return req.flash("success", "Internal server error");
-      }
-    });
-
-    req.flash("success", "Customer Restored successfully");
-    return res.redirect("/admin/categorie-list");
-  } catch (error) {
-    req.flash("error", error.message);
-    return res.redirect(`/admin/categorie-list`);
-  }
-};
-
-const PermanentDelete = async (req, res) => {
-  try {
-    const categorieId = req.params.categorieId;
-
-    const DeleteQuery = "DELETE FROM customers WHERE id = ?";
-
-    pool.query(DeleteQuery, [categorieId], (error, result) => {
-      if (error) {
-        console.error(error);
-        return req.flash("success", "Internal server error");
-      }
-    });
-
-    req.flash("success", "Customer deleted successfully");
-    return res.redirect("/admin/categorie-list");
-  } catch (error) {
-    req.flash("error", error.message);
-    return res.redirect(`/admin/categorie-list`);
-  }
-};
 
 const Show = async (req, res) => {
   const facultyId = req.params.postId;
@@ -380,6 +324,41 @@ const Show = async (req, res) => {
     req.flash("error", error.message);
     res.redirect("/admin/faculty-list");
   }
+};
+
+const Delete = async (req, res) => {
+   await Helper.handleTableAction({
+    req,
+    res,
+    action: "soft-delete",
+    table_name,
+    redirectUrl: `${actions_url}-list`,
+    title: module_title,
+  });
+};
+
+// Restore
+const Restore = async (req, res) => {
+  await Helper.handleTableAction({
+    req,
+    res,
+    action: "restore",
+    table_name,
+    redirectUrl: `${actions_url}-list`,
+    title: module_title,
+  });
+};
+
+// Permanent Delete
+const PermanentDelete = async (req, res) => {
+  await Helper.handleTableAction({
+    req,
+    res,
+    action: "delete",
+    table_name,
+    redirectUrl: `${actions_url}-list`,
+    title: module_title,
+  });
 };
 
 module.exports = {

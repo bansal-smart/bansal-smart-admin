@@ -41,12 +41,12 @@ router.get(
   facultyController.Delete
 );
 router.get(
-  "/admin/faculty-restore",
+  "/admin/faculty-restore/:postId",
   adminauthenticateCustomer,
   facultyController.Restore
 );
 router.get(
-  "/admin/faculty-permanent-delete",
+  "/admin/faculty-permanent-delete/:postId",
   adminauthenticateCustomer,
   facultyController.PermanentDelete
 );

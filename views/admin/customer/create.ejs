@@ -1,5 +1,7 @@
 <%- include('../layouts/header') %>
 
+<!-- Include Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <section class="content-body">
   <div class="container-fluid">
@@ -22,6 +24,19 @@
                         <div>
                             <section>
                                 <div class="row">
+                                  <div class="col-md-6">
+  <div class="form-group">
+    <label for="course">Course Name</label>
+   <select name="course[]" multiple class="form-control select2">
+  <% courses.forEach(function(course) { %>
+    <option value="<%= course.id %>" <%= course.is_paid ? "selected" : "" %>>
+      <%= course.course_name %> 
+    </option>
+  <% }); %>
+</select>
+    <div class="invalid-feedback"></div>
+  </div>
+</div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                         <label for="name">Full Name</label>
@@ -44,7 +59,17 @@
                                         <input type="text" name="mobile" id="mobile" class="form-control isNumberKey"  maxlength="10"  value="<%= customer ? customer.mobile : '' %>" onkeypress="return isNumberKey(event)" placeholder="Enter Your Mobile No">
                                         <div class="invalid-feedback"></div>
                                     </div>
+
+                                    
 </div>
+<div class="col-md-6">
+                                        <div class="form-group">
+                                        <label for="mobile">City</label>
+                                        <input type="text" name="city" id="city" class="form-control"  maxlength="10"  value="<%= customer ? customer.city : '' %>"  placeholder="Enter Your City">
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    </div>
+                                    
                                <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Category Name*</label>
@@ -126,6 +151,7 @@
                             </section>
                         </div>
                     </form>
+                    </div></div>
                 </div></div></div></div></div></section>
 
 <%- include('../layouts/footer') %>
@@ -179,3 +205,22 @@ $(document).ready(function () {
     });
 });
 </script> -->
+
+<!-- Include jQuery and Select2 JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $('#course').select2({
+      placeholder: "Select Courses"
+    });
+  });
+
+  
+</script>
+<script>
+  $(document).ready(function() {
+    $('.select2').select2();
+  });
+</script>

@@ -11,7 +11,7 @@ const courseUploadPath = "public/uploads/courses/";
 const courseUploadStorage = setupStorage(courseUploadPath);
 const courseUploadMulter = multer({ storage: courseUploadStorage });
 
-router.route("/admin/course-list/:course_type")
+router.route("/admin/course-list/:course_type?")
   .get(adminauthenticateCustomer, CourseController.List)
   .post(adminauthenticateCustomer, CourseController.List);
 router.get(
@@ -50,12 +50,12 @@ router.get(
   CourseController.Delete
 );
 router.get(
-  "/admin/course-restore",
+  "/admin/course-restore/:courseId",
   adminauthenticateCustomer,
   CourseController.Restore
 );
 router.get(
-  "/admin/course-permanent-delete",
+  "/admin/course-permanent-delete/:courseId",
   adminauthenticateCustomer,
   CourseController.PermanentDelete
 );
@@ -66,8 +66,16 @@ router.get(
 );
 
 router.get(
-  "/admin/course-booking-list/:courseId",
+  "/admin/course-booking-list/:courseId?",
   adminauthenticateCustomer,
   CourseController.Booking
 );
+
+router.get(
+  "/admin/course-sort-order",
+  adminauthenticateCustomer,
+  courseUploadMulter.none(),
+  CourseController.courseSortOrder
+);
+
 module.exports = router;

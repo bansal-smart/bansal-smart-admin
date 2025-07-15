@@ -18,6 +18,7 @@ const List = async (req, res) => {
       ORDER BY ${table_name}.id DESC
     `;
 
+    
     const page_name =
       status === "trashed" ? "Trashed Banners List" : "Banners List";
 

@@ -1,0 +1,94 @@
+<%- include('../layouts/header') %>
+
+<section class="content-body">
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Booking Details</h4>
+          <button type="button" id="backButton" class="btn btn-primary btn-sm">
+                      <i class="fa fa-arrow-left"></i> 
+                    </button>
+      </div>
+      <div class="card-body">
+       <table class="table table-bordered table-striped">
+      <tbody>
+        <tr>
+          <th>Booking Type</th>
+          <td>
+            <%= booking.order_type === 'course' ? 'Course Booking' : booking.order_type === 'TestSeries' ? 'Test Series Booking' : 'N/A' %>
+          </td>
+        </tr>
+        <tr>
+          <th>Customer Name</th>
+          <td><%= booking.customer_name || 'N/A' %></td>
+        </tr>
+        <tr>
+          <th>Email</th>
+          <td><%= booking.email || 'N/A' %></td>
+        </tr>
+        <tr>
+          <th>Phone</th>
+          <td><%= booking.mobile || 'N/A' %></td>
+        </tr>
+        <tr>
+          <th>Course Name</th>
+          <td><%= booking.course_name || 'N/A' %></td>
+        </tr>
+        <tr>
+          <th>Transaction ID</th>
+          <td><%= booking.transaction_id || 'N/A' %></td>
+        </tr>
+        <tr>
+          <th>Coupon Code</th>
+          <td><%= booking.coupon_code || 'N/A' %></td>
+        </tr>
+        <tr>
+          <th>Discount Type</th>
+          <td><%= booking.discount_type || 'N/A' %></td>
+        </tr>
+        <tr>
+          <th>Coupon Discount</th>
+          <td><%= booking.coupon_discount || '0' %></td>
+        </tr>
+        <tr>
+          <th>Discount Amount</th>
+          <td><%= booking.discount_amount.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <th>Total Before GST</th>
+          <td><%= booking.total_amount_before_gst.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <th>GST (%)</th>
+          <td><%= booking.gst_per %>%</td>
+        </tr>
+        <tr>
+          <th>GST Amount</th>
+          <td><%= booking.gst_amount.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <th>Total Amount</th>
+          <td><%= booking.total_amount.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <th>Payment Status</th>
+          <td><%= booking.payment_status || 'Pending' %></td>
+        </tr>
+        <tr>
+          <th>Course Expiry Date</th>
+          <td><div id="expiry-date"><%= booking.course_expired_date || 'N/A' %></div></td>
+        </tr>
+      </tbody>
+    </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../layouts/footer') %>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+<script>
+  const rawDate = "<%= booking.course_expired_date %>";
+  const formattedDate = moment(rawDate).format("dddd, Do MMMM YYYY");
+  document.getElementById("expiry-date").innerText = formattedDate;
+</script>

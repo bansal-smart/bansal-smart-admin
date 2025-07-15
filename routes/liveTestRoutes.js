@@ -69,6 +69,13 @@ router.get(
   controller.QuestionList
 );
 
+router.get(
+  "/admin/live-test-result-analysis/:postId?",
+  adminauthenticateCustomer,
+  controller.ExamAnalysis
+);
+
+
 // router.post(
 //   "/admin/live-test-question-upload",
 //   adminauthenticateCustomer,
