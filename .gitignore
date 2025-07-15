@@ -1,17 +1,1 @@
-# Node modules
-node_modules/
-
-# Logs
-logs
-*.log
-npm-debug.log*
-
-# OS files
-.DS_Store
-
-# Env files
-.env
-
-# Optional build directories
-dist/
-build/
+Bansal Smart Admin
